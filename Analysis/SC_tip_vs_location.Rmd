@@ -17,27 +17,30 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ## R Markdown
 
 ```{r}
-#
-taxi_trips <- read.csv("yellow_tripdata_2019-06.csv")
+
+#taxi_trips <- read.csv("yellow_tripdata_2019-06.csv")
 
 #trips_zones <- trips_zones_full[sample(nrow(trips_zones_full), 20000, replace = F, prob = NULL),]
 
 # https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
-taxi_zones <- read.csv("taxi_zone_lookup.csv")
+#taxi_zones <- read.csv("taxi_zone_lookup.csv")
 
-trips_zones <- merge(x = taxi_trips, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+#trips_zones <- merge(x = taxi_trips, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
 
-trips_zones <- subset(trips_zones, select = -c(Zone,service_zone))
+#trips_zones <- subset(trips_zones, select = -c(Zone,service_zone))
 
-colnames(trips_zones)[colnames(trips_zones)=="Borough"] <- "Borough_pu"
+#colnames(trips_zones)[colnames(trips_zones)=="Borough"] <- "Borough_pu"
 
-trips_zones <- merge(x = trips_zones, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
-colnames(trips_zones)[colnames(trips_zones)=="Borough"] <- "Borough_do"
+#trips_zones <- merge(x = trips_zones, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+#colnames(trips_zones)[colnames(trips_zones)=="Borough"] <- "Borough_do"
 ```
 
 ``` {r}
 
-trips_zones <- read.csv("trips_zones_20000.csv")
+trips_zones <- read.csv("../Data/trips_zones_20000.csv")
+tz_boxplot <- boxplot(trips_zones$tip_amount, col = c("#0000FF"))
+
+trips_zones <- trips_zones[ ! trips_zones$tip_amount %in% tz_boxplot$out, ]
 
 str(trips_zones)
 
@@ -119,5 +122,5 @@ ttest_tip_95
 # Or subset by payment type and do box plot series for each payment type grouped by borough
 
 #The T-interval on GRE is [`r format(ttest80_gre$conf.int,digits=4)`] at 0.80 confidence level and [`r format(ttest99_gre$conf.int,digits=4)`] at 0.99 confidence level.
-plot(rejected$rank, rejected$gpa, main="Rejected Students GPA from Different Ranks", ylab="GPA (out of 4.0)", xlab="Student Undergrad School Ranking", col=c("#ff0000","#00ff00","#0000ff","#ffff00") )
+#plot(rejected$rank, rejected$gpa, main="Rejected Students GPA from Different Ranks", ylab="GPA (out of 4.0)", xlab="Student Undergrad School Ranking", col=c("#ff0000","#00ff00","#0000ff","#ffff00") )
 ```
