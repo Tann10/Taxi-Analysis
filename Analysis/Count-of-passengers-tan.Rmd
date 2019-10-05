@@ -1,4 +1,10 @@
 
 # read data
 
+```{r }
 unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
+#str(unprocessed_data)
+summary(unprocessed_data)
+# selected list of columns
+
+```
