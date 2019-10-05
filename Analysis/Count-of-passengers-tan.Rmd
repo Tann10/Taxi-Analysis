@@ -1,0 +1,4 @@
+
+# read data
+
+unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
