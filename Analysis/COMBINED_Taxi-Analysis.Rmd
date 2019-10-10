@@ -15,8 +15,10 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r}
+loadPkg("dplyr")
+
 # This block is for MERGING THE DATASET
-unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
+unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
 
 
 unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
@@ -29,6 +31,26 @@ processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type ==
 per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
 
 processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
+
+
+
+#####STEVEN######
+taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
+
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+
+processed_df <- subset(processed_df, select = -c(Zone, service_zone))
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
+
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
+
+
+
+
+
 
 summary(processed_df)
 
