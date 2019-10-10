@@ -25,7 +25,13 @@ unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data[
 # removing outliers:
 # fare amount in negative & credit card payments
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
+
+per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
+
+processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
+
 summary(processed_df)
+
 
 ```
 
