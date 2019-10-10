@@ -42,6 +42,8 @@ tz_boxplot <- boxplot(trips_zones$tip_amount, col = c("#0000FF"))
 
 trips_zones <- trips_zones[ ! trips_zones$tip_amount %in% tz_boxplot$out, ]
 
+trips_zones <- subset(trips_zones, payment_type == 1)
+
 str(trips_zones)
 
 head(trips_zones, n = 5)
