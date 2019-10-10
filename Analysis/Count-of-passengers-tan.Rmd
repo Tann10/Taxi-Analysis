@@ -2,20 +2,30 @@
 # read data
 
 ```{r }
+library(ggplot2)
 unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
+
 
 unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
 
 
 # removing outliers:
-
 # fare amount in negative & credit card payments
-processed_df <- unprocessed_data %>% filter((fare_amount < 0) | (payment_type == 1))
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
 
 
 summary(processed_df)
 # selected list of columns
-tz_boxplot <- boxplot(unprocessed_data$tip_amount, col = c("#0000FF"))
+
+ggplot(processed_df, aes(y=per_tip)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4)
+
+
+tz_boxplot <- boxplot(processed_df$tip_amount, col = c("#0000FF"))
+
+geom_boxplot(outlier.colour="black", outlier.shape=16,
+             outlier.size=2, notch=FALSE)
 
 trips_zones <- unprocessed_data[ ! unprocessed_data$tip_amount %in% tz_boxplot$out, ]
 
@@ -23,7 +33,7 @@ trips_zones <- unprocessed_data[ ! unprocessed_data$tip_amount %in% tz_boxplot$o
 
 credit_trips <-trips_zones %>% filter(payment_type == 1)
 
-hist(credit_trips$tip_amount)
+hist(processed_df$per_tip)
 hist(credit_trips$fare_amount)
 summary(credit_trips$fare_amount)
 

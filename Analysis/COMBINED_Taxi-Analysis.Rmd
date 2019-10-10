@@ -16,6 +16,16 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 
 ```{r}
 # This block is for MERGING THE DATASET
+unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
+
+
+unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
+
+
+# removing outliers:
+# fare amount in negative & credit card payments
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
+summary(processed_df)
 
 ```
 
