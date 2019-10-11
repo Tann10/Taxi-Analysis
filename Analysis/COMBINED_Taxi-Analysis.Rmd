@@ -15,6 +15,7 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r}
+loadPkg("plyr")
 loadPkg("dplyr")
 
 # This block is for MERGING THE DATASET
@@ -31,6 +32,8 @@ processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type ==
 per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
 
 processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
+
+#per_tip_outliers
 
 
 
@@ -92,5 +95,31 @@ summary(processed_df)
 ```{r}
 # STEVEN
 
+#ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
+plot(summary(processed_df$Borough_do))
+
+#count(processed_df, c("Borough_pu", "Borough_do"))
+
+ddply(processed_df, .(Borough_pu, Borough_do), nrow)
+
+
+# ANOVA
+# Box plot for tip vs locations
+
+# Run ANOVA
+anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
 ```
 ####################################
