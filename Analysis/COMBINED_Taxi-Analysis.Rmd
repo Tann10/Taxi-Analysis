@@ -1,6 +1,6 @@
 ---
 title: "COMBINED_Taxi-Analysis"
-author: "Steven Chao"
+author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna"
 date: "10/10/2019"
 output: html_document
 ---
@@ -31,8 +31,6 @@ per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
 processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
 
 summary(processed_df)
-
-
 ```
 
 ####################################
@@ -41,6 +39,9 @@ summary(processed_df)
 ```{r}
 # TANAYA
 
+# anova tests 
+anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
+summary(anova_tip_amount)
 ```
 
 ####################################
