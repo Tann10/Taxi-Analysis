@@ -15,8 +15,11 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r}
+loadPkg("plyr")
+loadPkg("dplyr")
+
 # This block is for MERGING THE DATASET
-unprocessed_data = read.csv("../Data/trips_zones_20000.csv")
+unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
 
 
 unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
@@ -29,6 +32,34 @@ processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type ==
 per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
 
 processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
+
+#per_tip_outliers
+
+
+
+#####STEVEN######
+taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
+
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+
+processed_df <- subset(processed_df, select = -c(Zone, service_zone))
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
+
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
+
+#####END####STEVEN######
+
+#### PUT DATA PROCESSING HERE####
+## SAVE TO PROCESSED_DF######
+
+
+
+#######
+
+
 
 summary(processed_df)
 ```
@@ -65,5 +96,34 @@ summary(anova_tip_amount)
 ```{r}
 # STEVEN
 
+#ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
+plot(summary(processed_df$Borough_do))
+
+#count(processed_df, c("Borough_pu", "Borough_do"))
+
+ddply(processed_df, .(Borough_pu, Borough_do), nrow)
+
+
+# ANOVA
+# Box plot for tip vs locations
+
+# Run ANOVA
+anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
+
+# Next task for STeven: # Subset by borough and run t test on each for tip amount, could also a box plot series for each borough grouped by payment type
+# Or subset by payment type and do box plot series for each payment type grouped by borough
 ```
 ####################################
