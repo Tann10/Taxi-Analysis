@@ -37,7 +37,10 @@ loadPkg("data.table")
 
 # Introduction
 
+## Literature Review
+
 ## Problem statement
+QUESTION: For those who pay tip by credit card, what factors influence the amount of tip given?
 Should you pay tip to the taxi driver? If yes, how much?
 
 Analyse the factors which takes place to determine the tip amount paid to the driver
@@ -69,6 +72,7 @@ glimpse(unprocessed_data)
 glimpse(taxi_zones)
 ```
 
+The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
 
 ```{r merge location descriptions}
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
@@ -85,6 +89,12 @@ unique(unprocessed_data$Borough_do)
 ```
 
 ## Data statistics 
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
+
+********HISTOGRAM OF RAW TIP AMOUNT EHRE
+
+A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
+
 per_tip creation
 
 ```{r }
@@ -97,6 +107,7 @@ print(mean(processed_df$per_tip))
 
 
 ## Outlier detection and data filters
+The dataset comes with an associated data definition guide. 
 
 ```{r Outlier detection and missing values, echo=T}
 
@@ -389,4 +400,15 @@ tukey_anova_location
 # Next task for STeven: # Subset by borough and run t test on each for tip amount, could also a box plot series for each borough grouped by payment type
 # Or subset by payment type and do box plot series for each payment type grouped by borough
 ```
-####################################
+
+
+# Limitations
+One limitation was hardware limitations.
+Another limitation was that cash tips by nature are not documented.
+Also, as previously discussed, our data was not perfectly normally distributed. While it was roughly normal, not being normally distributed may slightly contradict some of the assumptions of the statistical analyses.
+
+# Future Considerations
+We might have to do just an analysis on the neighborhoods within Manhattan since yellow taxis are mainly found in Manhattan. Or, we could combine the yellow taxi data with green taxi data to do an analysis that encompasses all five boroughs.
+
+
+# Conclusions
