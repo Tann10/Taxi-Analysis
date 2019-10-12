@@ -10,12 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Write a roughly 10-page (definitely no more than 4000 words) summary of the research and EDA process of your project. The summary should be prepared in R-markdown, and knitted into HTML. You may take some of the work in part B (such as graphs and results) to include here. They can overlap. This summary is to-be presented to your boss, your client, or to-be submitted for publication in journals. Potential area of topics to address in this summary may include:
-▪ What do we know about this dataset?
-▪ What are the limitations of the dataset?
-▪ How was the information gathered?
-▪ What analysis has already been completed related to the content in your dataset? ▪ How did the research you gathered contribute to your question development?
-▪ What additional information would be beneficial?
-▪ How did your question change, if at all, after Exploratory Data Analysis? ▪ Based on EDA can you begin to sketch out an answer to your question?
+▪ What do we know about this dataset? - Madhuri
+▪ What are the limitations of the dataset? - Amna
+▪ How was the information gathered? - Madhuri
+▪ What analysis has already been completed related to the content in your dataset? -Steven
+▪ How did the research you gathered contribute to your question development? - Steven
+▪ What additional information would be beneficial? - Amna
+▪ How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+▪ Based on EDA can you begin to sketch out an answer to your question? - EVERYONE
 
 ```{r cars}
 summary(cars)
