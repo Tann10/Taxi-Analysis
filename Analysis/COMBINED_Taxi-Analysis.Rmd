@@ -361,9 +361,6 @@ summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
 
-outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
-print(outlier)
-
 processed_df <- processed_df %>% filter( trip_distance > 0 )
 summary(processed_df$trip_distance)
 
