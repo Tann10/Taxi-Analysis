@@ -25,9 +25,6 @@ Taxi cabs are an integral part of the New York City experience. Widely recognize
 ##How was the information gathered? - Madhuri
 -some examples: we merged dataset for location; we calculated morning/evening time zone based on time
 
--Steven wrote this, but feel free to use
-As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
-The dataset does not provide information on the passenger's home location, wealth, or even purpose of travel; it simply provides pick up and drop off locations. However, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home [2]. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources. Therefore, this may provide some context into how an individual lives.
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
 What are tips
