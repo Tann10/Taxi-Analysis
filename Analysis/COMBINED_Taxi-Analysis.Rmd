@@ -33,6 +33,8 @@ loadPkg("data.table")
 # loadPkg("grid")
 # loadPkg("gridExtra")
 # loadPkg("egg")
+loadPkg("nortest")
+loadPkg("corrplot")
 ```
 
 # Introduction
@@ -131,6 +133,55 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 
 
 ```
+
+##Pickup column
+
+```{r Pickup_time, include=TRUE, echo = FALSE}
+processed_df$pickup_datetime <- as.POSIXlt(as.character(processed_df$tpep_pickup_datetime), format="%Y-%m-%d %H:%M:%S")
+processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M:%S")
+processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M:%S"),'%H')
+processed_df$pickup_hrs_num <- as.numeric(processed_df$pickup_hrs)
+processed_df$pickup_time_type <- ifelse(processed_df$pickup_hrs_num >= 05 & processed_df$pickup_hrs_num <= 11, "Morning",
+            ifelse(processed_df$pickup_hrs_num > 11 & processed_df$pickup_hrs_num <= 16, "Afternoon",
+            ifelse(processed_df$pickup_hrs_num > 16 & processed_df$pickup_hrs_num <= 21, "Evening", "Night")))
+processed_df$pickup_time_type <- as.factor(processed_df$pickup_time_type)
+processed_df$pickup_time_type <- ordered(processed_df$pickup_time_type, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+
+## Dropoff column
+```{r Dropoff_time, include=TRUE, echo = FALSE}
+processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), format="%Y-%m-%d %H:%M:%S")
+processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M:%S")
+processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M:%S"),'%H')
+processed_df$dropoff_hrs_num <- as.numeric(processed_df$dropoff_hrs)
+processed_df$dropoff_time_type <- ifelse(processed_df$dropoff_hrs_num >= 05 & processed_df$dropoff_hrs_num <= 11, "Morning",
+            ifelse(processed_df$dropoff_hrs_num > 11 & processed_df$dropoff_hrs_num <= 16, "Afternoon",
+            ifelse(processed_df$dropoff_hrs_num > 16 & processed_df$dropoff_hrs_num <= 21, "Evening", "Night")))
+processed_df$dropoff_time_type <- as.factor(processed_df$dropoff_time_type)
+processed_df$dropoff_time_type <- ordered(processed_df$dropoff_time_type, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+##Trip_duration
+```{r Trip_duration, include=TRUE, echo = FALSE}
+processed_df$trip_duration_mins <- difftime(processed_df$dropoff_datetime, processed_df$pickup_datetime, units = "mins")
+
+processed_df$trip_duration_mins1 <- floor(as.numeric(processed_df$trip_duration_mins))
+
+#head(processed_df)
+#min(processed_df$trip_duration_mins1)
+#max(processed_df$trip_duration_mins1)
+#subset(processed_df, trip_duration_mins1 == 1439)
+#nrow(processed_df)
+
+boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
+duration_outliers <- boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
+
+processed_df = processed_df[ !processed_df$trip_duration_mins1 %in% duration_outliers$out, ]
+
+boxplot(processed_df$per_tip, col = c("#0000FF"))
+```
+
 
 ## Normality check
 ```{r}
@@ -231,12 +282,89 @@ summary(anova_tip_amount)
 ```
 
 ####################################
-
-
-```{r}
 # MADHURI
 
+```{r include=TRUE, echo = FALSE}
+
+ad.test(processed_df$per_tip)
+qqnorm(processed_df$per_tip, main = "Q-Q plot of BMI", col = "pink")
+
+hist(processed_df$per_tip,     main = "Histogram of plasma glucose concentration",    col = c('pink'))
+
 ```
+
+
+```{r Pickup_time1, include=TRUE, echo = FALSE}
+
+qqnorm(processed_df$pickup_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
+hist(processed_df$pickup_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+
+boxplot(per_tip ~ pickup_time_type, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
+```
+
+```{r Pick_up_time_Anova, include=TRUE, echo = FALSE}
+
+anova_pickup_time_type = aov(per_tip ~ pickup_time_type, data = processed_df)
+
+summary(anova_pickup_time_type)
+tukeyday_pickup_time_type <- TukeyHSD(anova_pickup_time_type)
+tukeyday_pickup_time_type
+plot(tukeyday_pickup_time_type)
+
+```
+
+p<0.05 hence we reject null hypothesis
+null hyp = means for all the day types are equal
+conclusion : Avg tip amt for diffrent time in the day is not equal
+not all of the means are equal and the results are statistically significant
+
+
+
+```{r Dropoff_time1, include=TRUE, echo = FALSE}
+qqnorm(processed_df$dropoff_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
+hist(processed_df$dropoff_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+
+boxplot(per_tip ~ dropoff_time_type, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
+```
+
+```{r Dropoff_time_Anova, include=TRUE, echo = FALSE}
+
+anova_dropoff_time_type = aov(per_tip ~ dropoff_time_type, data = processed_df)
+
+summary(anova_dropoff_time_type)
+tukeyday_dropoff_time_type <- TukeyHSD(anova_dropoff_time_type)
+tukeyday_dropoff_time_type
+plot(tukeyday_dropoff_time_type)
+
+```
+
+p<0.05 hence we reject null hypothesis
+null hyp = means for all the day types are equal
+conclusion : Avg tip amt for diffrent time in the day is not equal
+not all of the means are equal and the results are statistically significant
+
+
+
+```{r Trip_duration1, include=TRUE, echo = FALSE}
+
+hist(processed_df$trip_duration_mins1, processed_df$per_tip, main = "Histogram of PER_TIP vs tRIP DURATION", col = rainbow(40), breaks = 40)
+
+```
+
+```{r Trip_duration_Two_Sample_Ttest, include=TRUE, echo = FALSE}
+
+a <- t.test(processed_df$per_tip, processed_df$trip_duration_mins1)
+a
+
+processed_df_num <- processed_df[, sapply(processed_df, is.numeric)]
+processed_df_cor = cor(processed_df_num)
+corrplot.mixed(processed_df_cor)
+```
+
+p<0.05 hence we reject null hypothesis
+null hyp = means for per_tip and trip_duration_min are equal
+conclusion : true difference in means is not equal to 0
+means are not equal and the results are statistically significant
 
 ####################################
 
