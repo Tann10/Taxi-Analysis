@@ -119,8 +119,8 @@ The dataset comes with an associated data definition guide.
 
 ```{r Outlier detection and missing values, echo=T}
 
-# fare amount in negative & credit card payments
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
+# fare amount in negative & credit card payments & trip_distance > 0
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0))
 
 # removing outliers:
 # per_tip laying outside IQR range in box plot
@@ -130,6 +130,9 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
+
+
+
 ```
 
 ##Pickup column
@@ -374,19 +377,15 @@ means are not equal and the results are statistically significant
 
 ####################################
 
+### Tip payed and distance travelled by passengers 
 
-```{r}
+```{r distance_vs_tip, inlcude=T, echo=F}
 # AMNA
 
 summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
 
-outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
-print(outlier)
-
-processed_df <- processed_df %>% filter( trip_distance > 0 )
-summary(processed_df$trip_distance)
 
 plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
 # not so good/visible results
@@ -612,38 +611,6 @@ For pick up locations, there is no statistical difference for the between the fo
 
 Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
 
-```{r TOBEDELETED, include = F}
-# STEVEN
-#ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
-plot(summary(processed_df$Borough_do))
-
-#count(processed_df, c("Borough_pu", "Borough_do"))
-
-ddply(processed_df, .(Borough_pu, Borough_do), nrow)
-
-
-# ANOVA
-# Box plot for tip vs locations
-
-# Run ANOVA
-anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
-
-# Print ANOVA results
-anova_location
-
-# Summarize ANOVA
-summary(anova_location)
-
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
-
-# Next task for STeven: # Subset by borough and run t test on each for tip amount, could also a box plot series for each borough grouped by payment type
-# Or subset by payment type and do box plot series for each payment type grouped by borough
-```
 
 ``` {r}
 # Fit linear model with 3 variables
