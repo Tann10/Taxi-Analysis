@@ -260,26 +260,12 @@ print(mean(processed_df$per_tip))
 ```
 
 
-
-
-#### PUT DATA PROCESSING HERE####
-## SAVE TO PROCESSED_DF######
-
-
-
-#######
-
-
-
-summary(processed_df)
-```
 ```{r boxplot_pertip, include = T, echo = F}
 
 boxplot(processed_df$tip_amount)
 boxplot(processed_df$per_tip)
 ```
 
-####################################
 
 
 ```{r}
@@ -375,11 +361,10 @@ null hyp = means for per_tip and trip_duration_min are equal
 conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
-####################################
 
 ### Tip payed and distance travelled by passengers 
 
-```{r distance_vs_tip, include=F, echo=T}
+```{r }
 
 # AMNA
 
