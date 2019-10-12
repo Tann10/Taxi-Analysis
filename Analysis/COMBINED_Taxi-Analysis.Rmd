@@ -60,7 +60,6 @@ Factors that can affect tip amount:
 5. distance
 6. count of passengers
 7. weather
-8. Co ordinates 
 
 # Data preprocessing
 
@@ -119,8 +118,8 @@ The dataset comes with an associated data definition guide.
 
 ```{r Outlier detection and missing values, echo=T}
 
-# fare amount in negative & credit card payments & trip_distance > 0
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0))
+# fare amount in negative & credit card payments
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
 
 # removing outliers:
 # per_tip laying outside IQR range in box plot
@@ -130,9 +129,6 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
-
-
-
 ```
 
 ##Pickup column
@@ -193,14 +189,6 @@ processed_df %>%
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
-
-```{r}
-
-processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
-
-processed_df %>% ggplot(aes())+ +
-  geom_bar(size=2, shape=23)
-```
 ## EDA
 
 ```{r }
@@ -238,9 +226,9 @@ ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 
-# hist(check_2$per_tip,probability=T, main="Histogram of normal
-# data",xlab="Approximately normally distributed data")
-# lines(density(check_2$per_tip),col=2)
+hist(check_2$per_tip,probability=T, main="Histogram of normal
+data",xlab="Approximately normally distributed data")
+lines(density(check_2$per_tip),col=2)
 ```
 
 
@@ -362,6 +350,7 @@ conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
 
+
 ### Tip payed and distance travelled by passengers 
 
 ```{r }
@@ -372,16 +361,19 @@ summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
 
+outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
+print(outlier)
+
+processed_df <- processed_df %>% filter( trip_distance > 0 )
+summary(processed_df$trip_distance)
 
 plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
 # not so good/visible results
 
 plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
-# even bad results
-
+# even bad results, what to do
 # plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance 
 # travelled (Log)", log = processed_df$tip_amount) 
-
 # should i take log etc
 
 hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
@@ -439,35 +431,9 @@ points(M,
 
 
 
-
-<!-- median_dist <- median(processed_df$trip_distance) -->
-
-<!-- factor_dist <- cut(processed_df$trip_distance, breaks=c(0, median_dist, Inf), labels=paste("Distance", 1:2, sep="")) -->
-<!-- # Factoring distance col -->
-
-<!-- processed_df$trip_distance <- factor_dist -->
-<!-- # assigning factored col to the original df -->
-<!-- str(processed_df) -->
-
-<!-- short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1") -->
-<!-- long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2") -->
-<!-- # subsetting df on basis of trip distance -->
-
-<!-- result <- t.test(short_dist$tip_amount, long_dist$tip_amount) -->
-<!-- print(result) -->
-
-<!-- plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Median)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") ) -->
-<!-- M = tapply(processed_df$per_tip, -->
-<!--            INDEX = processed_df$trip_distance, -->
-<!--            FUN   = median) -->
-<!-- points(M, -->
-<!--        col="yellow", -->
-<!--        pch="+",   ### symbol to use, see ?points -->
-<!--        cex=2) -->
-
-<!-- # same results as those for mean, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers -->
-
 ```
+
+####################################
 
 ### GEOGRAPHIC LOCATION AND TIP
 As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
@@ -598,14 +564,6 @@ For pick up locations, there is no statistical difference for the between the fo
 Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
 
 
-
-``` {r}
-# Fit linear model with 3 variables
-lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
-
-# Print summary
-summary(lm_3var)
-```
 
 # Limitations
 One limitation was hardware limitations.
