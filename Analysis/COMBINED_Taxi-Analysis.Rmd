@@ -14,9 +14,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+<<<<<<< HEAD
 library("knitr")
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(error = TRUE)
+=======
+#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(include = F)
+>>>>>>> 7fdcb40b32282c5935363a3c64d9b6dc9f5d3563
 ```
 
 ```{r basicfcn, include=F}
@@ -25,6 +30,11 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 ```{r load libraries, echo=FALSE}
 
+<<<<<<< HEAD
+=======
+```{r, include=F}
+loadPkg("plyr")
+>>>>>>> 7fdcb40b32282c5935363a3c64d9b6dc9f5d3563
 loadPkg("dplyr")
 loadPkg("ggplot2")
 loadPkg("data.table")
@@ -186,6 +196,11 @@ print(mean(processed_df$per_tip))
 
 summary(processed_df)
 ```
+```{r boxplot_pertip, include = T, echo = F}
+
+boxplot(processed_df$tip_amount)
+boxplot(processed_df$per_tip)
+```
 
 ####################################
 
@@ -216,9 +231,117 @@ summary(anova_tip_amount)
 
 ####################################
 
-```{r}
-# STEVEN
+### GEOGRAPHIC LOCATION AND TIP
+As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
+The dataset does not provide information on the passenger's home location, wealth, or even purpose of travel; it simply provides pick up and drop off locations. However, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home [2]. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources. Therefore, this may provide some context into how an individual lives.
 
+
+[1] https://scholarship.sha.cornell.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1102&context=articles
+[2] https://ieeexplore.ieee.org/abstract/document/4624004; https://onlinelibrary.wiley.com/doi/pdf/10.1111/0033-0124.00158?casa_token=fgUlwmzlofwAAAAA:k19TGhhaKN9uLpNH1QXQgXrqRrm77fEgGmBisvuspaVDzvnNfXkrcvBvC4QsJMOmptyw8ew-qJWCd4s; https://biblio.ugent.be/publication/3029997/file/6779790.pdf; https://www.tandfonline.com/doi/full/10.1080/02723638.2016.1142152
+
+To better understand this issue, descriptive statistics were run. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
+
+```{r location_barlot, include = T, echo = F}
+
+barplot(summary(processed_df$Borough_pu))
+barplot(summary(processed_df$Borough_do))
+```
+
+These bar charts show that Manhattan has the highest number of both pick up and drop offs, followed by Queens and Brooklyn in second and third, respectively. We also looked at the frequency of various drop off and pick up combinations.
+
+```{r combo_pu_df, include = T, echo = F}
+ddply(processed_df, .(Borough_pu, Borough_do), nrow)
+```
+
+This table shows that Manhattan to Manhattan has the highest number of trips, followed by Queens to Manhattan, Manhattan to Queens, and Manhattan to Brooklyn.
+
+Considering the Manhattan and Queens have the highest number of pick ups and drop offs, the fact that the number of trips within and between these places are also the highest make sense. The fact that Manhattan scores the highest in both measurements is also reasonable because yellow taxis (the focus of this study) mainly serve Manhattan, whereas green taxis usually serve the other boroughs that have been traditionally underserved by taxis (SOURCE).
+
+With these descriptive statistics in mind, we decided to compare the mean tipping amount for each borough based on drop off and pick up location to see if they were statistically different.
+
+We used the ANOVA test. Here are the results for tip amount based on pick up location:
+
+```{r anova_tip-amt_pu, include = T, echo = F}
+# Run ANOVA
+anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
+```
+
+Here are the results for tip amount based on drop off location:
+
+```{r anova_tip-amt_do, include = T, echo = F}
+# Run ANOVA
+anova_location <- aov(tip_amount ~ Borough_do, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
+```
+
+
+We also compared the mean tipping percenetage for each borough to see if those were statistically different. Here are the results for tip percentage based on pick up location:
+
+```{r anova_tip-percent_pu, include = T, echo = F}
+# Run ANOVA
+anova_location <- aov(per_tip ~ Borough_pu, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(per_tip ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
+```
+
+Here are the results for tip percentage based on drop off location:
+
+```{r anova_tip-percent_do, include = T, echo = F}
+# Run ANOVA
+anova_location <- aov(per_tip ~ Borough_do, data = processed_df)
+
+# Print ANOVA results
+anova_location
+
+# Summarize ANOVA
+summary(anova_location)
+
+# Plot rankings vs GRE
+plot(per_tip ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
+
+tukey_anova_location
+```
+
+```{r TOBEDELETED}
+# STEVEN
 #ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
 plot(summary(processed_df$Borough_do))
 
