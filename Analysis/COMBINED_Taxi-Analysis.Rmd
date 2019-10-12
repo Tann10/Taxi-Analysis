@@ -60,6 +60,7 @@ Factors that can affect tip amount:
 5. distance
 6. count of passengers
 7. weather
+8. Co ordinates 
 
 # Data preprocessing
 
@@ -192,6 +193,14 @@ processed_df %>%
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
+
+```{r}
+
+processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
+
+processed_df %>% ggplot(aes())+ +
+  geom_bar(size=2, shape=23)
+```
 ## EDA
 
 ```{r }
@@ -229,9 +238,9 @@ ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 
-hist(check_2$per_tip,probability=T, main="Histogram of normal
-data",xlab="Approximately normally distributed data")
-lines(density(check_2$per_tip),col=2)
+# hist(check_2$per_tip,probability=T, main="Histogram of normal
+# data",xlab="Approximately normally distributed data")
+# lines(density(check_2$per_tip),col=2)
 ```
 
 
@@ -474,8 +483,6 @@ points(M,
 <!-- # same results as those for mean, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers -->
 
 ```
-
-####################################
 
 ### GEOGRAPHIC LOCATION AND TIP
 As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
