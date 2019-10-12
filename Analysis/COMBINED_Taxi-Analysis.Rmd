@@ -235,9 +235,9 @@ ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 
-hist(check_2$per_tip,probability=T, main="Histogram of normal
-data",xlab="Approximately normally distributed data")
-lines(density(check_2$per_tip),col=2)
+# hist(check_2$per_tip,probability=T, main="Histogram of normal
+# data",xlab="Approximately normally distributed data")
+# lines(density(check_2$per_tip),col=2)
 ```
 
 

@@ -48,6 +48,7 @@ In this context, given the circumstances of taxicab tipping, this project seeks 
 -examples: weather data, geographic coordinates, driver ratings, etc.
 
 ##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+Initial question
 -not normal, so we changed to tip amount
 -because only credit card tips, we changed our question to focus only on credit card tips
 
