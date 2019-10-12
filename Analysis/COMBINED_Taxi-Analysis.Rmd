@@ -26,6 +26,7 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r load libraries, echo=FALSE}
+loadPkg("plyr")
 loadPkg("dplyr")
 loadPkg("ggplot2")
 loadPkg("data.table")
@@ -70,16 +71,16 @@ glimpse(taxi_zones)
 
 
 ```{r merge location descriptions}
-processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
 
-processed_df <- subset(processed_df, select = -c(Zone, service_zone))
+unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
 
-colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
+colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
 
-processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
 
-colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
-unique(processed_df$Borough_do)
+colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
+unique(unprocessed_data$Borough_do)
 
 ```
 
@@ -254,90 +255,109 @@ This table shows that Manhattan to Manhattan has the highest number of trips, fo
 
 Considering the Manhattan and Queens have the highest number of pick ups and drop offs, the fact that the number of trips within and between these places are also the highest make sense. The fact that Manhattan scores the highest in both measurements is also reasonable because yellow taxis (the focus of this study) mainly serve Manhattan, whereas green taxis usually serve the other boroughs that have been traditionally underserved by taxis (SOURCE).
 
-With these descriptive statistics in mind, we decided to compare the mean tipping amount for each borough based on drop off and pick up location to see if they were statistically different.
+With these descriptive statistics in mind, we decided to compare the mean tipping percentage for each borough based on drop off and pick up location to see if they were statistically different.
 
-We used the ANOVA test. Here are the results for tip amount based on pick up location:
-
-```{r anova_tip-amt_pu, include = T, echo = F}
-# Run ANOVA
-anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
-
-# Print ANOVA results
-anova_location
-
-# Summarize ANOVA
-summary(anova_location)
-
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
-```
-
-Here are the results for tip amount based on drop off location:
-
-```{r anova_tip-amt_do, include = T, echo = F}
-# Run ANOVA
-anova_location <- aov(tip_amount ~ Borough_do, data = processed_df)
-
-# Print ANOVA results
-anova_location
-
-# Summarize ANOVA
-summary(anova_location)
-
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
-```
-
-
-We also compared the mean tipping percenetage for each borough to see if those were statistically different. Here are the results for tip percentage based on pick up location:
+We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_location <- aov(per_tip ~ Borough_pu, data = processed_df)
+anova_tipper_pu <- aov(per_tip ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
-anova_location
+anova_tipper_pu
 
 # Summarize ANOVA
-summary(anova_location)
-
-# Plot rankings vs GRE
-plot(per_tip ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
+summary(anova_tipper_pu)
 ```
-
-Here are the results for tip percentage based on drop off location:
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_location <- aov(per_tip ~ Borough_do, data = processed_df)
+anova_tipper_do <- aov(per_tip ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
-anova_location
+anova_tipper_do
 
 # Summarize ANOVA
-summary(anova_location)
+summary(anova_tipper_do)
+```
+
+```{r tipper_plot, include = T, echo = F}
+# Plot rankings vs GRE
+plot(per_tip ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
 
 # Plot rankings vs GRE
 plot(per_tip ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
 ```
 
-```{r TOBEDELETED}
+The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+
+Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
+
+```{r tipper_tukey, include = T, echo = F}
+
+tukey_tipper_pu <- TukeyHSD(anova_tipper_pu, conf.level = 0.95)
+
+tukey_tipper_pu
+
+tukey_tipper_do <- TukeyHSD(anova_tipper_do, conf.level = 0.95)
+
+tukey_tipper_do
+```
+
+While the means are overall not the same, the following pick up pairs have significant differences in tipping percentage (excluding Unknown) given their small p-values: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant.
+
+ANOVA assumes a normal distribution, and as previously highlighted, the tipping amount is not necessarily normally distributed. Nonetheless, a look at the tipping amount can provide some context to the situation. We compared the mean tipping amount for each borough to see if those were statistically different. Here are the results for raw tip amount based on location:
+
+```{r anova_tip-amt_pu, include = T, echo = F}
+# Run ANOVA
+anova_tipamt_pu <- aov(tip_amount ~ Borough_pu, data = processed_df)
+
+# Print ANOVA results
+anova_tipamt_pu
+
+# Summarize ANOVA
+summary(anova_tipamt_pu)
+```
+
+```{r anova_tip-amt_do, include = T, echo = F}
+# Run ANOVA
+anova_tipamt_do <- aov(tip_amount ~ Borough_do, data = processed_df)
+
+# Print ANOVA results
+anova_tipamt_do
+
+# Summarize ANOVA
+summary(anova_tipamt_do)
+```
+
+```{r tipamt_plot, include = T, echo = F}
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+
+# Plot rankings vs GRE
+plot(tip_amount ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+```
+
+For these ANOVA analyses, the null hypothesis is that all means for different locations are the same. The p-values are `r summary(anova_tipamt_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipamt_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+
+As with the previous, because both are significant, we can run Tukey's HSD test:
+
+```{r tipamt_tukey, include = T, echo = F}
+
+tukey_tipamt_pu <- TukeyHSD(anova_tipamt_pu, conf.level = 0.95)
+
+tukey_tipamt_pu
+
+tukey_tipamt_do <- TukeyHSD(anova_tipamt_do, conf.level = 0.95)
+
+tukey_tipamt_do
+```
+
+For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant.
+
+Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
+
+```{r TOBEDELETED, include = F}
 # STEVEN
 #ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
 plot(summary(processed_df$Borough_do))
