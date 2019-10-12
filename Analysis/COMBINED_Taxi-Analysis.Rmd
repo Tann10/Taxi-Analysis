@@ -247,26 +247,12 @@ print(mean(processed_df$per_tip))
 ```
 
 
-
-
-#### PUT DATA PROCESSING HERE####
-## SAVE TO PROCESSED_DF######
-
-
-
-#######
-
-
-
-summary(processed_df)
-```
 ```{r boxplot_pertip, include = T, echo = F}
 
 boxplot(processed_df$tip_amount)
 boxplot(processed_df$per_tip)
 ```
 
-####################################
 
 
 ```{r}
@@ -362,19 +348,22 @@ null hyp = means for per_tip and trip_duration_min are equal
 conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
+<<<<<<< HEAD
 #Madhuri Ends
 ####################################
+=======
+>>>>>>> 29d0f71f0251384c4f2b8c5e24b3c721927ff061
 
 
-```{r}
+### Tip payed and distance travelled by passengers 
+
+```{r }
+
 # AMNA
 
 summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
-
-outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
-print(outlier)
 
 processed_df <- processed_df %>% filter( trip_distance > 0 )
 summary(processed_df$trip_distance)
@@ -384,7 +373,8 @@ plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot b
 
 plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
 # even bad results, what to do
-<!-- plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance travelled (Log)", log = processed_df$tip_amount) -->
+# plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance 
+# travelled (Log)", log = processed_df$tip_amount) 
 # should i take log etc
 
 hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
@@ -407,10 +397,7 @@ qqline(processed_df$trip_distance)
 # same result as tip_amount, end points digress
 
 # cannot perform Shapiro because observations (approx 13,000)  > 5000
-<!-- shapiro.test(processed_df$tip_amount) -->
-<!-- shapiro.test(processed_df$per_tip) -->
-<!-- shapiro.test(processed_df$trip_distance) -->
-<!-- str(processed_df) -->
+
 
 mean_dist <- mean(processed_df$trip_distance)
 # should i use mean or median bc this col in not normal
@@ -444,34 +431,6 @@ points(M,
 
 
 
-
-
-<!-- median_dist <- median(processed_df$trip_distance) -->
-
-<!-- factor_dist <- cut(processed_df$trip_distance, breaks=c(0, median_dist, Inf), labels=paste("Distance", 1:2, sep="")) -->
-<!-- # Factoring distance col -->
-
-<!-- processed_df$trip_distance <- factor_dist -->
-<!-- # assigning factored col to the original df -->
-<!-- str(processed_df) -->
-
-<!-- short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1") -->
-<!-- long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2") -->
-<!-- # subsetting df on basis of trip distance -->
-
-<!-- result <- t.test(short_dist$tip_amount, long_dist$tip_amount) -->
-<!-- print(result) -->
-
-<!-- plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Median)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") ) -->
-<!-- M = tapply(processed_df$per_tip, -->
-<!--            INDEX = processed_df$trip_distance, -->
-<!--            FUN   = median) -->
-<!-- points(M, -->
-<!--        col="yellow", -->
-<!--        pch="+",   ### symbol to use, see ?points -->
-<!--        cex=2) -->
-
-<!-- # same results as those for mean, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers -->
 
 ```
 
@@ -606,6 +565,7 @@ For pick up locations, there is no statistical difference for the between the fo
 Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
 
 
+<<<<<<< HEAD
 ``` {r}
 # Fit linear model with 3 variables
 lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
@@ -613,6 +573,8 @@ lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
 # Print summary
 summary(lm_3var)
 ```
+=======
+>>>>>>> 29d0f71f0251384c4f2b8c5e24b3c721927ff061
 
 # Limitations
 One limitation was hardware limitations.
