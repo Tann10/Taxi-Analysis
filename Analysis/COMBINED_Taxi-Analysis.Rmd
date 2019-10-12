@@ -406,6 +406,13 @@ tukey_anova_location
 # Or subset by payment type and do box plot series for each payment type grouped by borough
 ```
 
+``` {r}
+# Fit linear model with 3 variables
+lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
+
+# Print summary
+summary(lm_3var)
+```
 
 # Limitations
 One limitation was hardware limitations.
