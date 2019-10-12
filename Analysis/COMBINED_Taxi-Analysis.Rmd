@@ -91,7 +91,12 @@ unique(unprocessed_data$Borough_do)
 ## Data statistics 
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
 
-********HISTOGRAM OF RAW TIP AMOUNT EHRE
+```{r tipamount_distr, echo=F, include=T}
+boxplot(processed_df$tip_amount)
+
+qqnorm(processed_df$tip_amount)
+qqline(processed_df$tip_amount)
+```
 
 A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
@@ -243,6 +248,110 @@ summary(anova_tip_amount)
 
 ```{r}
 # AMNA
+
+summary(processed_df$per_tip)
+
+summary(processed_df$trip_distance)
+
+outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
+print(outlier)
+
+processed_df <- processed_df %>% filter( trip_distance > 0 )
+summary(processed_df$trip_distance)
+
+plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
+# not so good/visible results
+
+plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
+# even bad results, what to do
+<!-- plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance travelled (Log)", log = processed_df$tip_amount) -->
+# should i take log etc
+
+hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
+# not normal
+hist(processed_df$per_tip, main="Tip Percentage Histogram", xlab = "Tip Percentage", col = "aquamarine")   
+# pretty normal
+hist(processed_df$trip_distance, main="Trip Distance (miles) Histogram", xlab = "Trip Distance (miles)", col = "aquamarine")
+# not normal
+
+qqnorm(processed_df$tip_amount, main="Normal Q-Q Plot for Tip Amount", xlab="Theoretical Quantiles (z-scores)", ylab="Tip values", col="darkviolet")    
+qqline(processed_df$tip_amount)    
+# end points digress
+
+qqnorm(processed_df$per_tip, main="Normal Q-Q Plot for Tip Percentages", xlab="Theoretical Quantiles (z-scores)", ylab="Tip Percentage values", col="darkviolet")    
+qqline(processed_df$per_tip)    
+# much better results than simple tip amount
+
+qqnorm(processed_df$trip_distance, main="Normal Q-Q Plot for Trip Distances", xlab="Theoretical Quantiles (z-scores)", ylab="Trip Distances values", col="darkviolet")    
+qqline(processed_df$trip_distance)    
+# same result as tip_amount, end points digress
+
+# cannot perform Shapiro because observations (approx 13,000)  > 5000
+<!-- shapiro.test(processed_df$tip_amount) -->
+<!-- shapiro.test(processed_df$per_tip) -->
+<!-- shapiro.test(processed_df$trip_distance) -->
+<!-- str(processed_df) -->
+
+mean_dist <- mean(processed_df$trip_distance)
+# should i use mean or median bc this col in not normal
+
+factor_dist <- cut(processed_df$trip_distance, breaks=c(0, mean_dist, Inf), labels=paste("Distance", 1:2, sep=""))
+# Factoring distance col
+
+processed_df$trip_distance <- factor_dist
+# assigning factored col to the original df
+str(processed_df)
+
+short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1")
+long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2")
+# subsetting df on basis of trip distance
+
+# Applying 2 Sample t-test below
+result <- t.test(short_dist$tip_amount, long_dist$tip_amount)
+print(result)
+# My Null Hyp = Both means equal, Alt Hyp = Both means not equal
+
+plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Mean)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") )
+M = tapply(processed_df$per_tip,
+           INDEX = processed_df$trip_distance,
+           FUN   = mean)
+points(M,
+       col="yellow",
+       pch="+",   ### symbol to use, see ?points
+       cex=2)
+
+# somewhat surprising results, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers
+
+
+
+
+
+<!-- median_dist <- median(processed_df$trip_distance) -->
+
+<!-- factor_dist <- cut(processed_df$trip_distance, breaks=c(0, median_dist, Inf), labels=paste("Distance", 1:2, sep="")) -->
+<!-- # Factoring distance col -->
+
+<!-- processed_df$trip_distance <- factor_dist -->
+<!-- # assigning factored col to the original df -->
+<!-- str(processed_df) -->
+
+<!-- short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1") -->
+<!-- long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2") -->
+<!-- # subsetting df on basis of trip distance -->
+
+<!-- result <- t.test(short_dist$tip_amount, long_dist$tip_amount) -->
+<!-- print(result) -->
+
+<!-- plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Median)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") ) -->
+<!-- M = tapply(processed_df$per_tip, -->
+<!--            INDEX = processed_df$trip_distance, -->
+<!--            FUN   = median) -->
+<!-- points(M, -->
+<!--        col="yellow", -->
+<!--        pch="+",   ### symbol to use, see ?points -->
+<!--        cex=2) -->
+
+<!-- # same results as those for mean, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers -->
 
 ```
 
@@ -407,6 +516,13 @@ tukey_anova_location
 # Or subset by payment type and do box plot series for each payment type grouped by borough
 ```
 
+``` {r}
+# Fit linear model with 3 variables
+lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
+
+# Print summary
+summary(lm_3var)
+```
 
 # Limitations
 One limitation was hardware limitations.
