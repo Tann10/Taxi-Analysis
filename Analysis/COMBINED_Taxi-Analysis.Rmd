@@ -121,6 +121,14 @@ processed_df %>%
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
+
+```{r}
+
+processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
+
+processed_df %>% ggplot(aes())+ +
+  geom_bar(size=2, shape=23)
+```
 ## EDA
 
 ```{r }
@@ -225,8 +233,6 @@ summary(anova_tip_amount)
 # AMNA
 
 ```
-
-####################################
 
 ### GEOGRAPHIC LOCATION AND TIP
 As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
