@@ -10,29 +10,51 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Write a roughly 10-page (definitely no more than 4000 words) summary of the research and EDA process of your project. The summary should be prepared in R-markdown, and knitted into HTML. You may take some of the work in part B (such as graphs and results) to include here. They can overlap. This summary is to-be presented to your boss, your client, or to-be submitted for publication in journals. Potential area of topics to address in this summary may include:
-##What do we know about this dataset? - Madhuri
 
+#******EACH PERSON SHOULD WRITE ABOUT 1000 WORDS!!!!!!*******
+
+#Introduction
+Taxi cabs are an integral part of the New York City experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxi cabs in service today. The popularity of taxi cabs have come under siege recently with the growing popularity and use of competiting ride-hailing services such as Lyft and Uber. There are 80,000 of these cars in New York City, with 50,000 drivers serving 236 million passengers per year. Tips are an important part of the service industry. Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. Devaraj and Patel note that these taxi cabs are worth $800,000 each. Taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity.
+
+##What do we know about this dataset? - Madhuri
+-provide some graphs and charts
 
 ##What are the limitations of the dataset? - Amna
-
+-some examples: tips are only credit card; hardware limitations; tip amount is very skewed/not normal
 
 ##How was the information gathered? - Madhuri
+-some examples: we merged dataset for location; we calculated morning/evening time zone based on time
 
+-Steven wrote this, but feel free to use
+As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
+The dataset does not provide information on the passenger's home location, wealth, or even purpose of travel; it simply provides pick up and drop off locations. However, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home [2]. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources. Therefore, this may provide some context into how an individual lives.
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
+What are tips
+Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Cunningham). Tipping is an integral part of the service sector in the US, which generated about xXXX billion in tips in YEAR. 
+
+What influences tips
+
+In short, tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel).
+
+However, Devaraj and Patel argue that these factors have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers.
+Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017) argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Alternatively, Flynn and Greenberg (date) disagree, saying that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
 
 ##How did the research you gathered contribute to your question development? - Steven
-
+In this context, given the circumstances of taxicab tipping, this project seeks to identify if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior, there may be other factors, such as economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
 
 ##What additional information would be beneficial? - Amna
-
+-examples: weather data, geographic coordinates, driver ratings, etc.
 
 ##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+-not normal, so we changed to tip amount
+-because only credit card tips, we changed our question to focus only on credit card tips
 
+-put updated research questions here
 ```{r cars}
 summary(cars)
 ```
 
 
-##Based on EDA can you begin to sketch out an answer to your question? - EVERYONE
+##Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
