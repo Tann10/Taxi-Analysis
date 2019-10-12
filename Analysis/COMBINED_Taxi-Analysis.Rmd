@@ -1,45 +1,71 @@
 ---
 title: "COMBINED_Taxi-Analysis"
-author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna"
-date: "10/10/2019"
-output: html_document
+author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
+library("knitr")
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(error = TRUE)
 ```
 
 ```{r basicfcn, include=F}
 # can add quietly=T option to the require() function
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
+```{r load libraries, echo=FALSE}
 
-```{r}
-loadPkg("plyr")
 loadPkg("dplyr")
+loadPkg("ggplot2")
+loadPkg("data.table")
+```
 
-# This block is for MERGING THE DATASET
+# Introduction
+
+## Problem statement
+Should you pay tip to the taxi driver? If yes, how much?
+
+Analyse the factors which takes place to determine the tip amount paid to the driver
+
+Why?
+Benefits?
+Use?
+
+Hypothesis:
+Factors that can affect tip amount:
+1. Vendor service
+2. Driver service
+3. Location :  (generous locations)
+4. duration of day 
+5. distance
+6. count of passengers
+7. weather
+
+# Data preprocessing
+
+## Load data
+write where data is collected from 
+```{r read data files}
 unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
-
-
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
-
-
-# removing outliers:
-# fare amount in negative & credit card payments
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
-
-per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-
-processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
-
-#per_tip_outliers
-
-
-
-#####STEVEN######
 taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
 
+glimpse(unprocessed_data)
+
+glimpse(taxi_zones)
+```
+
+
+```{r merge location descriptions}
 processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
 
 processed_df <- subset(processed_df, select = -c(Zone, service_zone))
@@ -49,8 +75,105 @@ colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
 processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
 
 colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
+unique(processed_df$Borough_do)
 
-#####END####STEVEN######
+```
+
+## Data statistics 
+per_tip creation
+
+```{r }
+# get percentage tip amount
+unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
+summary(unprocessed_data)
+print(sd(processed_df$per_tip))
+print(mean(processed_df$per_tip))
+```
+
+
+## Outlier detection and data filters
+
+```{r Outlier detection and missing values, echo=T}
+
+# fare amount in negative & credit card payments
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
+
+# removing outliers:
+# per_tip laying outside IQR range in box plot
+while (length(boxplot(processed_df$per_tip)$out) != 0){
+  dim(processed_df)
+  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
+  processed_df = processed_df[ !processed_df$per_tip %in% per_tip_outliers$out, ]
+  dim(processed_df)
+}
+```
+
+## Normality check
+```{r}
+processed_df %>%
+  ggplot(aes(per_tip)) +
+  geom_histogram(aes(y =..density..),
+                   colour = "black", 
+                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
+```
+
+## EDA
+
+```{r }
+processed_df %>%
+  group_by(passenger_count) %>%
+  count() %>%
+  ggplot(aes(passenger_count, n, fill = passenger_count)) +
+  geom_col() +
+  scale_y_sqrt() +
+  theme(legend.position = "none")
+
+processed_df %>%
+  ggplot(aes(VendorID, fill = VendorID)) +
+  geom_bar() +
+  theme(legend.position = "none")
+
+```
+
+EDA questions:
+1. What places give max and min tip?
+2. How is the tip amount varying?
+3. What time of the day gives your more tip?
+4. Distribution across count of passenger?
+5. Distance and time variation in the trip?
+
+
+```{r}
+# Bar chart according to VendorID
+processed_df %>% group_by(VendorID) %>% summarise(n = n(),average = mean(per_tip), min = min(per_tip),  max = max(per_tip))
+
+ggplot(processed_df, aes(y=per_tip, group = VendorID)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4)
+
+hist(check_2$per_tip,probability=T, main="Histogram of normal
+data",xlab="Approximately normally distributed data")
+lines(density(check_2$per_tip),col=2)
+```
+
+
+```{r }
+hist(processed_df$per_tip,probability=T, main="Histogram of normal
+data",xlab="Approximately normally distributed data")
+lines(density(processed_df$per_tip),col=2)
+
+
+qqnorm(processed_df$per_tip)
+qqline(processed_df$per_tip)
+
+print(sd(processed_df$per_tip))
+
+print(mean(processed_df$per_tip))
+#per_tip_outliers
+```
+
+
+
 
 #### PUT DATA PROCESSING HERE####
 ## SAVE TO PROCESSED_DF######
