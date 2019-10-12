@@ -370,7 +370,8 @@ means are not equal and the results are statistically significant
 
 ### Tip payed and distance travelled by passengers 
 
-```{r distance_vs_tip, inlcude=T, echo=F}
+```{r distance_vs_tip, include=F, echo=T}
+
 # AMNA
 
 summary(processed_df$per_tip)
@@ -382,8 +383,11 @@ plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot b
 # not so good/visible results
 
 plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
-# even bad results, what to do
-<!-- plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance travelled (Log)", log = processed_df$tip_amount) -->
+# even bad results
+
+# plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance 
+# travelled (Log)", log = processed_df$tip_amount) 
+
 # should i take log etc
 
 hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
@@ -406,10 +410,7 @@ qqline(processed_df$trip_distance)
 # same result as tip_amount, end points digress
 
 # cannot perform Shapiro because observations (approx 13,000)  > 5000
-<!-- shapiro.test(processed_df$tip_amount) -->
-<!-- shapiro.test(processed_df$per_tip) -->
-<!-- shapiro.test(processed_df$trip_distance) -->
-<!-- str(processed_df) -->
+
 
 mean_dist <- mean(processed_df$trip_distance)
 # should i use mean or median bc this col in not normal
@@ -604,38 +605,7 @@ For pick up locations, there is no statistical difference for the between the fo
 
 Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
 
-```{r TOBEDELETED, include = F}
-# STEVEN
-#ggplot(as.data.frame(tbl), aes(factor(Depth), Freq, fill = Species)) + geom_col(position = 'dodge')
-plot(summary(processed_df$Borough_do))
 
-#count(processed_df, c("Borough_pu", "Borough_do"))
-
-ddply(processed_df, .(Borough_pu, Borough_do), nrow)
-
-
-# ANOVA
-# Box plot for tip vs locations
-
-# Run ANOVA
-anova_location <- aov(tip_amount ~ Borough_pu, data = processed_df)
-
-# Print ANOVA results
-anova_location
-
-# Summarize ANOVA
-summary(anova_location)
-
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
-
-tukey_anova_location <- TukeyHSD(anova_location, conf.level = 0.95)
-
-tukey_anova_location
-
-# Next task for STeven: # Subset by borough and run t test on each for tip amount, could also a box plot series for each borough grouped by payment type
-# Or subset by payment type and do box plot series for each payment type grouped by borough
-```
 
 ``` {r}
 # Fit linear model with 3 variables
