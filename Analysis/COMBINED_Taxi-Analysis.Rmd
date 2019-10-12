@@ -116,8 +116,8 @@ The dataset comes with an associated data definition guide.
 
 ```{r Outlier detection and missing values, echo=T}
 
-# fare amount in negative & credit card payments
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
+# fare amount in negative & credit card payments & trip_distance > 0
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0))
 
 # removing outliers:
 # per_tip laying outside IQR range in box plot
@@ -127,6 +127,9 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
+
+
+
 ```
 
 ## Normality check
@@ -237,19 +240,15 @@ summary(anova_tip_amount)
 
 ####################################
 
+### Tip payed and distance travelled by passengers 
 
-```{r}
+```{r distance_vs_tip, inlcude=T, echo=F}
 # AMNA
 
 summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
 
-outlier <- subset(processed_df, processed_df$trip_distance == 0)     # add that to merge_dataset block, also have we removed NA's from our dataset?
-print(outlier)
-
-processed_df <- processed_df %>% filter( trip_distance > 0 )
-summary(processed_df$trip_distance)
 
 plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
 # not so good/visible results
