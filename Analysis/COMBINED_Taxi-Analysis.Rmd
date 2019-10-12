@@ -58,6 +58,7 @@ Factors that can affect tip amount:
 5. distance
 6. count of passengers
 7. weather
+8. Co ordinates 
 
 # Data preprocessing
 
