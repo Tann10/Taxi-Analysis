@@ -60,7 +60,6 @@ Factors that can affect tip amount:
 5. distance
 6. count of passengers
 7. weather
-8. Co ordinates 
 
 # Data preprocessing
 
@@ -112,7 +111,6 @@ print(mean(processed_df$per_tip))
 The dataset comes with an associated data definition guide. 
 
 ```{r Outlier detection and missing values, echo=F}
-
 # fare amount in negative & credit card payments & trip_distance > 0
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0) )
 
@@ -127,16 +125,16 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   dim(processed_df)
 }
 
-
-
+str(processed_df)
 ```
+
 
 ##Pickup column
 
 ```{r Pickup_time, include=TRUE, echo = FALSE}
-processed_df$pickup_datetime <- as.POSIXlt(as.character(processed_df$tpep_pickup_datetime), format="%Y-%m-%d %H:%M:%S")
-processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M:%S")
-processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M:%S"),'%H')
+processed_df$pickup_datetime <- as.POSIXct(as.character(processed_df$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
+processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M")
+processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M"),'%H')
 processed_df$pickup_hrs_num <- as.numeric(processed_df$pickup_hrs)
 processed_df$pickup_time_type <- ifelse(processed_df$pickup_hrs_num >= 05 & processed_df$pickup_hrs_num <= 11, "Morning",
             ifelse(processed_df$pickup_hrs_num > 11 & processed_df$pickup_hrs_num <= 16, "Afternoon",
@@ -148,9 +146,9 @@ processed_df$pickup_time_type <- ordered(processed_df$pickup_time_type, levels =
 
 ## Dropoff column
 ```{r Dropoff_time, include=TRUE, echo = FALSE}
-processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), format="%Y-%m-%d %H:%M:%S")
-processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M:%S")
-processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M:%S"),'%H')
+processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
+processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M")
+processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M"),'%H')
 processed_df$dropoff_hrs_num <- as.numeric(processed_df$dropoff_hrs)
 processed_df$dropoff_time_type <- ifelse(processed_df$dropoff_hrs_num >= 05 & processed_df$dropoff_hrs_num <= 11, "Morning",
             ifelse(processed_df$dropoff_hrs_num > 11 & processed_df$dropoff_hrs_num <= 16, "Afternoon",
@@ -165,18 +163,15 @@ processed_df$trip_duration_mins <- difftime(processed_df$dropoff_datetime, proce
 
 processed_df$trip_duration_mins1 <- floor(as.numeric(processed_df$trip_duration_mins))
 
-#head(processed_df)
-#min(processed_df$trip_duration_mins1)
-#max(processed_df$trip_duration_mins1)
-#subset(processed_df, trip_duration_mins1 == 1439)
-#nrow(processed_df)
-
 boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
+
 duration_outliers <- boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
 
-processed_df = processed_df[ !processed_df$trip_duration_mins1 %in% duration_outliers$out, ]
+processed_df = processed_df[!processed_df$trip_duration_mins1 %in% duration_outliers$out, ]
 
 boxplot(processed_df$per_tip, col = c("#0000FF"))
+
+str(processed_df)
 ```
 
 
@@ -188,7 +183,7 @@ Looking at the distribution of raw tip amount, it is clear that it is not normal
 processed_df %>%
   ggplot(aes(per_tip)) +
   geom_histogram(aes(y =..density..),
-                   colour = "black", 
+                   colour = "black",
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
@@ -201,6 +196,7 @@ processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip"
 processed_df %>% ggplot(aes())+ 
   geom_bar(size=2, shape=23)
 ```
+
 ## EDA
 
 ```{r }
@@ -234,13 +230,13 @@ EDA questions:
 # Bar chart according to VendorID
 processed_df %>% group_by(VendorID) %>% summarise(n = n(),average = mean(per_tip), min = min(per_tip),  max = max(per_tip))
 
-ggplot(processed_df, aes(y=per_tip, group = VendorID)) + 
+ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 
-# hist(check_2$per_tip,probability=T, main="Histogram of normal
-# data",xlab="Approximately normally distributed data")
-# lines(density(check_2$per_tip),col=2)
+hist(check_2$per_tip,probability=T, main="Histogram of normal
+data",xlab="Approximately normally distributed data")
+lines(density(check_2$per_tip),col=2)
 ```
 
 
@@ -260,32 +256,18 @@ print(mean(processed_df$per_tip))
 ```
 
 
-
-
-#### PUT DATA PROCESSING HERE####
-## SAVE TO PROCESSED_DF######
-
-
-
-#######
-
-
-
-summary(processed_df)
-```
 ```{r boxplot_pertip, include = T, echo = F}
 
 boxplot(processed_df$tip_amount)
 boxplot(processed_df$per_tip)
 ```
 
-####################################
 
 
 ```{r}
 # TANAYA
 
-# anova tests 
+# anova tests
 anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
 summary(anova_tip_amount)
 ```
@@ -375,24 +357,89 @@ null hyp = means for per_tip and trip_duration_min are equal
 conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
-####################################
+### Tip payed vs distance travelled by passengers 
 
-### Tip payed and distance travelled by passengers 
+Variables...
 
-```{r distance_vs_tip, inlcude=T, echo=F}
+
+Which test to perform and why?
+
+
+Assumptions/Criteria to be fulfilled:
+<ul>
+  <li>Random sampling [data](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+  <li>Normally distributed dependent variable (CLT)
+  <li>Independence of observations
+</ul>
+
+
+First Step in Significance testing: 
+<ul>
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
+</ul>
+```{r }
+
 # AMNA
+
+# i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so subsetting my variables into a new df
+df_dist <- subset(processed_df, select=c(tip_amount, trip_distance))
+glimpse(df_dist)
+
+
+# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  
+
+# Bimodal so divided it into 2 chunks for normalization
+
+# So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. So I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data".
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+glimpse(df_dist)
+
+# Lets have a look at them
+# Basic histogram of tip variable
+theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
+ggplot(df_dist, aes(x=tip_amount)) + 
+  geom_histogram(binwidth=0.1, color="green") + coord_cartesian(xlim=c(0,20)) + 
+  labs(x="Tips($)", y = "Count") + ggtitle("Histogram for Tip values")
+
+# ?? Some of the values look like outliers and hence skewing the whole distributions so I am going to remove them from my dataset treating them as outliers ??
+
+# Plot combining values from both of my variables
+# Use semi-transparent (alpha=0.5) fill  ??how to change legend title??
+p<-ggplot(df_dist, aes(x=tip_amount, fill=trip_distance, color=trip_distance)) +
+  geom_histogram(binwidth=0.1, position="identity", alpha=0.5) + coord_cartesian(xlim=c(0,20)) + 
+  labs(x="Tips($)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
+p
+# Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
+
+
+
+
+
+
+
+# But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
+
+# All set. Now the 1st step in significance testing is to state your hypothesis. Null: Average amount tipped by the passenger(s) travelling shorter distances equals that of longer distance travellers.
+
+str(processed_df)    
+# sample size is large enough approx 13,000 observations so CLT applies and we can say our data is normally distributed
+
+# shapiro.test(processed_df$tip_amount)
+# For Shapiro, sample size must be between 3 and 5000
 
 summary(processed_df$per_tip)
 
 summary(processed_df$trip_distance)
-
 
 plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
 # not so good/visible results
 
 plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
 # even bad results, what to do
-<!-- plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance travelled (Log)", log = processed_df$tip_amount) -->
+# plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance 
+# travelled (Log)", log = processed_df$tip_amount) 
 # should i take log etc
 
 hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
@@ -415,19 +462,14 @@ qqline(processed_df$trip_distance)
 # same result as tip_amount, end points digress
 
 # cannot perform Shapiro because observations (approx 13,000)  > 5000
-<!-- shapiro.test(processed_df$tip_amount) -->
-<!-- shapiro.test(processed_df$per_tip) -->
-<!-- shapiro.test(processed_df$trip_distance) -->
-<!-- str(processed_df) -->
+
 
 mean_dist <- mean(processed_df$trip_distance)
 # should i use mean or median bc this col in not normal
 
-factor_dist <- cut(processed_df$trip_distance, breaks=c(0, mean_dist, Inf), labels=paste("Distance", 1:2, sep=""))
-# Factoring distance col
 
-processed_df$trip_distance <- factor_dist
-# assigning factored col to the original df
+
+
 str(processed_df)
 
 short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1")
@@ -453,35 +495,13 @@ points(M,
 
 
 
-
-<!-- median_dist <- median(processed_df$trip_distance) -->
-
-<!-- factor_dist <- cut(processed_df$trip_distance, breaks=c(0, median_dist, Inf), labels=paste("Distance", 1:2, sep="")) -->
-<!-- # Factoring distance col -->
-
-<!-- processed_df$trip_distance <- factor_dist -->
-<!-- # assigning factored col to the original df -->
-<!-- str(processed_df) -->
-
-<!-- short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1") -->
-<!-- long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2") -->
-<!-- # subsetting df on basis of trip distance -->
-
-<!-- result <- t.test(short_dist$tip_amount, long_dist$tip_amount) -->
-<!-- print(result) -->
-
-<!-- plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Median)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") ) -->
-<!-- M = tapply(processed_df$per_tip, -->
-<!--            INDEX = processed_df$trip_distance, -->
-<!--            FUN   = median) -->
-<!-- points(M, -->
-<!--        col="yellow", -->
-<!--        pch="+",   ### symbol to use, see ?points -->
-<!--        cex=2) -->
-
-<!-- # same results as those for mean, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers -->
-
 ```
+
+
+
+
+
+####################################
 
 ### GEOGRAPHIC LOCATION AND TIP
 As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
@@ -494,15 +514,19 @@ The dataset does not provide information on the passenger's home location, wealt
 To better understand this issue, descriptive statistics were run. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
 
 ```{r location_barlot, include = T, echo = F}
-
-barplot(summary(processed_df$Borough_pu))
-barplot(summary(processed_df$Borough_do))
+# Create boxplots for trip counts based on location
+barplot(summary(processed_df$Borough_pu), main = "Trip Counts Based on Pickup Location", col = "red")
+barplot(summary(processed_df$Borough_do), main = "Trip Counts Based on Dropoff Location", col = "blue")
 ```
 
 These bar charts show that Manhattan has the highest number of both pick up and drop offs, followed by Queens and Brooklyn in second and third, respectively. We also looked at the frequency of various drop off and pick up combinations.
 
 ```{r combo_pu_df, include = T, echo = F}
-ddply(processed_df, .(Borough_pu, Borough_do), nrow)
+# Subset data to get locations only
+pu_do <- subset(processed_df, select = c("Borough_pu", "Borough_do"))
+
+# Create table of location combinations
+ddply(pu_do, .(Borough_pu, Borough_do), nrow)
 ```
 
 This table shows that Manhattan to Manhattan has the highest number of trips, followed by Queens to Manhattan, Manhattan to Queens, and Manhattan to Brooklyn.
@@ -536,11 +560,11 @@ summary(anova_tipper_do)
 ```
 
 ```{r tipper_plot, include = T, echo = F}
-# Plot rankings vs GRE
-plot(per_tip ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip percentage by pickup location
+ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 
-# Plot rankings vs GRE
-plot(per_tip ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip percentage by dropoff location
+ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
 The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
@@ -548,13 +572,16 @@ The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summa
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
 ```{r tipper_tukey, include = T, echo = F}
-
+# Conduct Tukey test for tip percentage vs pickup
 tukey_tipper_pu <- TukeyHSD(anova_tipper_pu, conf.level = 0.95)
 
+# Print Tukey test
 tukey_tipper_pu
 
+# Conduct Tukey test for tip percentage vs dropoff
 tukey_tipper_do <- TukeyHSD(anova_tipper_do, conf.level = 0.95)
 
+# Print Tukey test
 tukey_tipper_do
 ```
 
@@ -585,11 +612,11 @@ summary(anova_tipamt_do)
 ```
 
 ```{r tipamt_plot, include = T, echo = F}
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip amount vs pickup location
+ggplot(data = processed_df, aes(x = Borough_pu, y = tip_amount, fill = Borough_pu)) + ggtitle("Tip Amount by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Amount")
 
-# Plot rankings vs GRE
-plot(tip_amount ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip amount vs dropoff location
+ggplot(data = processed_df, aes(x = Borough_do, y = tip_amount, fill = Borough_do)) + ggtitle("Tip Amount by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Amount")
 ```
 
 For these ANOVA analyses, the null hypothesis is that all means for different locations are the same. The p-values are `r summary(anova_tipamt_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipamt_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
@@ -597,20 +624,23 @@ For these ANOVA analyses, the null hypothesis is that all means for different lo
 As with the previous, because both are significant, we can run Tukey's HSD test:
 
 ```{r tipamt_tukey, include = T, echo = F}
-
+# Conduct Tukey test for tip amount vs pickup
 tukey_tipamt_pu <- TukeyHSD(anova_tipamt_pu, conf.level = 0.95)
 
+# Print Tukey test
 tukey_tipamt_pu
 
+# Conduct Tukey test for tip amount vs pickup
 tukey_tipamt_do <- TukeyHSD(anova_tipamt_do, conf.level = 0.95)
 
+# Print Tukey test
 tukey_tipamt_do
+
 ```
 
 For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant.
 
 Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
-
 
 ``` {r}
 # Fit linear model with 3 variables
@@ -619,6 +649,7 @@ lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
 # Print summary
 summary(lm_3var)
 ```
+
 
 # Limitations
 One limitation was hardware limitations.
