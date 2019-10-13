@@ -133,6 +133,7 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 str(processed_df)
 ```
 
+
 ##Pickup column
 
 ```{r Pickup_time, include=TRUE, echo = FALSE}
@@ -184,7 +185,7 @@ str(processed_df)
 processed_df %>%
   ggplot(aes(per_tip)) +
   geom_histogram(aes(y =..density..),
-                   colour = "black", 
+                   colour = "black",
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
@@ -221,7 +222,7 @@ EDA questions:
 # Bar chart according to VendorID
 processed_df %>% group_by(VendorID) %>% summarise(n = n(),average = mean(per_tip), min = min(per_tip),  max = max(per_tip))
 
-ggplot(processed_df, aes(y=per_tip, group = VendorID)) + 
+ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 
@@ -258,7 +259,7 @@ boxplot(processed_df$per_tip)
 ```{r}
 # TANAYA
 
-# anova tests 
+# anova tests
 anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
 summary(anova_tip_amount)
 ```
@@ -355,17 +356,76 @@ means are not equal and the results are statistically significant
 >>>>>>> 29d0f71f0251384c4f2b8c5e24b3c721927ff061
 
 
-### Tip payed and distance travelled by passengers 
+### Tip payed vs distance travelled by passengers 
 
+Variables...
+
+
+Which test to perform and why?
+
+
+Assumptions/Criteria to be fulfilled:
+<ul>
+  <li>Random sampling [data](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+  <li>Normally distributed dependent variable (CLT)
+  <li>Independence of observations
+</ul>
+
+
+First Step in Significance testing: 
+<ul>
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
+</ul>
 ```{r }
 
 # AMNA
 
+# i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so subsetting my variables into a new df
+df_dist <- subset(processed_df, select=c(tip_amount, trip_distance))
+glimpse(df_dist)
+
+
+# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. So I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data".
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+glimpse(df_dist)
+
+# Lets have a look at them
+# Basic histogram of tip variable
+theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
+ggplot(df_dist, aes(x=tip_amount)) + 
+  geom_histogram(binwidth=0.1, color="green") + coord_cartesian(xlim=c(0,20)) + 
+  labs(x="Tips($)", y = "Count") + ggtitle("Histogram for Tip values")
+
+# ?? Some of the values look like outliers and hence skewing the whole distributions so I am going to remove them from my dataset treating them as outliers ??
+
+# Plot combining values from both of my variables
+# Use semi-transparent (alpha=0.5) fill  ??how to change legend title??
+p<-ggplot(df_dist, aes(x=tip_amount, fill=trip_distance, color=trip_distance)) +
+  geom_histogram(binwidth=0.1, position="identity", alpha=0.5) + coord_cartesian(xlim=c(0,20)) + 
+  labs(x="Tips($)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
+p
+# Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
+
+
+
+
+
+
+
+# But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
+
+# All set. Now the 1st step in significance testing is to state your hypothesis. Null: Average amount tipped by the passenger(s) travelling shorter distances equals that of longer distance travellers.
+
+str(processed_df)    
+# sample size is large enough approx 13,000 observations so CLT applies and we can say our data is normally distributed
+
+# shapiro.test(processed_df$tip_amount)
+# For Shapiro, sample size must be between 3 and 5000
+
 summary(processed_df$per_tip)
 
-summary(processed_df$trip_distance)
-
-processed_df <- processed_df %>% filter( trip_distance > 0 )
 summary(processed_df$trip_distance)
 
 plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
@@ -402,11 +462,9 @@ qqline(processed_df$trip_distance)
 mean_dist <- mean(processed_df$trip_distance)
 # should i use mean or median bc this col in not normal
 
-factor_dist <- cut(processed_df$trip_distance, breaks=c(0, mean_dist, Inf), labels=paste("Distance", 1:2, sep=""))
-# Factoring distance col
 
-processed_df$trip_distance <- factor_dist
-# assigning factored col to the original df
+
+
 str(processed_df)
 
 short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1")
@@ -433,6 +491,10 @@ points(M,
 
 
 ```
+
+
+
+
 
 ####################################
 
