@@ -72,6 +72,7 @@ taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
 glimpse(unprocessed_data)
 
 glimpse(taxi_zones)
+
 ```
 
 The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
@@ -86,6 +87,7 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
 
 colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
+
 unique(unprocessed_data$Borough_do)
 
 ```
@@ -112,6 +114,48 @@ print(sd(processed_df$per_tip))
 print(mean(processed_df$per_tip))
 ```
 
+##Columns creation
+
+```{r Pickup_time, include=TRUE, echo = FALSE}
+#Pickup column
+processed_df$pickup_datetime <- as.POSIXct(as.character(processed_df$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
+processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M")
+processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M"),'%H')
+processed_df$pickup_hrs <- as.numeric(processed_df$pickup_hrs)
+processed_df$pickup_period <- ifelse(processed_df$pickup_hrs >= 05 & processed_df$pickup_hrs <= 11, "Morning",
+            ifelse(processed_df$pickup_hrs > 11 & processed_df$pickup_hrs <= 16, "Afternoon",
+            ifelse(processed_df$pickup_hrs > 16 & processed_df$pickup_hrs <= 21, "Evening", "Night")))
+processed_df$pickup_period <- as.factor(processed_df$pickup_period)
+processed_df$pickup_period <- ordered(processed_df$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+```{r Dropoff_time, include=TRUE, echo = FALSE}
+#Dropoff column
+processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
+processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M")
+processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M"),'%H')
+processed_df$dropoff_hrs <- as.numeric(processed_df$dropoff_hrs)
+processed_df$drop_period <- ifelse(processed_df$dropoff_hrs >= 05 & processed_df$dropoff_hrs <= 11, "Morning",
+            ifelse(processed_df$dropoff_hrs > 11 & processed_df$dropoff_hrs <= 16, "Afternoon",
+            ifelse(processed_df$dropoff_hrs > 16 & processed_df$dropoff_hrs <= 21, "Evening", "Night")))
+processed_df$drop_period <- as.factor(processed_df$drop_period)
+processed_df$drop_period <- ordered(processed_df$drop_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+```{r Trip_duration, include=TRUE, echo = FALSE}
+#Trip_duration
+processed_df$trip_duration <- difftime(processed_df$dropoff_datetime, processed_df$pickup_datetime, units = "mins")
+processed_df$trip_duration <- floor(as.numeric(processed_df$trip_duration))
+boxplot(processed_df$trip_duration, col = c("#0000FF"))
+
+duration_outliers <- boxplot(processed_df$trip_duration, col = c("#0000FF"))
+
+processed_df = processed_df[!processed_df$trip_duration %in% duration_outliers$out, ]
+
+boxplot(processed_df$trip_duration, col = c("#0000FF"))
+min(processed_df$trip_duration)
+max(processed_df$trip_duration)
+```
 
 ## Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
@@ -132,53 +176,6 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 
 str(processed_df)
 ```
-
-
-##Pickup column
-
-```{r Pickup_time, include=TRUE, echo = FALSE}
-processed_df$pickup_datetime <- as.POSIXct(as.character(processed_df$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
-processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M")
-processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M"),'%H')
-processed_df$pickup_hrs_num <- as.numeric(processed_df$pickup_hrs)
-processed_df$pickup_time_type <- ifelse(processed_df$pickup_hrs_num >= 05 & processed_df$pickup_hrs_num <= 11, "Morning",
-            ifelse(processed_df$pickup_hrs_num > 11 & processed_df$pickup_hrs_num <= 16, "Afternoon",
-            ifelse(processed_df$pickup_hrs_num > 16 & processed_df$pickup_hrs_num <= 21, "Evening", "Night")))
-processed_df$pickup_time_type <- as.factor(processed_df$pickup_time_type)
-processed_df$pickup_time_type <- ordered(processed_df$pickup_time_type, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-
-## Dropoff column
-```{r Dropoff_time, include=TRUE, echo = FALSE}
-processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
-processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M")
-processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M"),'%H')
-processed_df$dropoff_hrs_num <- as.numeric(processed_df$dropoff_hrs)
-processed_df$dropoff_time_type <- ifelse(processed_df$dropoff_hrs_num >= 05 & processed_df$dropoff_hrs_num <= 11, "Morning",
-            ifelse(processed_df$dropoff_hrs_num > 11 & processed_df$dropoff_hrs_num <= 16, "Afternoon",
-            ifelse(processed_df$dropoff_hrs_num > 16 & processed_df$dropoff_hrs_num <= 21, "Evening", "Night")))
-processed_df$dropoff_time_type <- as.factor(processed_df$dropoff_time_type)
-processed_df$dropoff_time_type <- ordered(processed_df$dropoff_time_type, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-##Trip_duration
-```{r Trip_duration, include=TRUE, echo = FALSE}
-processed_df$trip_duration_mins <- difftime(processed_df$dropoff_datetime, processed_df$pickup_datetime, units = "mins")
-
-processed_df$trip_duration_mins1 <- floor(as.numeric(processed_df$trip_duration_mins))
-
-boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
-
-duration_outliers <- boxplot(processed_df$trip_duration_mins1, col = c("#0000FF"))
-
-processed_df = processed_df[!processed_df$trip_duration_mins1 %in% duration_outliers$out, ]
-
-boxplot(processed_df$per_tip, col = c("#0000FF"))
-
-str(processed_df)
-```
-
 
 ## Normality check
 ```{r}
@@ -282,17 +279,17 @@ hist(processed_df$per_tip,     main = "Histogram of plasma glucose concentration
 qqnorm(processed_df$pickup_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
 hist(processed_df$pickup_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
 
-boxplot(per_tip ~ pickup_time_type, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
+boxplot(per_tip ~ pickup_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
 ```
 
 ```{r Pick_up_time_Anova, include=TRUE, echo = FALSE}
 
-anova_pickup_time_type = aov(per_tip ~ pickup_time_type, data = processed_df)
+anova_pickup_period = aov(per_tip ~ pickup_period, data = processed_df)
 
-summary(anova_pickup_time_type)
-tukeyday_pickup_time_type <- TukeyHSD(anova_pickup_time_type)
-tukeyday_pickup_time_type
-plot(tukeyday_pickup_time_type)
+summary(anova_pickup_period)
+tukeyday_pickup_period <- TukeyHSD(anova_pickup_period)
+tukeyday_pickup_period
+plot(tukeyday_pickup_period)
 
 ```
 
@@ -307,17 +304,17 @@ not all of the means are equal and the results are statistically significant
 qqnorm(processed_df$dropoff_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
 hist(processed_df$dropoff_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
 
-boxplot(per_tip ~ dropoff_time_type, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
+boxplot(per_tip ~ drop_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
 ```
 
 ```{r Dropoff_time_Anova, include=TRUE, echo = FALSE}
 
-anova_dropoff_time_type = aov(per_tip ~ dropoff_time_type, data = processed_df)
+anova_drop_period = aov(per_tip ~ drop_period, data = processed_df)
 
-summary(anova_dropoff_time_type)
-tukeyday_dropoff_time_type <- TukeyHSD(anova_dropoff_time_type)
-tukeyday_dropoff_time_type
-plot(tukeyday_dropoff_time_type)
+summary(anova_drop_period)
+tukeyday_drop_period <- TukeyHSD(anova_drop_period)
+tukeyday_drop_period
+plot(tukeyday_drop_period)
 
 ```
 
@@ -328,17 +325,16 @@ not all of the means are equal and the results are statistically significant
 
 
 
-```{r Trip_duration1, include=TRUE, echo = FALSE}
-
-hist(processed_df$trip_duration_mins1, processed_df$per_tip, main = "Histogram of PER_TIP vs tRIP DURATION", col = rainbow(40), breaks = 40)
-
+```{r Trip_duration, include=TRUE, echo = FALSE}
+hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of PER_TIP vs tRIP DURATION", col = rainbow(40), breaks = 40)
 ```
 
 ```{r Trip_duration_Two_Sample_Ttest, include=TRUE, echo = FALSE}
+trip_duration_ttest <- t.test(processed_df$per_tip, processed_df$trip_duration)
+trip_duration_ttest
+```
 
-a <- t.test(processed_df$per_tip, processed_df$trip_duration_mins1)
-a
-
+```{r Corelation plot, include=TRUE, echo = FALSE}
 processed_df_num <- processed_df[, sapply(processed_df, is.numeric)]
 processed_df_cor = cor(processed_df_num)
 corrplot.mixed(processed_df_cor)
@@ -349,11 +345,7 @@ null hyp = means for per_tip and trip_duration_min are equal
 conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
-<<<<<<< HEAD
-#Madhuri Ends
-####################################
-=======
->>>>>>> 29d0f71f0251384c4f2b8c5e24b3c721927ff061
+###End
 
 
 ### Tip payed vs distance travelled by passengers 
