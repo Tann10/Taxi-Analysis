@@ -386,7 +386,11 @@ df_dist <- subset(processed_df, select=c(tip_amount, trip_distance))
 glimpse(df_dist)
 
 
-# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. So I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data".
+# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  
+
+# Bimodal so divided it into 2 chunks for normalization
+
+# So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. So I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data".
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
 df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 glimpse(df_dist)
