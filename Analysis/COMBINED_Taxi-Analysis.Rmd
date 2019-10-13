@@ -225,6 +225,16 @@ processed_df %>%
   geom_col() +
   theme(legend.position = "none")
 
+processed_df %>%
+  group_by(RatecodeID) %>%
+  count() %>%
+  ggplot(aes(RatecodeID, n, fill = RatecodeID)) +
+  geom_col() +
+  theme(legend.position = "none")
+
+
+
+
 ```
 
 EDA questions:
