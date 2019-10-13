@@ -73,28 +73,61 @@ WE CAN SEE THERE ARE OUTLIERS
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
 
 ```{r tipamount_distr, echo=F, include=T}
-boxplot(processed_df$tip_amount)
+boxplot(unprocessed_data$tip_amount)
 
-qqnorm(processed_df$tip_amount)
-qqline(processed_df$tip_amount)
+qqnorm(unprocessed_data$tip_amount)
+qqline(unprocessed_data$tip_amount)
+```
+
+A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
+
+## Tip Percentage
+```{r }
+# get percentage tip amount
+unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
+summary(unprocessed_data)
+print(sd(unprocessed_data$per_tip, na.rm = T))
+print(mean(unprocessed_data$per_tip, na.rm = T))
+```
+
+### Outlier detection and data filters
+The dataset comes with an associated data definition guide. 
+
+```{r Outlier detection and missing values, echo=F, include=T}
+# fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
+
+hist(processed_df$tip_amount)
+hist(processed_df$per_tip)
+# removing outliers:
+# per_tip laying outside IQR range in box plot
+while (length(boxplot(processed_df$per_tip)$out) != 0){
+  dim(processed_df)
+  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
+  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
+  dim(processed_df)
+}
+
+str(processed_df)
+```
+
+### Normality check
+
+```{r}
+processed_df %>%
+  ggplot(aes(per_tip)) +
+  geom_histogram(aes(y =..density..),
+                   colour = "black",
+                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
 
-## Column Creation
+```{r}
 
-### Location Columns
-The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
 
-```{r merge location descriptions}
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
-
-unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
-
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
-
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
-
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
+processed_df %>% ggplot(aes())+ 
+  geom_bar(size=2, shape=23)
 ```
 
 ## Data statistics 
@@ -104,13 +137,21 @@ summary(unprocessed_data)
 ```
 
 
-### Tip Percentage
-```{r }
-# get percentage tip amount
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
-summary(unprocessed_data)
-print(sd(processed_df$per_tip))
-print(mean(processed_df$per_tip))
+## Column Creation
+
+### Location Columns
+The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+
+```{r merge location descriptions, include = T}
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+
+processed_df <- subset(processed_df, select = -c(Zone, service_zone))
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
+
+processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+
+colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
 ```
 
 ### Pickup column
@@ -158,48 +199,6 @@ boxplot(processed_df$per_tip, col = c("#0000FF"))
 str(processed_df)
 ```
 
-## Outlier detection and data filters
-The dataset comes with an associated data definition guide. 
-
-```{r Outlier detection and missing values, echo=F, include=T}
-# fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
-
-hist(processed_df$tip_amount)
-hist(processed_df$per_tip)
-# removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
-  dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
-  dim(processed_df)
-}
-
-str(processed_df)
-```
-
-## Normality check
-
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
-
-```{r}
-processed_df %>%
-  ggplot(aes(per_tip)) +
-  geom_histogram(aes(y =..density..),
-                   colour = "black",
-                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
-```
-
-A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
-
-```{r}
-
-processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
-
-processed_df %>% ggplot(aes())+ 
-  geom_bar(size=2, shape=23)
-```
 
 SELECT COLUMN OF INTERESTS ONY
 
@@ -310,7 +309,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu))
 ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+The p-values are r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]] for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
@@ -362,7 +361,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_amount, fill = Borough_p
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_amount, fill = Borough_do)) + ggtitle("Tip Amount by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Amount")
 ```
 
-For these ANOVA analyses, the null hypothesis is that all means for different locations are the same. The p-values are `r summary(anova_tipamt_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipamt_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+For these ANOVA analyses, the null hypothesis is that all means for different locations are the same. The p-values are r summary(anova_tipamt_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipamt_do)[[1]][["Pr(>F)"]][[1]] for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 As with the previous, because both are significant, we can run Tukey's HSD test:
 
