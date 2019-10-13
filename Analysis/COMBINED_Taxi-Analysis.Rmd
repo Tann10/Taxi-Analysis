@@ -509,15 +509,19 @@ The dataset does not provide information on the passenger's home location, wealt
 To better understand this issue, descriptive statistics were run. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
 
 ```{r location_barlot, include = T, echo = F}
-
-barplot(summary(processed_df$Borough_pu))
-barplot(summary(processed_df$Borough_do))
+# Create boxplots for trip counts based on location
+barplot(summary(processed_df$Borough_pu), main = "Trip Counts Based on Pickup Location", col = "red")
+barplot(summary(processed_df$Borough_do), main = "Trip Counts Based on Dropoff Location", col = "blue")
 ```
 
 These bar charts show that Manhattan has the highest number of both pick up and drop offs, followed by Queens and Brooklyn in second and third, respectively. We also looked at the frequency of various drop off and pick up combinations.
 
 ```{r combo_pu_df, include = T, echo = F}
-ddply(processed_df, .(Borough_pu, Borough_do), nrow)
+# Subset data to get locations only
+pu_do <- subset(processed_df, select = c("Borough_pu", "Borough_do"))
+
+# Create table of location combinations
+ddply(pu_do, .(Borough_pu, Borough_do), nrow)
 ```
 
 This table shows that Manhattan to Manhattan has the highest number of trips, followed by Queens to Manhattan, Manhattan to Queens, and Manhattan to Brooklyn.
@@ -551,11 +555,11 @@ summary(anova_tipper_do)
 ```
 
 ```{r tipper_plot, include = T, echo = F}
-# Plot rankings vs GRE
-plot(per_tip ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip percentage by pickup location
+plot(per_tip ~ Borough_pu, data = processed_df, main = "Tip Percentage by Pickup Location", xlab = "Location", ylab = "Tip Percentage", col = c("green", "blue", "red", "yellow", "purple", "grey", "orange"))
 
-# Plot rankings vs GRE
-plot(per_tip ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+# Plot tip percentage by dropoff location
+plot(per_tip ~ Borough_do, data = processed_df, main = "Tip Percentage by Dropoff Location", xlab = "Location", ylab = "Tip Percentage", col = c("green", "blue", "red", "yellow", "purple", "grey", "orange"))
 ```
 
 The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
@@ -601,10 +605,10 @@ summary(anova_tipamt_do)
 
 ```{r tipamt_plot, include = T, echo = F}
 # Plot rankings vs GRE
-plot(tip_amount ~ Borough_pu, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+plot(tip_amount ~ Borough_pu, data = processed_df, main = "Tip Amount by Pickup Location", xlab = "Location", ylab = "Tip Amount", col = c("green", "blue", "red", "yellow", "purple", "grey", "orange"))
 
 # Plot rankings vs GRE
-plot(tip_amount ~ Borough_do, data = processed_df, main = "Title", xlab = "x", ylab = "y")
+plot(tip_amount ~ Borough_do, data = processed_df, main = "Tip Amount by Drop offLocation", xlab = "Location", ylab = "Tip Percentage", col = c("green", "blue", "red", "yellow", "purple", "grey", "orange"))
 ```
 
 For these ANOVA analyses, the null hypothesis is that all means for different locations are the same. The p-values are `r summary(anova_tipamt_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipamt_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
