@@ -94,7 +94,7 @@ print(mean(unprocessed_data$per_tip, na.rm = T))
 ### Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
 
-```{r Outlier detection and missing values, echo=F, include=T}
+```{r Outlier detection and missing values, include=F}
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
 
@@ -294,7 +294,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu))
 ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-The p-values are r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]] for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+The p-values are `summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
