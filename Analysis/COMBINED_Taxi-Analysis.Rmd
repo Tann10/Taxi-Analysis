@@ -94,10 +94,10 @@ unique(unprocessed_data$Borough_do)
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
 
 ```{r tipamount_distr, echo=F, include=T}
-boxplot(processed_df$tip_amount)
+boxplot(unprocessed_data$tip_amount)
 
-qqnorm(processed_df$tip_amount)
-qqline(processed_df$tip_amount)
+qqnorm(unprocessed_data$tip_amount)
+qqline(unprocessed_data$tip_amount)
 ```
 
 A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
