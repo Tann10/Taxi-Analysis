@@ -87,21 +87,15 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
 
 colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
-unique(unprocessed_data$Borough_do)
-
 ```
 
 ## Data statistics 
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
 
-```{r tipamount_distr, echo=F, include=T}
-boxplot(processed_df$tip_amount)
 
-qqnorm(processed_df$tip_amount)
-qqline(processed_df$tip_amount)
+```{r summary of the unprocessed data, echo=F, include=T}
+summary(unprocessed_data)
 ```
 
-A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
 per_tip creation
 
@@ -117,11 +111,13 @@ print(mean(processed_df$per_tip))
 ## Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
 
-```{r Outlier detection and missing values, echo=T}
+```{r Outlier detection and missing values, echo=F}
 
 # fare amount in negative & credit card payments & trip_distance > 0
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0))
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0) )
 
+hist(processed_df$tip_amount)
+hist(processed_df$per_tip)
 # removing outliers:
 # per_tip laying outside IQR range in box plot
 while (length(boxplot(processed_df$per_tip)$out) != 0){
@@ -185,6 +181,9 @@ boxplot(processed_df$per_tip, col = c("#0000FF"))
 
 
 ## Normality check
+
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
+
 ```{r}
 processed_df %>%
   ggplot(aes(per_tip)) +
@@ -193,12 +192,13 @@ processed_df %>%
                    fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
 ```
 
+A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
 ```{r}
 
 processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
 
-processed_df %>% ggplot(aes())+ +
+processed_df %>% ggplot(aes())+ 
   geom_bar(size=2, shape=23)
 ```
 ## EDA
