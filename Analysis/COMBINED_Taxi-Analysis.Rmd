@@ -97,6 +97,7 @@ The dataset comes with an associated data definition guide.
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
 
+
 hist(processed_df$tip_amount)
 hist(processed_df$per_tip)
 # removing outliers:
@@ -122,13 +123,7 @@ processed_df %>%
 ```
 
 
-```{r}
 
-processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
-
-processed_df %>% ggplot(aes())+ 
-  geom_bar(size=2, shape=23)
-```
 
 ## Data statistics 
 
