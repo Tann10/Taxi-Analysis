@@ -381,18 +381,11 @@ First Step in Significance testing:
 
 # AMNA
 
+summary(processed_df$trip_distance)
+# ?? question remains whether I factor on basis of mean or median
+
 # i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so subsetting my variables into a new df
 df_dist <- subset(processed_df, select=c(tip_amount, trip_distance))
-glimpse(df_dist)
-
-
-# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  
-
-# Bimodal so divided it into 2 chunks for normalization
-
-# So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. So I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data".
-factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
-df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 glimpse(df_dist)
 
 # Lets have a look at them
@@ -402,7 +395,19 @@ ggplot(df_dist, aes(x=tip_amount)) +
   geom_histogram(binwidth=0.1, color="green") + coord_cartesian(xlim=c(0,20)) + 
   labs(x="Tips($)", y = "Count") + ggtitle("Histogram for Tip values")
 
-# ?? Some of the values look like outliers and hence skewing the whole distributions so I am going to remove them from my dataset treating them as outliers ??
+
+# Here print a histogram for per_tip to show that it is more normalized.
+
+# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. I also cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  
+
+# Bimodal so divided it into 2 chunks for normalization
+
+# So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. For that I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. I divided this column into 2 factors based on mean value of distance travelled.
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+glimpse(df_dist)
+
+
 
 # Plot combining values from both of my variables
 # Use semi-transparent (alpha=0.5) fill  ??how to change legend title??
@@ -414,71 +419,33 @@ p
 
 
 
-
-
-
-
 # But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
 
 # All set. Now the 1st step in significance testing is to state your hypothesis. Null: Average amount tipped by the passenger(s) travelling shorter distances equals that of longer distance travellers.
 
-str(processed_df)    
-# sample size is large enough approx 13,000 observations so CLT applies and we can say our data is normally distributed
-
-# shapiro.test(processed_df$tip_amount)
-# For Shapiro, sample size must be between 3 and 5000
-
-summary(processed_df$per_tip)
-
-summary(processed_df$trip_distance)
-
-plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Tip Amount & Distance travelled")
-# not so good/visible results
-
-plot(processed_df$trip_distance, processed_df$per_tip, main = "Scatter plot between Percentage Tip Amount & Distance travelled")
-# even bad results, what to do
-# plot(processed_df$trip_distance, processed_df$tip_amount, main = "Scatter plot between Percentage Tip Amount & Distance 
-# travelled (Log)", log = processed_df$tip_amount) 
-# should i take log etc
-
-hist(processed_df$tip_amount, main="Tip Amount Histogram", xlab = "Tip ($)", col = "aquamarine")  
-# not normal
-hist(processed_df$per_tip, main="Tip Percentage Histogram", xlab = "Tip Percentage", col = "aquamarine")   
-# pretty normal
-hist(processed_df$trip_distance, main="Trip Distance (miles) Histogram", xlab = "Trip Distance (miles)", col = "aquamarine")
-# not normal
-
-qqnorm(processed_df$tip_amount, main="Normal Q-Q Plot for Tip Amount", xlab="Theoretical Quantiles (z-scores)", ylab="Tip values", col="darkviolet")    
-qqline(processed_df$tip_amount)    
-# end points digress
-
-qqnorm(processed_df$per_tip, main="Normal Q-Q Plot for Tip Percentages", xlab="Theoretical Quantiles (z-scores)", ylab="Tip Percentage values", col="darkviolet")    
-qqline(processed_df$per_tip)    
-# much better results than simple tip amount
-
-qqnorm(processed_df$trip_distance, main="Normal Q-Q Plot for Trip Distances", xlab="Theoretical Quantiles (z-scores)", ylab="Trip Distances values", col="darkviolet")    
-qqline(processed_df$trip_distance)    
-# same result as tip_amount, end points digress
-
-# cannot perform Shapiro because observations (approx 13,000)  > 5000
-
-
-mean_dist <- mean(processed_df$trip_distance)
-# should i use mean or median bc this col in not normal
+# Also add box plot to visually confirm the results of T-test
 
 
 
-
-str(processed_df)
-
-short_dist <- subset(processed_df, processed_df$trip_distance == "Distance1")
-long_dist <- subset(processed_df, processed_df$trip_distance == "Distance2")
-# subsetting df on basis of trip distance
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+str(short_dist)
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+str(long_dist)
 
 # Applying 2 Sample t-test below
 result <- t.test(short_dist$tip_amount, long_dist$tip_amount)
 print(result)
-# My Null Hyp = Both means equal, Alt Hyp = Both means not equal
+# With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+
+
+# We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
+
+p <- ggplot(df_dist, aes(x=df_dist$trip_distance, y=df_dist$tip_amount)) + 
+  geom_boxplot() + stat_summary(fun.y=mean, geom="point", shape=23, size=4)  # adding mean to box plot
+p
+
+
+
 
 plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Mean)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") )
 M = tapply(processed_df$per_tip,
