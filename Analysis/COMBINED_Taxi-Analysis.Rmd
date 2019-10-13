@@ -66,6 +66,11 @@ Factors that can affect tip amount:
 ## Load data
 write where data is collected from 
 ```{r read data files}
+set.seed(42)
+#taxi_trips <- read.csv("../Data/yellow_tripdata_2019-06.csv")
+#trips_zones <- trips_zones_full[sample(nrow(trips_zones_full), 20000, replace = F, prob = NULL),]
+#write.csv(trips_zones,"../Data/trips_zones_20000_v2.csv", row.names = FALSE)
+
 unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
 taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
 
@@ -89,7 +94,6 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do
 ```
 
 ## Data statistics 
-
 
 ```{r summary of the unprocessed data, echo=F, include=T}
 summary(unprocessed_data)

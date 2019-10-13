@@ -37,6 +37,12 @@ Like every other data set, our data has also some limitations which may impact t
 ##How was the information gathered? - Madhuri
 -some examples: we merged dataset for location; we calculated morning/evening time zone based on time
 
+--This was taken from COMBINED file & written by Steven, feel free to use/include
+The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+
+
+A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
+
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
 What are tips
@@ -70,6 +76,27 @@ Initial question
 -because only credit card tips, we changed our question to focus only on credit card tips
 
 -put updated research questions here
+
+from COMBINED file
+
+QUESTION: For those who pay tip by credit card, what factors influence the amount of tip given?
+Should you pay tip to the taxi driver? If yes, how much?
+
+Analyse the factors which takes place to determine the tip amount paid to the driver
+
+Why?
+Benefits?
+Use?
+
+Hypothesis:
+Factors that can affect tip amount:
+1. Vendor service
+2. Driver service
+3. Location :  (generous locations)
+4. duration of day 
+5. distance
+6. count of passengers
+7. weather
 ```{r cars}
 summary(cars)
 ```
