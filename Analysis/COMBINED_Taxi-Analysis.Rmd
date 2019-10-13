@@ -99,7 +99,6 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do
 summary(unprocessed_data)
 ```
 
-
 per_tip creation
 
 ```{r }
