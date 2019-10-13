@@ -37,6 +37,12 @@ Like every other data set, our data has also some limitations which may impact t
 ##How was the information gathered? - Madhuri
 -some examples: we merged dataset for location; we calculated morning/evening time zone based on time
 
+--This was taken from COMBINED file & written by Steven, feel free to use/include
+The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+
+
+A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
+
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
 What are tips
