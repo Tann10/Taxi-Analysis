@@ -76,6 +76,27 @@ Initial question
 -because only credit card tips, we changed our question to focus only on credit card tips
 
 -put updated research questions here
+
+from COMBINED file
+
+QUESTION: For those who pay tip by credit card, what factors influence the amount of tip given?
+Should you pay tip to the taxi driver? If yes, how much?
+
+Analyse the factors which takes place to determine the tip amount paid to the driver
+
+Why?
+Benefits?
+Use?
+
+Hypothesis:
+Factors that can affect tip amount:
+1. Vendor service
+2. Driver service
+3. Location :  (generous locations)
+4. duration of day 
+5. distance
+6. count of passengers
+7. weather
 ```{r cars}
 summary(cars)
 ```
