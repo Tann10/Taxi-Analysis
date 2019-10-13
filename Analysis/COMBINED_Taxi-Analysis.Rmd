@@ -110,9 +110,9 @@ print(mean(processed_df$per_tip))
 ## Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
 
-```{r Outlier detection and missing values, echo=F}
-# fare amount in negative & credit card payments & trip_distance > 0
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0) )
+```{r Outlier detection and missing values, echo=F, include=T}
+# fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
 
 hist(processed_df$tip_amount)
 hist(processed_df$per_tip)
@@ -212,8 +212,10 @@ processed_df %>%
   theme(legend.position = "none")
 
 processed_df %>%
-  ggplot(aes(VendorID, fill = VendorID)) +
-  geom_bar() +
+  group_by(VendorID) %>%
+  count() %>%
+  ggplot(aes(VendorID, n, fill = VendorID)) +
+  geom_col() +
   theme(legend.position = "none")
 
 ```
