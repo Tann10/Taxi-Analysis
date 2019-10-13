@@ -62,21 +62,7 @@ glimpse(taxi_zones)
 
 ```
 
-The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
 
-```{r merge location descriptions}
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
-
-unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
-
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
-
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
-
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
-
-unique(unprocessed_data$Borough_do)
-```
 ## Data statistics 
 
 ###Data Summary
@@ -91,7 +77,6 @@ Looking at the distribution of raw tip amount, it is clear that it is not normal
 
 ```{r tipamount_distr, echo=F, include=T}
 boxplot(unprocessed_data$tip_amount)
-
 qqnorm(unprocessed_data$tip_amount)
 qqline(unprocessed_data$tip_amount)
 ```
@@ -107,12 +92,68 @@ print(sd(unprocessed_data$per_tip, na.rm = T))
 print(mean(unprocessed_data$per_tip, na.rm = T))
 ```
 
+
+## Column Creation
+
+### Location Columns
+The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+
+```{r merge location descriptions, include = T}
+unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
+
+unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
+
+colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
+
+unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
+
+colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
+```
+
+### Pickup time column
+
+```{r Pickup_time, include=TRUE, echo = FALSE}
+#Pickup column
+unprocessed_data$pickup_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
+unprocessed_data$pickup_time <- format(unprocessed_data$pickup_datetime, format = "%H:%M")
+unprocessed_data$pickup_hrs <- format(strptime(unprocessed_data$pickup_time,"%H:%M"),'%H')
+unprocessed_data$pickup_hrs <- as.numeric(unprocessed_data$pickup_hrs)
+unprocessed_data$pickup_period <- ifelse(unprocessed_data$pickup_hrs >= 05 & unprocessed_data$pickup_hrs <= 11, "Morning",
+            ifelse(unprocessed_data$pickup_hrs > 11 & unprocessed_data$pickup_hrs <= 16, "Afternoon",
+            ifelse(unprocessed_data$pickup_hrs > 16 & unprocessed_data$pickup_hrs <= 21, "Evening", "Night")))
+unprocessed_data$pickup_period <- as.factor(unprocessed_data$pickup_period)
+unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+### Dropoff column
+
+```{r Dropoff_time, include=TRUE, echo = FALSE}
+#Dropoff column
+unprocessed_data$dropoff_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
+unprocessed_data$dropoff_time <- format(unprocessed_data$dropoff_datetime, format = "%H:%M")
+unprocessed_data$dropoff_hrs <- format(strptime(unprocessed_data$dropoff_time,"%H:%M"),'%H')
+unprocessed_data$dropoff_hrs <- as.numeric(unprocessed_data$dropoff_hrs)
+unprocessed_data$drop_period <- ifelse(unprocessed_data$dropoff_hrs >= 05 & unprocessed_data$dropoff_hrs <= 11, "Morning",
+            ifelse(unprocessed_data$dropoff_hrs > 11 & unprocessed_data$dropoff_hrs <= 16, "Afternoon",
+            ifelse(unprocessed_data$dropoff_hrs > 16 & unprocessed_data$dropoff_hrs <= 21, "Evening", "Night")))
+unprocessed_data$drop_period <- as.factor(unprocessed_data$drop_period)
+unprocessed_data$drop_period <- ordered(unprocessed_data$drop_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
+
+### Trip_duration
+
+```{r Trip_duration, include=TRUE, echo = FALSE}
+#Trip_duration
+unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, unprocessed_data$pickup_datetime, units = "mins")
+unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
+```
+
 ### Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
 
 ```{r Outlier detection and missing values, echo=F, include=T}
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4))
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration >= 0) & (trip_duration <= 37))
 
 hist(processed_df$tip_amount)
 hist(processed_df$per_tip)
@@ -146,99 +187,6 @@ processed_df %>% ggplot(aes())+
   geom_bar(size=2, shape=23)
 ```
 
-
-## Column Creation
-
-### Location Columns
-The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
-
-```{r merge location descriptions, include = T}
-processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
-
-processed_df <- subset(processed_df, select = -c(Zone, service_zone))
-
-colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_pu"
-
-processed_df <- merge(x = processed_df, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
-
-colnames(processed_df)[colnames(processed_df)=="Borough"] <- "Borough_do"
-```
-
-### Pickup time column
-
-```{r Pickup_time, include=TRUE, echo = FALSE}
-#Pickup column
-processed_df$pickup_datetime <- as.POSIXct(as.character(processed_df$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
-processed_df$pickup_time <- format(processed_df$pickup_datetime, format = "%H:%M")
-processed_df$pickup_hrs <- format(strptime(processed_df$pickup_time,"%H:%M"),'%H')
-processed_df$pickup_hrs <- as.numeric(processed_df$pickup_hrs)
-processed_df$pickup_period <- ifelse(processed_df$pickup_hrs >= 05 & processed_df$pickup_hrs <= 11, "Morning",
-            ifelse(processed_df$pickup_hrs > 11 & processed_df$pickup_hrs <= 16, "Afternoon",
-            ifelse(processed_df$pickup_hrs > 16 & processed_df$pickup_hrs <= 21, "Evening", "Night")))
-processed_df$pickup_period <- as.factor(processed_df$pickup_period)
-processed_df$pickup_period <- ordered(processed_df$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-### Dropoff column
-
-```{r Dropoff_time, include=TRUE, echo = FALSE}
-#Dropoff column
-processed_df$dropoff_datetime <- as.POSIXlt(as.character(processed_df$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
-processed_df$dropoff_time <- format(processed_df$dropoff_datetime, format = "%H:%M")
-processed_df$dropoff_hrs <- format(strptime(processed_df$dropoff_time,"%H:%M"),'%H')
-processed_df$dropoff_hrs <- as.numeric(processed_df$dropoff_hrs)
-processed_df$drop_period <- ifelse(processed_df$dropoff_hrs >= 05 & processed_df$dropoff_hrs <= 11, "Morning",
-            ifelse(processed_df$dropoff_hrs > 11 & processed_df$dropoff_hrs <= 16, "Afternoon",
-            ifelse(processed_df$dropoff_hrs > 16 & processed_df$dropoff_hrs <= 21, "Evening", "Night")))
-processed_df$drop_period <- as.factor(processed_df$drop_period)
-processed_df$drop_period <- ordered(processed_df$drop_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-### Trip_duration
-
-```{r Trip_duration, include=TRUE, echo = FALSE}
-#Trip_duration
-processed_df$trip_duration <- difftime(processed_df$dropoff_datetime, processed_df$pickup_datetime, units = "mins")
-processed_df$trip_duration <- floor(as.numeric(processed_df$trip_duration))
-boxplot(processed_df$trip_duration, col = c("#0000FF"))
-
-duration_outliers <- boxplot(processed_df$trip_duration, col = c("#0000FF"))
-
-processed_df = processed_df[!processed_df$trip_duration %in% duration_outliers$out, ]
-
-boxplot(processed_df$trip_duration, col = c("#0000FF"))
-min(processed_df$trip_duration)
-max(processed_df$trip_duration)
-```
-
-## Outlier detection and data filters
-The dataset comes with an associated data definition guide. 
-
-```{r Outlier detection and missing values, echo=T}
-
-# fare amount in negative & credit card payments
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7))
-
-# removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
-  dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
-  dim(processed_df)
-}
-
-str(processed_df)
-```
-
-## Normality check
-```{r}
-processed_df %>%
-  ggplot(aes(per_tip)) +
-  geom_histogram(aes(y =..density..),
-                   colour = "black",
-                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
-```
 
 SELECT COLUMN OF INTERESTS ONY
 
