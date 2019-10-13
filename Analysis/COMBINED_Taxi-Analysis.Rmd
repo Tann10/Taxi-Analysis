@@ -515,8 +515,10 @@ To better understand this issue, descriptive statistics were run. First, we calc
 
 ```{r location_barlot, include = T, echo = F}
 # Create boxplots for trip counts based on location
-barplot(summary(processed_df$Borough_pu), main = "Trip Counts Based on Pickup Location", col = "red")
-barplot(summary(processed_df$Borough_do), main = "Trip Counts Based on Dropoff Location", col = "blue")
+ggplot(data = processed_df, aes(x = Borough_pu, fill = Borough_pu)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Location") + xlab("Location") + ylab("Trip Frequency")
+
+# Create boxplots for trip counts based on location
+ggplot(data = processed_df, aes(x = Borough_do, fill = Borough_do)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Location") + xlab("Location") + ylab("Trip Frequency")
 ```
 
 These bar charts show that Manhattan has the highest number of both pick up and drop offs, followed by Queens and Brooklyn in second and third, respectively. We also looked at the frequency of various drop off and pick up combinations.
