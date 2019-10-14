@@ -504,8 +504,8 @@ hist(processed_df$per_tip,     main = "Histogram of plasma glucose concentration
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
 
-#qqnorm(processed_df$pickup_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
-#hist(processed_df$pickup_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of BMI", col = "skyblue")
+hist(processed_df$pickup_hrs, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
 
 boxplot(per_tip ~ pickup_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
 ```
@@ -529,8 +529,8 @@ not all of the means are equal and the results are statistically significant
 
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
-qqnorm(processed_df$dropoff_hrs_num, main = "Q-Q plot of BMI", col = "skyblue")
-hist(processed_df$dropoff_hrs_num, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+qqnorm(processed_df$dropoff_hrs, main = "Q-Q plot of BMI", col = "skyblue")
+hist(processed_df$dropoff_hrs, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
 
 boxplot(per_tip ~ drop_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
 ```
