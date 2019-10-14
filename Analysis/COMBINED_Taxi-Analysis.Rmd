@@ -582,7 +582,7 @@ The last factor that we chose for our study is distance travelled and we try to 
 
 First we take a look at summary of Trip Distance column... It shows that min is .. max.. mean and median however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
 
-```{r dist_summary include = T, echo = F}
+```{r dist_summary, include = T, echo = F}
 
 summary(processed_df$trip_distance)
 # str(processed_df)
@@ -590,7 +590,7 @@ summary(processed_df$trip_distance)
 ```
 
 This can visually be confirmed through a box plot and histogram. 
-```{r dist_boxplot include = T, echo = F}
+```{r dist_boxplot, include = T, echo = F}
 
 theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
 
@@ -611,7 +611,7 @@ b
 
 Now coming towards our second and dependent variable. Tip percentage ...
 
-```{r tip%_summary include = T, echo = F}
+```{r tip_summary, include = T, echo = F}
 
 summary(processed_df$per_tip)
 
@@ -645,7 +645,7 @@ As always, First Step in every Significance testing:
   <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
 </ul>
-```{r subset_2cols include = T, echo = F}
+```{r subset_2cols, include = T, echo = F}
 
 
 df_dist <- subset(processed_df, select=c(per_tip, trip_distance))
@@ -656,7 +656,7 @@ Since i am going to work on 2 variable cols, dependent variable is tip_amount & 
 
 Since I chose "2-sample" t test, I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. I divided this column into 2 factors based on mean value of distance travelled. you can see that from glimpse of dataset provided. 
 
-```{r factor_dist include = T, echo = F}
+```{r factor_dist, include = T, echo = F}
 
 
 # Bimodal so divided it into 2 chunks for normalization
@@ -669,7 +669,7 @@ glimpse(df_dist)
 
 Here is a Histogram where we combined values from both of my variables. It shows the frequency of %tips paid by both short & long distance travellers. We can get a rough idea about the means of tip percentages paid by both short & long distance travellers but we cant be sure. Just Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
 
-```{r plot_both_var include = T, echo = F}
+```{r plot_both_var, include = T, echo = F}
 
 # Use semi-transparent (alpha=0.5) fill 
 # plotting both my dependent & independent variable and trying to figure out if there is any relationship
@@ -685,7 +685,7 @@ dev.off()
 ```
 
 
-```{r t_test include = T, echo = F}
+```{r t_test, include = T, echo = F}
 
 
 # Also add box plot to visually confirm the results of T-test
@@ -705,7 +705,7 @@ With Significance level set to 5%, I get a P-value very close to zero. Concludin
 
 We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
 
-```{r box_plot include = T, echo = F}
+```{r box_plot, include = T, echo = F}
 
 # box-plot to see who pays more tips 
 e <- ggplot(data = df_dist, aes(x = trip_distance, y = per_tip, fill=trip_distance)) + 
