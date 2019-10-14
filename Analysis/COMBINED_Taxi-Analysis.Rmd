@@ -25,7 +25,7 @@ knitr::opts_chunk$set(error = TRUE)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
-```{r load libraries, echo=FALSE}
+```{r load libraries}
 loadPkg("plyr")
 loadPkg("dplyr")
 loadPkg("ggplot2")
@@ -99,14 +99,19 @@ print(mean(unprocessed_data$per_tip, na.rm = T))
 The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
 
 ```{r merge location descriptions, include = T}
+# Merge taxi zone names to taxi cab data for pick up locations
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
 
+# Delete unnecessary columns from merge
 unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
 
+# Change taxi zone name column
 colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
 
+# Merge taxi zone names to taxi cab data for drop off locations
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
 
+# Change taxi zone name column
 colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
 ```
 
@@ -148,7 +153,7 @@ unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, un
 unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
 ```
 
-### Outlier detection and data filters
+## Outlier detection and data filters
 The dataset comes with an associated data definition guide. 
 
 ```{r Outlier detection and missing values, include=F}
@@ -221,15 +226,8 @@ EDA questions:
 4. Distribution across count of passenger?
 5. Distance and time variation in the trip?
 
-## GEOGRAPHIC LOCATION AND TIP (Steven)
-As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
-The dataset does not provide information on the passenger's home location, wealth, or even purpose of travel; it simply provides pick up and drop off locations. However, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home [2]. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources. Therefore, this may provide some context into how an individual lives.
-
-
-[1] https://scholarship.sha.cornell.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1102&context=articles
-[2] https://ieeexplore.ieee.org/abstract/document/4624004; https://onlinelibrary.wiley.com/doi/pdf/10.1111/0033-0124.00158?casa_token=fgUlwmzlofwAAAAA:k19TGhhaKN9uLpNH1QXQgXrqRrm77fEgGmBisvuspaVDzvnNfXkrcvBvC4QsJMOmptyw8ew-qJWCd4s; https://biblio.ugent.be/publication/3029997/file/6779790.pdf; https://www.tandfonline.com/doi/full/10.1080/02723638.2016.1142152
-
-To better understand this issue, descriptive statistics were run. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
+## Impacts of Location on Tip
+Location can also impact the amount of tipping. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
 
 ```{r location_barlot, include = T, echo = F}
 # Create boxplots for trip counts based on location
@@ -287,7 +285,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu))
 ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-The p-values are `summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+The p-values are `summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
@@ -358,9 +356,7 @@ tukey_tipamt_do
 
 ```
 
-For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant.
-
-Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan. FINISH THIS
+For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant. Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan.
 
 ## TANAYA REMOVE???
 ```{r}
@@ -472,7 +468,7 @@ not all of the means are equal and the results are statistically significant
 
 
 
-```{r Trip_duration, include=TRUE, echo = FALSE}
+```{r Trip_duration2, include=TRUE, echo = FALSE}
 hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of PER_TIP vs tRIP DURATION", col = rainbow(40), breaks = 40)
 ```
 
