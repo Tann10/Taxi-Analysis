@@ -14,10 +14,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(error = TRUE)
 #knitr::opts_chunk$set(echo = TRUE)
-# knitr::opts_chunk$set(include = F)
+knitr::opts_chunk$set(include = F)
 ```
 
 ```{r basicfcn, include=F}
@@ -26,6 +26,7 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r load libraries}
+# Load libraries
 loadPkg("plyr")
 loadPkg("dplyr")
 loadPkg("ggplot2")
@@ -44,53 +45,88 @@ This r markdown file contains our code we used in our EDA. Our objective was to 
 # Data preprocessing
 
 ## Load data
+
 TALK ABOUT WHAT WE DID IN ONE LINE
 COMMENT CODE
-TALK ABOUT WHAT FILES WE ARE LOADING
+TALK ABOUT WHAT FILES WE ARE LOADING  
 To obtain the data, we subset the taxi cab data for the most recent available dataset at time of download (June 2019). We randomly selected 20000 variables due to hardware limitations, which prevented us from analyzing the entire dataset. Although we set a seed, to ensure that all group members were working on the same dataset, we exported the subset dataset and used that for our analysis. The code we used to subset the data is commented out below.
+
+The data was downloaded from the NYC Open Source GIS website: XXXX.
+
 ```{r read data files}
+# Set random seed
 set.seed(42)
+
+# Read in original data
 #taxi_trips <- read.csv("../Data/yellow_tripdata_2019-06.csv")
+
+# Sample data
 #trips_zones <- trips_zones_full[sample(nrow(trips_zones_full), 20000, replace = F, prob = NULL),]
+
+# Export sample
 #write.csv(trips_zones,"../Data/trips_zones_20000_v2.csv", row.names = FALSE)
 
+# Read in sample
 unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
+
+# Read in taxi zone name data
 taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
 
+# Get glimpse / structure of data
 glimpse(unprocessed_data)
-
 glimpse(taxi_zones)
-
 ```
 
 
 ## Data statistics 
 
 ###Data Summary
+
+Here is a summary of the subset taxi data:
 ```{r Summary_if_the_data, echo=F, include=T}
+# Get summary of data
 summary(unprocessed_data)
 ```
 TALK ABOUT SOME COLUMNS OF INTEREST
 WE CAN SEE THERE ARE OUTLIERS
 
 ###Normality Check
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed.
+
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
 
 ```{r tipamount_distr, echo=F, include=T}
-boxplot(unprocessed_data$tip_amount)
+# Create boxplot
+boxplot(unprocessed_data$tip_amount, main = "Boxplot of NYC Taxi Tip Data")
+
+# Create qqplot
 qqnorm(unprocessed_data$tip_amount)
 qqline(unprocessed_data$tip_amount)
 ```
 
+## Tip Percentage
+
 A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
-## Tip Percentage
 ```{r Tip_Percentage}
 # get percentage tip amount
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount'] 
-summary(unprocessed_data)
+unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
+
+# Print standard deviation and amount
 print(sd(unprocessed_data$per_tip, na.rm = T))
 print(mean(unprocessed_data$per_tip, na.rm = T))
+```
+
+Here is the structure, summary, and the first few rows of tip percentage: 
+
+```{r tip-percent-summary4, echo=F, include=T}
+# Get structure
+str(unprocessed_data$per_tip)
+
+# Get summary
+summary(unprocessed_data$per_tip)
+
+# Print first five rows
+head(unprocessed_data, n = 5)
 ```
 
 
@@ -99,7 +135,7 @@ print(mean(unprocessed_data$per_tip, na.rm = T))
 ### Location Columns
 The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
 
-```{r merge location descriptions, include = T}
+```{r merge location descriptions}
 # Merge taxi zone names to taxi cab data for pick up locations
 unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
 
@@ -118,7 +154,11 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do
 
 ### Pickup time column
 
-```{r Pickup_time, include=TRUE, echo = FALSE}
+QUICKLY TALK ABOUT WHAT YOU DID
+
+COMMENT CODE
+
+```{r Pickup_time}
 #Pickup column
 unprocessed_data$pickup_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
 unprocessed_data$pickup_time <- format(unprocessed_data$pickup_datetime, format = "%H:%M")
@@ -133,7 +173,12 @@ unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels
 
 ### Dropoff column
 
-```{r Dropoff_time, include=TRUE, echo = FALSE}
+
+TALK ABOUT WHAT YOU DID
+
+COMMENT CODE
+
+```{r Dropoff_time}
 #Dropoff column
 unprocessed_data$dropoff_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
 unprocessed_data$dropoff_time <- format(unprocessed_data$dropoff_datetime, format = "%H:%M")
@@ -148,19 +193,38 @@ unprocessed_data$drop_period <- ordered(unprocessed_data$drop_period, levels = c
 
 ### Trip_duration
 
-```{r Trip_duration, include=TRUE, echo = FALSE}
+TALK ABOUT WHAT YOU DID
+
+COMMENT CODE
+
+```{r Trip_duration}
 #Trip_duration
 unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, unprocessed_data$pickup_datetime, units = "mins")
 unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
 ```
 
-## Outlier detection and data filters
-The dataset comes with an associated data definition guide. 
+Here is the structure, summary, and the first few rows of the dataset with new columns: 
 
-```{r Outlier detection and missing values, include=F}
+```{r tip-percent-summary2, echo=F, include=T}
+# Print structure
+str(unprocessed_data)
+
+# Print summary
+summary(unprocessed_data)
+
+# Print first five rows
+head(unprocessed_data, n = 5)
+```
+
+## Outlier detection and data filters
+
+Using the boxplot, we removed the outliers from the dataset. 
+
+```{r Outlier detection and missing values}
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration >= 0) & (trip_duration <= 37))
 
+# Get histogram
 hist(processed_df$tip_amount)
 hist(processed_df$per_tip)
 # removing outliers:
@@ -171,27 +235,38 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
+```
 
+Here is the structure, summary, and the first few rows of the processed dataset: 
+
+```{r tip-percent-summary3, echo=F, include=T}
+# Get structure
 str(processed_df)
+
+# Get summary
+summary(processed_df)
+
+# Get first five rows
+head(processed_df, n = 5)
 ```
 
 ### Normality check
 
-```{r}
+COMMENT CODE
+
+Here's a histogram of the NYC taxi tip data after the removal of outliers:
+
+```{r, echo=F, include=T}
 processed_df %>%
   ggplot(aes(per_tip)) +
   geom_histogram(aes(y =..density..),
                    colour = "black",
-                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip)))
+                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 ```
 
-```{r}
 
-processed_df$flag_tip <- ifelse(processed_df$per_tip > 0.00, "tipped", " No tip")
+COMMENT CODE 
 
-processed_df %>% ggplot(aes())+ 
-  geom_bar(size=2, shape=23)
-```
 
 
 SELECT COLUMN OF INTERESTS ONY
@@ -199,6 +274,9 @@ SELECT COLUMN OF INTERESTS ONY
 
 # Exploratory Data Analysis
 ## TANAYA TITLE
+
+TALK ABOUT WHAT THIS IS FOR
+COMMENT CODE
 ```{r }
 
 processed_df$passenger_count <- as.factor(processed_df$passenger_count)
@@ -250,7 +328,7 @@ ddply(pu_do, .(Borough_pu, Borough_do), nrow)
 
 This table shows that Manhattan to Manhattan has the highest number of trips, followed by Queens to Manhattan, Manhattan to Queens, and Manhattan to Brooklyn.
 
-Considering the Manhattan and Queens have the highest number of pick ups and drop offs, the fact that the number of trips within and between these places are also the highest make sense. The fact that Manhattan scores the highest in both measurements is also reasonable because yellow taxis (the focus of this study) mainly serve Manhattan, whereas green taxis usually serve the other boroughs that have been traditionally underserved by taxis (SOURCE).
+Considering the Manhattan and Queens have the highest number of pick ups and drop offs, the fact that the number of trips within and between these places are also the highest make sense. The fact that Manhattan scores the highest in both measurements is also reasonable because yellow taxis (the focus of this study) mainly serve Manhattan, whereas green taxis usually serve the other boroughs that have been traditionally underserved by taxis.
 
 With these descriptive statistics in mind, we decided to compare the mean tipping percentage for each borough based on drop off and pick up location to see if they were statistically different.
 
@@ -360,6 +438,7 @@ tukey_tipamt_do
 For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant. Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan.
 
 ## TANAYA REMOVE???
+
 ```{r}
 # Bar chart according to VendorID
 processed_df %>% group_by(VendorID) %>% summarise(n = n(),average = mean(per_tip), min = min(per_tip),  max = max(per_tip))
@@ -407,6 +486,10 @@ summary(anova_tip_amount)
 ```
 
 ## MADHURI TITLE HERE
+
+TALK ABOUT WHAT YOU ARE DOING
+
+COMMENT CODE
 
 ```{r include=TRUE, echo = FALSE}
 
@@ -490,7 +573,7 @@ conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
 
-### Tip payed vs distance travelled by passengers (AMNA)
+## Tip payed vs distance travelled by passengers (AMNA)
 
 Variables...
 
