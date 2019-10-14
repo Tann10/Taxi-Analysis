@@ -226,7 +226,7 @@ EDA questions:
 2. How is the tip amount varying?
 3. What time of the day gives your more tip?
 4. Distribution across count of passenger?
-5. Distance and time variation in the trip?
+5. Does tip amount varies with distance travelled?
 
 ## GEOGRAPHIC LOCATION AND TIP (Steven)
 As previously discussed, location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping [1]. In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct culture of each borough in New York, there may be microcosims of tipping culture found in the city that differ between each borough.
@@ -500,13 +500,65 @@ null hyp = means for per_tip and trip_duration_min are equal
 conclusion : true difference in means is not equal to 0
 means are not equal and the results are statistically significant
 
+
+
+
+
 ### Tip payed vs distance travelled by passengers (AMNA)
 
-Variables...
+The last factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
+
+First we take a look at summary of Trip Distance column... It shows that min is .. max.. mean and median however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
+
+```{r dist_summary include = T, echo = F}
+
+summary(processed_df$trip_distance)
+# str(processed_df)
+
+```
+
+This can visually be confirmed through a box plot and histogram. 
+```{r dist_boxplot include = T, echo = F}
+
+theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
+
+a <- ggplot(data = processed_df, aes(x = "", y = trip_distance)) + 
+  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x=" ", y = "Distance Travelled (miles)") + ggtitle("Box Plot for Distance Travelled")
+a
+
+b <- ggplot(data = processed_df, aes(x=trip_distance)) + 
+  geom_histogram(binwidth=0.1, color="#00AFBB")  + 
+  labs(x="Distance(miles)", y = "Count") + ggtitle("Histogram for Distance values")
+b
 
 
-Which test to perform and why?
+```
 
+
+
+Now coming towards our second and dependent variable. Tip percentage ...
+
+```{r tip%_summary include = T, echo = F}
+
+summary(processed_df$per_tip)
+
+
+c <- ggplot(processed_df, aes(x=per_tip)) + 
+  geom_histogram(binwidth=0.001, fill = "#FFDB6D", color = "#C4961A") + coord_cartesian(xlim=c(0,1)) + 
+  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram for Tip values")
+c
+
+```
+
+It looks pretty normal. It also fulfills the CLT for normality so with a normal dependent variable we are all set to move forward.  
+
+Now that I know my variables, the question is which test to apply and why when comparing tip paid with distance travelled?
+I cannot use z-test because I dont know population mean & std dev. I also cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample. 
+
+So the simplest option that comes to mind is to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
+
+But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
 
 Assumptions/Criteria to be fulfilled:
 <ul>
@@ -516,60 +568,55 @@ Assumptions/Criteria to be fulfilled:
 </ul>
 
 
-First Step in Significance testing: 
+As always, First Step in every Significance testing: 
 <ul>
   <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
 </ul>
-```{r }
-
-# AMNA
-
-summary(processed_df$trip_distance)
-# ?? question remains whether I factor on basis of mean or median
-
-# i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so subsetting my variables into a new df
-df_dist <- subset(processed_df, select=c(tip_amount, trip_distance))
-glimpse(df_dist)
-
-# Lets have a look at them
-# Basic histogram of tip variable
-theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
-ggplot(df_dist, aes(x=tip_amount)) + 
-  geom_histogram(binwidth=0.1, color="green") + coord_cartesian(xlim=c(0,20)) + 
-  labs(x="Tips($)", y = "Count") + ggtitle("Histogram for Tip values")
+```{r subset_2cols include = T, echo = F}
 
 
-# Here print a histogram for per_tip to show that it is more normalized.
+df_dist <- subset(processed_df, select=c(per_tip, trip_distance))
+glimpse(df_dist)  # 12000 + obs
+```
 
-# Now that I know my variables, which test to choose. I cannot use z-test because I dont know population mean & std dev. I also cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample.  
+Since i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so just for my own ease subsetting my variables into a new df.
+
+Since I chose "2-sample" t test, I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. I divided this column into 2 factors based on mean value of distance travelled. you can see that from glimpse of dataset provided. 
+
+```{r factor_dist include = T, echo = F}
+
 
 # Bimodal so divided it into 2 chunks for normalization
 
-# So going to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups. For that I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. I divided this column into 2 factors based on mean value of distance travelled.
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
 df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 glimpse(df_dist)
 
+```
+
+Here is a Histogram where we combined values from both of my variables. It shows the frequency of %tips paid by both short & long distance travellers. We can get a rough idea about the means of tip percentages paid by both short & long distance travellers but we cant be sure. Just Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
+
+```{r plot_both_var include = T, echo = F}
+
+# Use semi-transparent (alpha=0.5) fill 
+# plotting both my dependent & independent variable and trying to figure out if there is any relationship
+
+d <- ggplot(df_dist, aes(x=per_tip, fill=trip_distance, color=trip_distance)) +
+  geom_histogram(binwidth=0.001, position="identity", alpha=0.5)  + 
+  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
+d
+
+png("both_tip&dist")
+print(d)
+dev.off()
+```
 
 
-# Plot combining values from both of my variables
-# Use semi-transparent (alpha=0.5) fill  ??how to change legend title??
-p<-ggplot(df_dist, aes(x=tip_amount, fill=trip_distance, color=trip_distance)) +
-  geom_histogram(binwidth=0.1, position="identity", alpha=0.5) + coord_cartesian(xlim=c(0,20)) + 
-  labs(x="Tips($)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
-p
-# Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
+```{r t_test include = T, echo = F}
 
-
-
-# But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
-
-# All set. Now the 1st step in significance testing is to state your hypothesis. Null: Average amount tipped by the passenger(s) travelling shorter distances equals that of longer distance travellers.
 
 # Also add box plot to visually confirm the results of T-test
-
-
 
 short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
 str(short_dist)
@@ -577,35 +624,29 @@ long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
 str(long_dist)
 
 # Applying 2 Sample t-test below
-result <- t.test(short_dist$tip_amount, long_dist$tip_amount)
+result <- t.test(short_dist$per_tip, long_dist$per_tip)
 print(result)
-# With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
-
-
-# We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
-
-p <- ggplot(df_dist, aes(x=df_dist$trip_distance, y=df_dist$tip_amount)) + 
-  geom_boxplot() + stat_summary(fun.y=mean, geom="point", shape=23, size=4)  # adding mean to box plot
-p
-
-
-
-
-plot(processed_df$per_tip ~ processed_df$trip_distance, data=processed_df , main="Tips paid by Short vs High Distance Commuters (Mean)", ylab="Tips Paid", xlab="Distance travelled", col=c("#ff0000","#00ff00") )
-M = tapply(processed_df$per_tip,
-           INDEX = processed_df$trip_distance,
-           FUN   = mean)
-points(M,
-       col="yellow",
-       pch="+",   ### symbol to use, see ?points
-       cex=2)
-
-# somewhat surprising results, above plot shows that mean tip paid by short-distance travellers is greater than long-distance travellers
-
-
-
 
 ```
+With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+
+
+We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
+
+```{r box_plot include = T, echo = F}
+
+# box-plot to see who pays more tips 
+e <- ggplot(data = df_dist, aes(x = trip_distance, y = per_tip, fill=trip_distance)) + 
+  geom_boxplot()+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x="Distance Travelled", y = "Tip %") + ggtitle("Box Plot for Tip Percentages vs Distance Travelled")
+e
+
+# png("final_comparison")
+# print(e)
+# dev.off()
+```
+
+Honestly speaking I was a bit surprised to see the results that short distance travellers pay more tip in terms of fare percentage amount than those who travelled more miles. I think that this result deserve a separate study on their own, why short distance travellers pay more like maybe because of pshychological reasons or why long distance travellers pay less maybe because of phychological or socio-economic reasons or they are tired of the commute which affects their mood but that is another topic. 
 
 
 
