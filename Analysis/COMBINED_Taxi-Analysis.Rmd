@@ -47,6 +47,7 @@ This r markdown file contains our code we used in our EDA. Our objective was to 
 TALK ABOUT WHAT WE DID IN ONE LINE
 COMMENT CODE
 TALK ABOUT WHAT FILES WE ARE LOADING
+To obtain the data, we subset the taxi cab data for the most recent available dataset at time of download (June 2019). We randomly selected 20000 variables due to hardware limitations, which prevented us from analyzing the entire dataset. Although we set a seed, to ensure that all group members were working on the same dataset, we exported the subset dataset and used that for our analysis. The code we used to subset the data is commented out below.
 ```{r read data files}
 set.seed(42)
 #taxi_trips <- read.csv("../Data/yellow_tripdata_2019-06.csv")
