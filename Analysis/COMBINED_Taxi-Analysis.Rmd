@@ -111,12 +111,21 @@ Here is a summary of the subset taxi data:
 summary(unprocessed_data)
 ```
 
+Tip amound varies from `r min(unprocessed_data$tip_amount)` and `r max(unprocessed_data$tip_amount)` dollars. 
+
+Also trip distance varies from `r min(unprocessed_data$trip_distance)` and `r max(unprocessed_data$trip_distance)` with an average distance of `r mean(unprocessed_data$trip_distance)`. 
+
+Minimu fare amount is `r min(unprocessed_data$fare_amount)`. As fare amount is negative this looks like an outlier. 
+
+Vendor ID maximum is `r min(unprocessed_data$VendorID)`. But according to data dictionary provided, the data is collected for two vendors namely Creative Mobile Technologies, LLC as ID 1 and  VeriFone Inc as ID 2.
+
 
 ### Normality Check
 
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
 
 ```{r tipamount_distr, echo=F, include=T}
+
 # Create boxplot
 boxplot(unprocessed_data$tip_amount, main = "Boxplot of NYC Taxi Tip Data")
 
