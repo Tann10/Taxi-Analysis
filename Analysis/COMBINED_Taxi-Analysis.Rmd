@@ -18,6 +18,7 @@ output:
 knitr::opts_chunk$set(error = F)
 #knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(include = F)
+knitr::opts_chunk$set(warning = F)
 ```
 
 ```{r basicfcn, include=F}
@@ -25,7 +26,7 @@ knitr::opts_chunk$set(include = F)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
-```{r load libraries}
+```{r load libraries, echo=FALSE}
 # Load libraries
 loadPkg("plyr")
 loadPkg("dplyr")
@@ -245,8 +246,14 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 
 Below is the box plot after outlier treatment 
 ```{r boxplot after outlier removal}
-ggplot(data = processed_df, aes(x=factor(0), per_tip)) + ggtitle("Tip Percentage distribution") + geom_boxplot() + xlab("Tip Percentage") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x=factor(0), per_tip)) + 
+  ggtitle("Tip Percentage distribution") + 
+  geom_boxplot() + 
+  xlab("Tip Percentage") + 
+  ylab("Tip Percentage")
 ```
+
+**Observation :** All outliers are removed after treatment
 
 Here is the structure, summary, and the first few rows of the processed dataset: 
 
@@ -269,57 +276,90 @@ Here's a histogram of the NYC taxi tip data after the removal of outliers:
 #ggplot histogram of per_tip for processed df
 processed_df %>%
   ggplot(aes(per_tip)) +
-  geom_histogram(aes(y =..density..),
-                   colour = "black",
-                   fill = "blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "blue") + 
+  stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 ```
-
+**Observation :** 
 The data is approximately normally distributed. There are lesser points on the left side of the mean.
 
 
 # Exploratory Data Analysis
-## TANAYA TITLE
 
-TALK ABOUT WHAT THIS IS FOR
-COMMENT CODE
+## Feature visualization
 
-```{r }
+In order to understand how different features are distributed in the data we plotted the below graphs.
 
-processed_df$passenger_count <- as.factor(processed_df$passenger_count)
-
+```{r passenger count}
+# plotting count of drives with passenger count
 processed_df %>%
   group_by(passenger_count) %>%
   count() %>%
   ggplot(aes(passenger_count, n, fill = passenger_count)) +
   geom_col() +
   scale_y_sqrt() +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+  
+  xlab("Number of passengers") + 
+  ylab("Total number of trips") +
+  ggtitle('Distribution according to the number of passengers in a taxi')
+```
 
+**Observation :** 
+1. There are not many trips with zero passengers, and majority of the rides are with 1 passenger 
+2. The number of the trips starts reducing as the number of passengers till 4. This maybe due to the size of the car.
+3. Until the increase at 5 which maybe due to large car size.
+
+```{r vendor ID}
+# plotting  count of drives for vendor
 processed_df %>%
   group_by(VendorID) %>%
   count() %>%
   ggplot(aes(VendorID, n, fill = VendorID)) +
   geom_col() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  xlab("Vendor ID") + 
+  ylab("Total number of trips") +
+  ggtitle('Distribution according to vendors of the taxi service')
+```
+Vendor Ids 1 and 2 belongs to Creative Mobile Technologies, LLC; VeriFone Inc respectively
 
+**Observation :** Vendor 2 has more number of trips that vendor 1
+
+```{r passenger count}
+# plotting  count of drives for vendor
+processed_df %>%
+  mutate(wday = wday(processed_df$pickup_datetime)) %>%
+  group_by(wday, VendorID) %>%
+  count() %>%
+  ggplot(aes(wday, n, colour = VendorID)) +
+  geom_point(size = 3) +
+  labs(x = "Day of the week", y = "Total number of pickups") 
+  # theme(legend.position = "best")
+```
+**Observation :** Vendor 2 has more number of trips that vendor 1 holds true for every day of the week
+
+```{r passenger count}
+# plotting  count of drives for vendor
 processed_df %>%
   group_by(RatecodeID) %>%
   count() %>%
   ggplot(aes(RatecodeID, n, fill = RatecodeID)) +
   geom_col() +
-  theme(legend.position = "none")
-
-
-
+  theme(legend.position = "none") +
+  xlab("Rate code") + 
+  ylab("Count of rides") +
+  ggtitle('Distribution according to rate code for the service')
 
 ```
 
-EDA questions:
-1. What places give max and min tip?
-2. How is the tip amount varying?
-3. What time of the day gives your more tip?
-4. Distribution across count of passenger?
-5. Does tip amount varies with distance travelled?
+Following are the different rate codes:
+1= Standard rate
+2=JFK
+3=Newark
+4=Nassau or Westchester
+5=Negotiated fare
+6=Group ride
+
+**Observation :** Most of the trips are with booked with standard rate in the sample set. As the distribution for rate code is highly skewed this variable won't be used in our futher analysis for hypothesis testing
 
 ## Impacts of Location on Tip
 Location can also impact the amount of tipping. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
@@ -453,53 +493,57 @@ tukey_tipamt_do
 
 For pick up locations, there is no statistical difference for the between the following pairs (excluding Unknown) given their large p-values: Brooklyn and Bronx, and Manhattan and Bronx. For drop off locations, there is no difference for: Queens and Bronx, Staten Island and Bronz, Staten Island and Brooklyn, Staten Island and EWR, and Staten Island and Queens. All the Manhattan drop off locations are significant. Based on this analysis, it seems that being dropped off in Manhattan is significantly different from being dropped off in another location. The same seems to be true for being picked up in Manhattan.
 
-## TANAYA REMOVE???
+## Passenger count and Vendor
 
-```{r}
-# Bar chart according to VendorID
-processed_df %>% group_by(VendorID) %>% summarise(n = n(),average = mean(per_tip), min = min(per_tip),  max = max(per_tip))
-
-ggplot(processed_df, aes(y=per_tip, group = VendorID)) +
-  geom_boxplot(outlier.colour="red", outlier.shape=8,
-                outlier.size=4)
-
-#hist(check_2$per_tip,probability=T, main="Histogram of normal
-#data",xlab="Approximately normally distributed data")
-#lines(density(check_2$per_tip),col=2)
+We hyothesis that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
+```{r hypothesis testing for passenger count and vendor}
+processed_df %>%
+  ggplot(aes(passenger_count, per_tip, color = passenger_count)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  labs(y = "Percentage tip amount [$]", x = "Number of passengers")
 ```
 
+**Observation:** The mean of all the groups of passenger count is not varying much. 
 
-```{r }
-hist(processed_df$per_tip,probability=T, main="Histogram of normal
-data",xlab="Approximately normally distributed data")
-lines(density(processed_df$per_tip),col=2)
-
-
-qqnorm(processed_df$per_tip)
-qqline(processed_df$per_tip)
-
-print(sd(processed_df$per_tip))
-
-print(mean(processed_df$per_tip))
-#per_tip_outliers
-```
-
-
-```{r boxplot_pertip, include = T, echo = F}
-
-boxplot(processed_df$tip_amount)
-boxplot(processed_df$per_tip)
-```
-
-
-
-```{r}
-# TANAYA
-
+While performing anova our null hypothesis is the means across all groups of passenger count is same whereas alternate hypothesis is the mean is not same. 
+```{r anova test for passenger_count}
 # anova tests
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+str(processed_df)
 anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
 summary(anova_tip_amount)
+
 ```
+The P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` is > 0.05, hence we fail to reject null hypothesis. 
+
+Hence, we can conclude that the number of passenger in the car does not affect tip amount
+
+Below is the box plot distribution for vendors 1 and 2. WE hypothesise that the vendor brand name affects the % tip amount paid to the driver 
+
+```{r hypothesis testing for passenger count and vendor}
+processed_df %>%
+  ggplot(aes(VendorID, per_tip, color = VendorID)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  labs(y = "Percentage tip amount [$]", x = "Vendor ID")
+
+unique(processed_df$VendorID)
+```
+
+**observation:** Distribution for both the vendors looks almost same.
+
+While performing anova our null hypothesis is the means across vendors is same whereas alternate hypothesis is the mean is not same. 
+
+```{r anova test for vendor ID}
+# anova tests
+anova_vendor = aov(per_tip ~ VendorID, data = processed_df)
+summary(anova_vendor)
+
+```
+The P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` is > 0.05, hence we fail to reject null hypothesis. 
+
+Hence, we can conclude that the vendor does not affect tip amount
 
 ## MADHURI TITLE HERE
 
