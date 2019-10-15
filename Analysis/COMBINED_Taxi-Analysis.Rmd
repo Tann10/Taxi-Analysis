@@ -14,7 +14,6 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(error = F)
 #knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(include = F)
@@ -24,6 +23,25 @@ knitr::opts_chunk$set(warning = F)
 ```{r basicfcn, include=F}
 # can add quietly=T option to the require() function
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
+
+
+# This function calculates number of columns with type integer or double
+count_numeric_columns = function(df) { numericc <- 0
+doublec <- 0
+for (col in colnames(df)){
+  # check type integer
+  if (typeof(df[,col]) == "integer"){
+    numericc = numericc + 1
+  }
+  # check type double
+  else {
+    doublec = doublec + 1
+  }
+}
+# create list of the return variables
+  type_list <- list("num" = numericc, "dbl" = doublec) 
+  return(type_list)
+}
 ```
 
 ```{r load libraries, echo=FALSE}
@@ -32,9 +50,6 @@ loadPkg("plyr")
 loadPkg("dplyr")
 loadPkg("ggplot2")
 loadPkg("data.table")
-# loadPkg("grid")
-# loadPkg("gridExtra")
-# loadPkg("egg")
 loadPkg("nortest")
 loadPkg("corrplot")
 ```
@@ -47,9 +62,6 @@ This r markdown file contains code used to analyse New York City yellow taxi dat
 
 ## Load data
 
-TALK ABOUT WHAT WE DID IN ONE LINE
-COMMENT CODE
-TALK ABOUT WHAT FILES WE ARE LOADING  
 To obtain the data, we have subset the taxi cab data for the most recent available dataset at time of download (June 2019). We have randomly selected 20000 observations due to hardware limitations, which have prevented us from analyzing the entire dataset. Although we have set a seed, we exported the subset dataset and used that for our analysis, to ensure that all group members were working on the same dataset. The code we used to subset the data is commented below.
 
 The data was downloaded from the NYC Open Source GIS website: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
@@ -72,12 +84,22 @@ unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
 
 # Read in taxi zone name data
 taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
-
-# Get glimpse / structure of data
-glimpse(unprocessed_data)
-glimpse(taxi_zones)
 ```
 
+```{r glimpes of unprocessed data, echo=T, include=T}
+# Get glimpse / structure of data
+glimpse(unprocessed_data)
+```
+
+The total number of rows and columns are`r dim(unprocessed_data)` in unprocessed df.There are around `r count_numeric_columns(unprocessed_data)[1]` columns with numerical type and `r count_numeric_columns(unprocessed_data)[2]` columns with double for unprocessed taxi data. We need to convert columns like passenger count, vendor id, payment type into factor columns during analysis.
+
+
+```{r glimpse of mapping file, echo=T, include=T}
+# taxi zone mapping file
+glimpse(taxi_zones)
+
+```
+The total number of rows and columns are`r dim(taxi_zones)` in  df. And around `r count_numeric_columns(taxi_zones)[1]` columns with numerical type and `r count_numeric_columns(taxi_zones)[2]` columns with double for unprocessed taxi data. We need to convert columns Borough, Zone, service_zone to factor columns during analysis.  
 
 ## Data statistics 
 
@@ -88,8 +110,7 @@ Here is a summary of the subset taxi data:
 # Get summary of data
 summary(unprocessed_data)
 ```
-TALK ABOUT SOME COLUMNS OF INTEREST
-WE CAN SEE THERE ARE OUTLIERS
+
 
 ### Normality Check
 
