@@ -324,7 +324,7 @@ Vendor Ids 1 and 2 belongs to Creative Mobile Technologies, LLC; VeriFone Inc re
 
 **Observation :** Vendor 2 has more number of trips that vendor 1
 
-```{r passenger count}
+```{r  weekday and vendor}
 # plotting  count of drives for vendor
 processed_df %>%
   mutate(wday = wday(processed_df$pickup_datetime)) %>%
@@ -337,7 +337,7 @@ processed_df %>%
 ```
 **Observation :** Vendor 2 has more number of trips that vendor 1 holds true for every day of the week
 
-```{r passenger count}
+```{r rate code id}
 # plotting  count of drives for vendor
 processed_df %>%
   group_by(RatecodeID) %>%
@@ -496,7 +496,8 @@ For pick up locations, there is no statistical difference for the between the fo
 ## Passenger count and Vendor
 
 We hyothesis that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
-```{r hypothesis testing for passenger count and vendor}
+```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
+processed_df$passenger_count <- as.factor(processed_df$passenger_count)
 processed_df %>%
   ggplot(aes(passenger_count, per_tip, color = passenger_count)) +
   geom_boxplot() +
@@ -507,10 +508,9 @@ processed_df %>%
 **Observation:** The mean of all the groups of passenger count is not varying much. 
 
 While performing anova our null hypothesis is the means across all groups of passenger count is same whereas alternate hypothesis is the mean is not same. 
-```{r anova test for passenger_count}
+```{r anova test for passenger_count, echo=T,  include=T}
 # anova tests
 processed_df$VendorID <- as.factor(processed_df$VendorID)
-str(processed_df)
 anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
 summary(anova_tip_amount)
 
@@ -521,7 +521,7 @@ Hence, we can conclude that the number of passenger in the car does not affect t
 
 Below is the box plot distribution for vendors 1 and 2. WE hypothesise that the vendor brand name affects the % tip amount paid to the driver 
 
-```{r hypothesis testing for passenger count and vendor}
+```{r hypothesis testing for vendor, echo=T,  include=T}
 processed_df %>%
   ggplot(aes(VendorID, per_tip, color = VendorID)) +
   geom_boxplot() +
@@ -535,7 +535,7 @@ unique(processed_df$VendorID)
 
 While performing anova our null hypothesis is the means across vendors is same whereas alternate hypothesis is the mean is not same. 
 
-```{r anova test for vendor ID}
+```{r anova test for vendor ID, echo=T, include=T}
 # anova tests
 anova_vendor = aov(per_tip ~ VendorID, data = processed_df)
 summary(anova_vendor)
