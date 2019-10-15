@@ -41,7 +41,7 @@ loadPkg("corrplot")
 
 # Introduction
 
-This r markdown file contains code we used to analyse New York City yellow taxi dataset. Our objective was to identify what factors contribute to tipping amount for taxicab services.
+This r markdown file contains code used to analyse New York City yellow taxi dataset. Our objective is to identify what factors contribute to tipping amount for taxicab services.
 
 # Data preprocessing
 
@@ -50,9 +50,9 @@ This r markdown file contains code we used to analyse New York City yellow taxi 
 TALK ABOUT WHAT WE DID IN ONE LINE
 COMMENT CODE
 TALK ABOUT WHAT FILES WE ARE LOADING  
-To obtain the data, we subset the taxi cab data for the most recent available dataset at time of download (June 2019). We randomly selected 20000 variables due to hardware limitations, which prevented us from analyzing the entire dataset. Although we set a seed, to ensure that all group members were working on the same dataset, we exported the subset dataset and used that for our analysis. The code we used to subset the data is commented out below.
+To obtain the data, we have subset the taxi cab data for the most recent available dataset at time of download (June 2019). We have randomly selected 20000 observations due to hardware limitations, which have prevented us from analyzing the entire dataset. Although we have set a seed, we exported the subset dataset and used that for our analysis, to ensure that all group members were working on the same dataset. The code we used to subset the data is commented below.
 
-The data was downloaded from the NYC Open Source GIS website: XXXX.
+The data was downloaded from the NYC Open Source GIS website: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
 
 ```{r read data files}
 # Set random seed
