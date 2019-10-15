@@ -120,19 +120,26 @@ Minimu fare amount is `r min(unprocessed_data$fare_amount)`. As fare amount is n
 Vendor ID maximum is `r min(unprocessed_data$VendorID)`. But according to data dictionary provided, the data is collected for two vendors namely Creative Mobile Technologies, LLC as ID 1 and  VeriFone Inc as ID 2.
 
 
-### Normality Check
+### Outlier and Normality Check of Unprocessed Data
 
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
+```{r unprocessed tip amount boxplot, echo=T, include=T}
+ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
+  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
+```
+
+For the graph above, there are many observations tagged as outliers. We need to treat the data for outliers before analysis.
+
 
 ```{r tipamount_distr, echo=F, include=T}
-
-# Create boxplot
-boxplot(unprocessed_data$tip_amount, main = "Boxplot of NYC Taxi Tip Data")
-
 # Create qqplot
-qqnorm(unprocessed_data$tip_amount)
-qqline(unprocessed_data$tip_amount)
+ggplot(unprocessed_data, aes(sample = tip_amount)) + 
+  stat_qq() + 
+  stat_qq_line() +
+  ggtitle("QQ plot for tip amount") 
 ```
+
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
 
 ## Column Creation
 
