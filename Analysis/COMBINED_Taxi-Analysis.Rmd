@@ -105,8 +105,8 @@ qqline(unprocessed_data$tip_amount)
 ```
 
 ## Column Creation
-### Tip Percentage
 
+### Tip Percentage
 A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
 ```{r Tip_Percentage}
@@ -130,10 +130,6 @@ summary(unprocessed_data$per_tip)
 head(unprocessed_data, n = 5)
 ```
 
-
-
-
-
 ### Location Columns
 The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
 
@@ -156,53 +152,60 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do
 
 
 ### Pickup time column
-
-QUICKLY TALK ABOUT WHAT YOU DID
-
-COMMENT CODE
+The dataset provides pickup datetime column in factor datatype. For our analysis we create a new column pickup_period which is of type factor contains values "Morning", "Afternoon", "Evening" or "Night" based on the pickup hours.
 
 ```{r Pickup_time}
 #Pickup column
+#change factor type to datetime type
 unprocessed_data$pickup_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
+#extract only the time from datetime type
 unprocessed_data$pickup_time <- format(unprocessed_data$pickup_datetime, format = "%H:%M")
+#extract hours from the time extracted
 unprocessed_data$pickup_hrs <- format(strptime(unprocessed_data$pickup_time,"%H:%M"),'%H')
+#convert hrs column type to numeric
 unprocessed_data$pickup_hrs <- as.numeric(unprocessed_data$pickup_hrs)
+#convert numeric hrs type to pickup period
 unprocessed_data$pickup_period <- ifelse(unprocessed_data$pickup_hrs >= 05 & unprocessed_data$pickup_hrs <= 11, "Morning",
             ifelse(unprocessed_data$pickup_hrs > 11 & unprocessed_data$pickup_hrs <= 16, "Afternoon",
             ifelse(unprocessed_data$pickup_hrs > 16 & unprocessed_data$pickup_hrs <= 21, "Evening", "Night")))
+#convert pickup period from string type to factor
 unprocessed_data$pickup_period <- as.factor(unprocessed_data$pickup_period)
+#order the pickup_period column (this is of our interst in further analysis)
 unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
 ```
 
 ### Dropoff column
-
-
-TALK ABOUT WHAT YOU DID
-
-COMMENT CODE
+The dataset provides dropoff datetime column in factor datatype. For our analysis we create a new column drop_period which is of type factor contains values "Morning", "Afternoon", "Evening" or "Night" based on the pickup hours.
 
 ```{r Dropoff_time}
 #Dropoff column
+#change factor type to datetime type
 unprocessed_data$dropoff_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
+#extract only the time from datetime type
 unprocessed_data$dropoff_time <- format(unprocessed_data$dropoff_datetime, format = "%H:%M")
+#extract hours from the time extracted
 unprocessed_data$dropoff_hrs <- format(strptime(unprocessed_data$dropoff_time,"%H:%M"),'%H')
+#convert hrs column type to numeric
 unprocessed_data$dropoff_hrs <- as.numeric(unprocessed_data$dropoff_hrs)
+#convert numeric hrs type to drop period
 unprocessed_data$drop_period <- ifelse(unprocessed_data$dropoff_hrs >= 05 & unprocessed_data$dropoff_hrs <= 11, "Morning",
             ifelse(unprocessed_data$dropoff_hrs > 11 & unprocessed_data$dropoff_hrs <= 16, "Afternoon",
             ifelse(unprocessed_data$dropoff_hrs > 16 & unprocessed_data$dropoff_hrs <= 21, "Evening", "Night")))
+#convert drop period from string type to factor
 unprocessed_data$drop_period <- as.factor(unprocessed_data$drop_period)
+#order the drop_period column(this is of our interst in further analysis)
 unprocessed_data$drop_period <- ordered(unprocessed_data$drop_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
 ```
 
 ### Trip_duration
 
-TALK ABOUT WHAT YOU DID
-
-COMMENT CODE
+We thought there might be also correlation between the duration of the trip (time taken for the trip) and the tip amount paid. Since the duration of the trip is missing in the dataset we calculate the same by taking the difference between the pickup and dropoff time.
 
 ```{r Trip_duration}
 #Trip_duration
+#calculation of trip duration in minutes = dropoff_time - pickup time
 unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, unprocessed_data$pickup_datetime, units = "mins")
+#conversion of trip duration from minutes to numeric(this is of our interst in further analysis)
 unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
 ```
 
@@ -227,7 +230,7 @@ Following filters are applied on the data set:
 3. fare_amount = data has fareamount in negative, such entries are outliers hence removed
 4. passenger count = according to the law maximum 7 passengers are allowed in a taxi
 5. trip distance = there are some observation with 0 trip distance, maybe a cancelled taxi. These observations are not considered for the analysis
-6. trip duration = 
+6. trip duration = the values >=37 and <=0 fall outside the boxplot. These are removed.
 Using the boxplot, we removed the outliers from the dataset. 
 
 ```{r Outlier detection and missing values, include=F, echo=F}
@@ -276,7 +279,7 @@ Here's a histogram of the NYC taxi tip data after the removal of outliers:
 #ggplot histogram of per_tip for processed df
 processed_df %>%
   ggplot(aes(per_tip)) +
-  geom_histogram(aes(y =..density..),  colour = "black", fill = "blue") + 
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF") + 
   stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 ```
 **Observation :** 
@@ -365,10 +368,10 @@ Following are the different rate codes:
 Location can also impact the amount of tipping. First, we calculate the number of trips in each borough, firstly grouped by pickup location and secondly grouped by drop off location.
 
 ```{r location_barlot, include = T, echo = F}
-# Create boxplots for trip counts based on location
+# Create barplots for trip counts based on location
 ggplot(data = processed_df, aes(x = Borough_pu, fill = Borough_pu)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Location") + xlab("Location") + ylab("Trip Frequency")
 
-# Create boxplots for trip counts based on location
+# Create barplots for trip counts based on location
 ggplot(data = processed_df, aes(x = Borough_do, fill = Borough_do)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Location") + xlab("Location") + ylab("Trip Frequency")
 ```
 
@@ -483,7 +486,7 @@ tukey_tipamt_pu <- TukeyHSD(anova_tipamt_pu, conf.level = 0.95)
 # Print Tukey test
 tukey_tipamt_pu
 
-# Conduct Tukey test for tip amount vs pickup
+# Conduct Tukey test for tip amount vs dropoff
 tukey_tipamt_do <- TukeyHSD(anova_tipamt_do, conf.level = 0.95)
 
 # Print Tukey test
@@ -545,96 +548,118 @@ The P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` is > 0.05, hence w
 
 Hence, we can conclude that the vendor does not affect tip amount
 
-## MADHURI TITLE HERE
+## Impacts of Pickup and Dropoff time on Tip
 
-TALK ABOUT WHAT YOU ARE DOING
+The amount of tipping can be impacted by pickup time, dropoff time and the duration of the trip itself. For this analysis we have categorised the data into four categories,  "Morning", "Afternoon", "Evening" and "Night" hours.
 
-COMMENT CODE
-
-```{r include=TRUE, echo = FALSE}
-
-ad.test(processed_df$per_tip)
-qqnorm(processed_df$per_tip, main = "Q-Q plot of BMI", col = "pink")
-
-hist(processed_df$per_tip,     main = "Histogram of plasma glucose concentration",    col = c('pink'))
-
-```
-
+Let us analyse the pickup period. 
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
+# Create barplot for trip counts based on Pickup_Time
+ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
 
-qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of BMI", col = "skyblue")
-hist(processed_df$pickup_hrs, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+# Plot tip percentage by Pickup_Time
+ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
 
-boxplot(per_tip ~ pickup_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
-```
-
-```{r Pick_up_time_Anova, include=TRUE, echo = FALSE}
-
-anova_pickup_period = aov(per_tip ~ pickup_period, data = processed_df)
-
-summary(anova_pickup_period)
-tukeyday_pickup_period <- TukeyHSD(anova_pickup_period)
-tukeyday_pickup_period
-plot(tukeyday_pickup_period)
+# Create qqplot
+qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
+qqline(processed_df$pickup_hrs)
 
 ```
 
-p<0.05 hence we reject null hypothesis
-null hyp = means for all the day types are equal
-conclusion : Avg tip amt for diffrent time in the day is not equal
-not all of the means are equal and the results are statistically significant
 
+Let us analyse the dropoff period. 
 
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
-qqnorm(processed_df$dropoff_hrs, main = "Q-Q plot of BMI", col = "skyblue")
-hist(processed_df$dropoff_hrs, main = "Histogram of plasma glucose concentration",    col = c('skyblue'))
+# Create barplot for trip counts based on Dropoff_Time
+ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
 
-boxplot(per_tip ~ drop_period, data = processed_df, col = c("#BB81EE","#A255E5","#7C29C6","#6515AB"), main = "GPA ", xlab = "School Ranking", ylab = "GPA" )
+# Plot tip percentage by Dropoff_Time
+ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
+
+# Create qqplot
+qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
+qqline(processed_df$pickup_hrs)
+
 ```
 
+From the bar charts its is crealy seen that the data is almost uniformly distributed. Except for the Night time there are less number of trips observed for both pickup and dropoff time periods. However from the box plots it is observed that the means of various time periods are not equal. So we perform ANOVA test on the column to obtain the statistical hypothesis.
+
+Anova for pickup time periods
+
+```{r Pick_up_time_Anova, include=TRUE, echo = FALSE}
+
+# Run ANOVA
+anova_pickup_period <- aov(per_tip ~ pickup_period, data = processed_df)
+
+# Print ANOVA results
+anova_pickup_period
+
+# Summarize ANOVA
+summary(anova_pickup_period)
+```
+
+Anova for dropoff time periods
 ```{r Dropoff_time_Anova, include=TRUE, echo = FALSE}
 
-anova_drop_period = aov(per_tip ~ drop_period, data = processed_df)
+# Run ANOVA
+anova_drop_period <- aov(per_tip ~ drop_period, data = processed_df)
 
+# Print ANOVA results
+anova_drop_period
+
+# Summarize ANOVA
 summary(anova_drop_period)
-tukeyday_drop_period <- TukeyHSD(anova_drop_period)
-tukeyday_drop_period
-plot(tukeyday_drop_period)
+```
+
+For these ANOVA analyses, the null hypothesis is that all means for different time period are the same. The p-values are `r summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+
+As the previous results were significant, we can run Tukey's HSD test:
+
+```{r tukey_timeperiod, include = T, echo = F}
+# Conduct Tukey test for tip amount vs pickup time period
+tukey_pu_period <- TukeyHSD(anova_pickup_period, conf.level = 0.95)
+
+# Print Tukey test
+tukey_pu_period
+
+# Conduct Tukey test for tip amount vs dropoff time period
+tukey_do_period <- TukeyHSD(anova_drop_period, conf.level = 0.95)
+
+# Print Tukey test
+tukey_do_period
 
 ```
 
-p<0.05 hence we reject null hypothesis
-null hyp = means for all the day types are equal
-conclusion : Avg tip amt for diffrent time in the day is not equal
-not all of the means are equal and the results are statistically significant
+For pick up period, the larger p-values are observed for : Afternoon-Morning, Night-Afternoon and Night-Evening.
+For drop off period, the larger p-values are observed for : Afternoon-Morning, Night-Afternoon. 
+p-value observed is approximately zero of Evening-Morning and Evening-Afternoon shows that being dropped off or picked up in the evening is significant from other time periods.
 
+## Impacts of Duration of trip on Tip
 
-
+There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
-hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of PER_TIP vs tRIP DURATION", col = rainbow(40), breaks = 40)
+#plot a tip paid vs trip duration histogram
+hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of Trip_Duration vs Tip_Percentage", col = rainbow(40), breaks = 40, xlab = "Trip_Duration", ylab = "Tip_Percentage" )
 ```
+
+From the graph it is observed that tip is maximum for trips ranging from 5 to 10 minutes and decreases with the time. We perform Ttest hypothesis.
 
 ```{r Trip_duration_Two_Sample_Ttest, include=TRUE, echo = FALSE}
+
+#Run T-test
 trip_duration_ttest <- t.test(processed_df$per_tip, processed_df$trip_duration)
+
+#Print T-test
 trip_duration_ttest
 ```
 
-```{r Corelation plot, include=TRUE, echo = FALSE}
-processed_df_num <- processed_df[, sapply(processed_df, is.numeric)]
-processed_df_cor = cor(processed_df_num)
-corrplot.mixed(processed_df_cor)
-```
-
-p<0.05 hence we reject null hypothesis
+From the results we observe that p-value is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
 null hyp = means for per_tip and trip_duration_min are equal
-conclusion : true difference in means is not equal to 0
-means are not equal and the results are statistically significant
+Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on duration of the trip.
 
-
-
-## Tip payed vs distance travelled by passengers (AMNA)
+## Tip payed vs distance travelled by passengers
 
 
 The last factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
@@ -791,4 +816,13 @@ lm_3var <- lm(per_tip ~ Borough_pu, data = processed_df)
 
 # Print summary
 summary(lm_3var)
+
+#normality test
+ad.test(processed_df$per_tip)
+
+#Corelation plot
+processed_df_num <- processed_df[, sapply(processed_df, is.numeric)]
+processed_df_cor = cor(processed_df_num)
+corrplot.mixed(processed_df_cor)
+```
 ```
