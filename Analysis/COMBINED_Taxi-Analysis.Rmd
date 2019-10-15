@@ -329,7 +329,7 @@ The data is approximately normally distributed. There are lesser points on the l
 
 In order to understand how different features are distributed in the data we plotted the below graphs.
 
-```{r passenger count}
+```{r passenger count, echo=T, include=T}
 # plotting count of drives with passenger count
 processed_df %>%
   group_by(passenger_count) %>%
@@ -539,10 +539,11 @@ We hyothesis that there is a relationship between the number of passenger in the
 ```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
 processed_df$passenger_count <- as.factor(processed_df$passenger_count)
 processed_df %>%
-  ggplot(aes(passenger_count, per_tip, color = passenger_count)) +
+  ggplot(aes(passenger_count, per_tip, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Number of passengers")
+  labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
+  ggtitle("Box plot distribution for % tip amount and passenger count")
 ```
 
 **Observation:** The mean of all the groups of passenger count is not varying much. 
@@ -563,10 +564,12 @@ Below is the box plot distribution for vendors 1 and 2. WE hypothesise that the 
 
 ```{r hypothesis testing for vendor, echo=T,  include=T}
 processed_df %>%
-  ggplot(aes(VendorID, per_tip, color = VendorID)) +
+  ggplot(aes(VendorID, per_tip, fill = VendorID)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Vendor ID")
+  labs(y = "Percentage tip amount [$]", x = "Vendor ID") + 
+  ggtitle("Box plot distribution for % tip amount and vendor")
+
 
 unique(processed_df$VendorID)
 ```
