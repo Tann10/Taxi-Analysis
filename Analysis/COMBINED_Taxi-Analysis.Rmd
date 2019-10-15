@@ -39,8 +39,8 @@ loadPkg("corrplot")
 ```
 
 # Introduction
-ONE STATEMENT WHAT THE NOTEBOOK IS ABOUT
-This r markdown file contains our code we used in our EDA. Our objective was to identify what factors contribute to tipping amount for taxicab services.
+
+This r markdown file contains code we used to analyse New York City yellow taxi dataset. Our objective was to identify what factors contribute to tipping amount for taxicab services.
 
 # Data preprocessing
 
@@ -80,7 +80,7 @@ glimpse(taxi_zones)
 
 ## Data statistics 
 
-###Data Summary
+### Data Summary
 
 Here is a summary of the subset taxi data:
 ```{r Summary_if_the_data, echo=F, include=T}
@@ -90,7 +90,7 @@ summary(unprocessed_data)
 TALK ABOUT SOME COLUMNS OF INTEREST
 WE CAN SEE THERE ARE OUTLIERS
 
-###Normality Check
+### Normality Check
 
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
 
@@ -103,7 +103,8 @@ qqnorm(unprocessed_data$tip_amount)
 qqline(unprocessed_data$tip_amount)
 ```
 
-## Tip Percentage
+## Column Creation
+### Tip Percentage
 
 A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
 
@@ -126,23 +127,11 @@ summary(unprocessed_data$per_tip)
 
 # Print first five rows
 head(unprocessed_data, n = 5)
-
-
-hist(processed_df$tip_amount)
-hist(processed_df$per_tip)
-# removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
-  dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
-  dim(processed_df)
-}
-
 ```
 
 
-## Column Creation
+
+
 
 ### Location Columns
 The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
@@ -165,12 +154,7 @@ colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do
 ```
 
 
-
-## Data statistics 
-
-```{r summary of the unprocessed data, echo=F, include=T}
-summary(unprocessed_data)
-```
+### Pickup time column
 
 QUICKLY TALK ABOUT WHAT YOU DID
 
@@ -192,7 +176,6 @@ unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels
 ### Dropoff column
 
 
-### Pickup time column
 TALK ABOUT WHAT YOU DID
 
 COMMENT CODE
@@ -235,17 +218,21 @@ summary(unprocessed_data)
 head(unprocessed_data, n = 5)
 ```
 
-## Outlier detection and data filters
+## Outlier detection and treatment
 
+Following filters are applied on the data set:
+1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
+2. payment type = Only credit card details have corresponding tip amount value. Hence we will analysing only credit card payment types
+3. fare_amount = data has fareamount in negative, such entries are outliers hence removed
+4. passenger count = according to the law maximum 7 passengers are allowed in a taxi
+5. trip distance = there are some observation with 0 trip distance, maybe a cancelled taxi. These observations are not considered for the analysis
+6. trip duration = 
 Using the boxplot, we removed the outliers from the dataset. 
 
-```{r Outlier detection and missing values}
+```{r Outlier detection and missing values, include=F, echo=F}
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration >= 0) & (trip_duration <= 37))
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
 
-# Get histogram
-hist(processed_df$tip_amount)
-hist(processed_df$per_tip)
 # removing outliers:
 # per_tip laying outside IQR range in box plot
 while (length(boxplot(processed_df$per_tip)$out) != 0){
@@ -254,6 +241,11 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
+```
+
+Below is the box plot after outlier treatment 
+```{r boxplot after outlier removal}
+ggplot(data = processed_df, aes(x=factor(0), per_tip)) + ggtitle("Tip Percentage distribution") + geom_boxplot() + xlab("Tip Percentage") + ylab("Tip Percentage")
 ```
 
 Here is the structure, summary, and the first few rows of the processed dataset: 
