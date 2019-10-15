@@ -263,24 +263,18 @@ head(processed_df, n = 5)
 
 ### Normality check
 
-COMMENT CODE
-
 Here's a histogram of the NYC taxi tip data after the removal of outliers:
 
 ```{r, echo=F, include=T}
+#ggplot histogram of per_tip for processed df
 processed_df %>%
   ggplot(aes(per_tip)) +
   geom_histogram(aes(y =..density..),
                    colour = "black",
-                   fill = "light blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+                   fill = "blue") + stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 ```
 
-
-COMMENT CODE 
-
-
-
-SELECT COLUMN OF INTERESTS ONY
+The data is approximately normally distributed. There are lesser points on the left side of the mean.
 
 
 # Exploratory Data Analysis
