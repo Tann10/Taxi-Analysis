@@ -274,7 +274,7 @@ Using the boxplot, we removed the outliers from the dataset.
 
 ```{r Outlier detection and missing values, include=F, echo=F}
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) & (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
+processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) &  (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
 
 # removing outliers:
 # per_tip laying outside IQR range in box plot
@@ -284,6 +284,7 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
   processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
   dim(processed_df)
 }
+
 ```
 
 Below is the box plot after outlier treatment 
