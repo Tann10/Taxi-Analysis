@@ -1,166 +1,12 @@
 ---
-title: "Write-Up_Taxi-Analysis"
-author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    code_folding: hide
-    fig_height: 4.5
-    fig_width: 7
-    highlight: tango
-    number_sections: yes
-    theme: cosmo
-    toc: yes
-  pdf_document:
-    toc: yes
+title: "WRITE-UP_Taxi-Analysis"
+author: "Steven Chao"
+date: "10/12/2019"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(error = F)
-#knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(include = F)
-knitr::opts_chunk$set(warning = F)
-```
-
-```{r basicfcn, include=F}
-# can add quietly=T option to the require() function
-loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
-
-
-# This function calculates number of columns with type integer or double
-count_numeric_columns = function(df) { numericc <- 0
-doublec <- 0
-for (col in colnames(df)){
-  # check type integer
-  if (typeof(df[,col]) == "integer"){
-    numericc = numericc + 1
-  }
-  # check type double
-  else {
-    doublec = doublec + 1
-  }
-}
-# create list of the return variables
-  type_list <- list("num" = numericc, "dbl" = doublec) 
-  return(type_list)
-}
-```
-
-```{r load libraries, echo=FALSE}
-# Load libraries
-loadPkg("plyr")
-loadPkg("dplyr")
-loadPkg("ggplot2")
-loadPkg("data.table")
-loadPkg("nortest")
-loadPkg("corrplot")
-```
-
-```{r read data files}
-# Read in sample
-unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
-
-# Read in taxi zone name data
-taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
-```
-
-```{r Tip_Percentage}
-# get percentage tip amount
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
-
-# Print standard deviation and amount
-print(sd(unprocessed_data$per_tip, na.rm = T))
-print(mean(unprocessed_data$per_tip, na.rm = T))
-```
-
-```{r merge location descriptions}
-# Merge taxi zone names to taxi cab data for pick up locations
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "PULocationID", by.y = "LocationID", all.x = TRUE)
-
-# Delete unnecessary columns from merge
-unprocessed_data <- subset(unprocessed_data, select = -c(Zone, service_zone))
-
-# Change taxi zone name column
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_pu"
-
-# Merge taxi zone names to taxi cab data for drop off locations
-unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocationID", by.y = "LocationID", all.x = TRUE)
-
-# Change taxi zone name column
-colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
-```
-```{r Pickup_time}
-#Pickup column
-#change factor type to datetime type
-unprocessed_data$pickup_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
-#extract only the time from datetime type
-unprocessed_data$pickup_time <- format(unprocessed_data$pickup_datetime, format = "%H:%M")
-#extract hours from the time extracted
-unprocessed_data$pickup_hrs <- format(strptime(unprocessed_data$pickup_time,"%H:%M"),'%H')
-#convert hrs column type to numeric
-unprocessed_data$pickup_hrs <- as.numeric(unprocessed_data$pickup_hrs)
-#convert numeric hrs type to pickup period
-unprocessed_data$pickup_period <- ifelse(unprocessed_data$pickup_hrs >= 05 & unprocessed_data$pickup_hrs <= 11, "Morning",
-            ifelse(unprocessed_data$pickup_hrs > 11 & unprocessed_data$pickup_hrs <= 16, "Afternoon",
-            ifelse(unprocessed_data$pickup_hrs > 16 & unprocessed_data$pickup_hrs <= 21, "Evening", "Night")))
-#convert pickup period from string type to factor
-unprocessed_data$pickup_period <- as.factor(unprocessed_data$pickup_period)
-#order the pickup_period column (this is of our interst in further analysis)
-unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-```{r Dropoff_time}
-#Dropoff column
-#change factor type to datetime type
-unprocessed_data$dropoff_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_dropoff_datetime), tz = "", format="%m/%d/%Y %H:%M")
-#extract only the time from datetime type
-unprocessed_data$dropoff_time <- format(unprocessed_data$dropoff_datetime, format = "%H:%M")
-#extract hours from the time extracted
-unprocessed_data$dropoff_hrs <- format(strptime(unprocessed_data$dropoff_time,"%H:%M"),'%H')
-#convert hrs column type to numeric
-unprocessed_data$dropoff_hrs <- as.numeric(unprocessed_data$dropoff_hrs)
-#convert numeric hrs type to drop period
-unprocessed_data$drop_period <- ifelse(unprocessed_data$dropoff_hrs >= 05 & unprocessed_data$dropoff_hrs <= 11, "Morning",
-            ifelse(unprocessed_data$dropoff_hrs > 11 & unprocessed_data$dropoff_hrs <= 16, "Afternoon",
-            ifelse(unprocessed_data$dropoff_hrs > 16 & unprocessed_data$dropoff_hrs <= 21, "Evening", "Night")))
-#convert drop period from string type to factor
-unprocessed_data$drop_period <- as.factor(unprocessed_data$drop_period)
-#order the drop_period column(this is of our interst in further analysis)
-unprocessed_data$drop_period <- ordered(unprocessed_data$drop_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
-```
-
-```{r Trip_duration}
-#Trip_duration
-#calculation of trip duration in minutes = dropoff_time - pickup time
-unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, unprocessed_data$pickup_datetime, units = "mins")
-#conversion of trip duration from minutes to numeric(this is of our interst in further analysis)
-unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
-str(unprocessed_data)
-```
-
-```{r tip-percent-summary2, echo=F, include=T}
-# Print structure
-str(unprocessed_data)
-
-# Print summary
-summary(unprocessed_data)
-
-# Print first five rows
-head(unprocessed_data, n = 5)
-```
-
-```{r Outlier detection and missing values, include=F, echo=F}
-# fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
-processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) &  (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
-
-# removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
-  dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
-  dim(processed_df)
-}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Write a roughly 10-page (definitely no more than 4000 words) summary of the research and EDA process of your project. The summary should be prepared in R-markdown, and knitted into HTML. You may take some of the work in part B (such as graphs and results) to include here. They can overlap. This summary is to-be presented to your boss, your client, or to-be submitted for publication in journals. Potential area of topics to address in this summary may include:
@@ -168,42 +14,27 @@ Write a roughly 10-page (definitely no more than 4000 words) summary of the rese
 #******EACH PERSON SHOULD WRITE ABOUT 600-700 WORDS!!!!!!*******
 #*******MAKE SURE TO ADD SOME GRAPHS AND CHARTS************
 
-# Introduction
+#Introduction
+Taxi cabs are an integral part of the New York City experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxi cabs in service today. The popularity of taxi cabs have come under siege recently with the growing popularity and use of competiting ride-hailing services such as Lyft and Uber. There are 80,000 of these cars in New York City, with 50,000 drivers serving 236 million passengers per year. Tips are an important part of the service industry. Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. Devaraj and Patel note that these taxi cabs are worth $800,000 each. Taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity.
 
-Taxi cabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxi cabs in service today, worth about $800,000 each (Devaraj & Patel, 2007). The popularity of taxi cabs have come under siege recently with the growing popularity and use of competing ride-hailing services such as Lyft and Uber. There are 80,000 of these cars in New York City, with 50,000 drivers serving 236 million passengers per year (DeBoard, 2019).
-   This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
+##What analysis has already been completed related to the content in your dataset? -Steven
+What are tips
+Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Cunningham). Tipping is an integral part of the service sector in the US, which generated about xXXX billion in tips in YEAR. 
 
-## What analysis has already been completed related to the content in your dataset?
+What influences tips
 
-### What influences tips
+In short, tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel).
 
-Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done in regard to tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
-   Tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel, 2007). Economic reasons for tipping include providing an economic incentive for a higher quality of service (Flath, 2012) and wealth--although there are varying viewpoints amongst customers and waiters about the effect of a customer’s wealth on tip amount (Harris, 2012). Noneconomic factors include the idea of tipping being a social norm, where not tipping can cause a customer to feel guilty or embarrassed and where tipping can lead to positive feelings (Azar, 2010). Furthermore, tipping is also influenced by the fact that some customers recognize that their servers depend on tips to supplement their income.
-   Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010). The extent to which the quality of service, however, affects the tip amount is unclear. Bodvarsson, Luksetich, and McDermott (2003), Bodvarsson and Gibson (1997), and Lynn and McCall (2000) through interviews all found that service quality greatly affects a customer’s decision to tip. Alternatively, Azar (2007) stresses the need to consider what is said during an interview versus what a customer actually does. While a customer may in principle agree with the fact that tips should depend on the quality of service, in an actual situation, the social norm of tipping may take precedence over that principle.
-   Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
-
-### Taxicab Tipping
-
-There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017. Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, noting that the quality of the taxi service is not dependent on the driver.
-
-### Taxicab Data Analysis
-
-Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) found that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers found that African-American drivers often received one-third of the tip received by white drivers. They also found that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
-Other non-tipping work related to the NYC dataset have been conducted, especially in regards to location, For example, Zhan, Hasan, Ukkusuri, and Kamga (2013) use the dataset to estimate potential travel times between a pick up and drop off location. Neutens et al. (2012) use the dataset to conduct a spatio-temporal analysis of taxi trips in New York City. The authors design and introduce a new system that enables users to visualize taxi trips based on pick up and drop off locations.
-Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and found that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempt to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other factors.
-
-## How did the research you gathered contribute to your question development? - Steven
-
-In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
-   As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2006). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough.Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources (Kwan, 1999; Neutens, Delafontaine, Scott, & De Maeyer, 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
-   Finally, focusing on the variables provided in the dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (such as on tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
+However, Devaraj and Patel argue that these factors have less influence in a taxi setting g
+##How did the research you gathered contribute to your question development? - Steven
+In this context, given the circumstances of taxicab tipping, this project seeks to identify if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior, there may be other factors, such as economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
+iven the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers.
+Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017) argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Alternatively, Flynn and Greenberg (date) disagree, saying that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
 
-# Dataset Analysis
-## How was the information gathered? - Madhuri
-## What do we know about this dataset? - Madhuri
-## preprocessing part - Madhuri- 
-
+##How was the information gathered? - Madhuri
+##What do we know about this dataset? - Madhuri
+##preprocessing part - Madhuri- 
 sampeling, provide some graphs and charts
 
 The source dataset used for the project was taken from https://www1.nyc.gov/
@@ -224,10 +55,7 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
 To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
-# Discussion
-
-## What are the limitations of the dataset? - Amna
-
+##What are the limitations of the dataset? - Amna
 Like every other data set, our data has also some limitations which may impact the results of our study.
 <ul>
   <li>Hardware Limitations: The data that is publicly made available by the NYC Taxi and Limousine Commission dates back to only ten years. Initially we tried to incorporate all of this data for statistical testing but it was too large to be tested on our personal computers. Even data for a single year exceeded 12 Gbs causing our machines to crash or hang when trying to run it in R, so we narrowed it down to just 20,000 observations from the month of June 2019 for yellow taxi tip records (the latest available data). Since our observations span only a short period of time, therefore the results obtained from our research can not be generalized for longer period of times.
@@ -242,8 +70,7 @@ Like every other data set, our data has also some limitations which may impact t
 </ul>
 
 
-## How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
-
+##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
 Initial question
 -not normal, so we changed to tip amount
 -because only credit card tips, we changed our question to focus only on credit card tips
@@ -273,8 +100,7 @@ Factors that can affect tip amount:
 ```{r cars}
 summary(cars)
 ```
-
-## What additional information would be beneficial? - Amna
+##What additional information would be beneficial? - Amna
 
 The results obtained by our team can be significantly improved and made more reliable if we were able to gather more features to consider. For instance:
 <ul>
@@ -284,50 +110,4 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior but we believe that can also serve to play an important part in tipping behavior.
 </ul>
 
-## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
-
-Quickly summarize what we found
-Linear regression; look at pearson correlation; then build linear model
-
-
-# Sources
-
-Ayres, I., Vars, F. E., & Zakariya, N. (2005). To Insure Prejudice: Racial Disparities in Taxicab Tipping. Yale Law Journal, 114, 1613–1674. doi: 10.2139/ssrn.401201
-
-Azar, O. H. (2007). The Social Norm of Tipping: A Review. Journal of Applied Social Psychology, 37(2), 380–402. doi: 10.1111/j.0021-9029.2007.00165.x
-
-Azar, O. H. (2010). Tipping Motivations and Behavior in the U.S. and Israel. Journal of Applied Social Psychology, 40(2), 421–457. doi: 10.1111/j.1559-1816.2009.00581.x
-
-DeBord, M. (2019, April 1). Congestion pricing could mark the beginning of the end of New York's famous yellow taxis. Retrieved October 14, 2019, from https://www.businessinsider.com/congestion-pricing-end-of-new-yorks-famous-yellow-taxis-2019-4.
-
-Devaraj, S., & Patel, P. C. (2017). Taxicab tipping and sunlight. PLoS One, 12(6). doi: 10.1371/journal.pone.0179193
-
-Douriez, M., Doraiswamy, H., Freire, J., & Silva, C. T. (2016). Anonymizing NYC Taxi Data: Does It Matter? Proceedings - 3rd IEEE International Conference on Data Science and Advanced Analytics, 140–148. doi: 10.1109/DSAA.2016.21
-
-Ferreira, N., Poco, J., Vo, H. T., Freire, J., & Silva, C. T. (2013). Visual Exploration of Big Spatio-Temporal Urban Data: A Study of New York City Taxi Trips. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2149–2158. doi: 10.1109/TVCG.2013.226
-
-Flath, D. (2012). Why Do We Tip Taxicab Drivers? Japanese Economy, 39(3), 69–76. doi: 10.2753/JES1097-203X390304
-
-Flynn, S. M., & Greenberg, A. E. (2012). Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data. Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data, 42(3), 702–716. doi: Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data
-
-Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). Modeling Taxi Demand with Gps Data from Taxis and Transit. Modeling Taxi Demand with GPS Data from Taxis and Transit. Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf
-
-Harris, M. B. (1995). Waiters, Customers, and Service: Some Tips About Tipping. Journal OfApplied Social Psychology, 25(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
-
-Kwan, M. (1999). Gender and Individual Access to Urban Opportunities: A Study Using Space–Time Measures. The Professional Geographer, 51, 211–227. doi: 10.1111/0033-0124.00158
-
-Lee, J., Shin, I., & Park, G. (2008). Analysis of the Passenger Pick-Up Pattern for Taxi Location Recommendation. 2008 Fourth International Conference on Networked Computing and Advanced Information Management. doi: 10.1109/NCM.2008.24
-
-Lynn, W. M. (2004). Tipping in Restaurants and Around the Globe: An Interdisciplinary Review. Handbook of Contemporary Behavioral Economics: Foundations and Developments. doi: https://ssrn.com/abstract=465942
-
-Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. Journal of Transport Geography, 23, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
-
-Qian, X., & Ukkusuri, S. (2015). Spatial variation of the urban taxi ridership using GPS data. Applied Geography, 59, 31–42. doi: 10.1016/j.apgeog.2015.02.011
-
-Rivoli, D., & Jorgensen, J. (2018, July 31). City vows to crack down on taxis refusing service as it also looks to cap Uber. Retrieved October 14, 2019, from https://www.nydailynews.com/news/politics/ny-pol-tax-uber-refuse-service-20180731-story.html.
-
-Sun, H., & McIntosh, S. (2016). Big Data Mobile Services for New York City Taxi Riders and Drivers. 2016 IEEE International Conference on Mobile Services, 57–64. doi: 10.1109/MoSb.2S0e1r6v.128016.19
-
-van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. Urban Geography, 37(7), 953–962. doi: 10.1080/02723638.2016.1142152
-
-Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
+##Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
