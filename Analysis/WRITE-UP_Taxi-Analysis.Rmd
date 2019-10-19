@@ -167,7 +167,11 @@ Taxi cabs are an integral part of the New York City (NYC) experience. Widely rec
 
 This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
+<<<<<<< HEAD
 
+=======
+# Literature Review
+>>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
 What are tips
@@ -184,6 +188,7 @@ Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010)
 
 Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
+<<<<<<< HEAD
 In short, tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel).
 
 However, Devaraj and Patel argue that these factors have less influence in a taxi setting g
@@ -191,10 +196,17 @@ However, Devaraj and Patel argue that these factors have less influence in a tax
 In this context, given the circumstances of taxicab tipping, this project seeks to identify if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior, there may be other factors, such as economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
 iven the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers.
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017) argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Alternatively, Flynn and Greenberg (date) disagree, saying that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
+=======
+## Taxicab Tipping
+>>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 
+<<<<<<< HEAD
 =======
 ### Taxicab Data Analysis
+=======
+## Taxicab Data Analysis
+>>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) found that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers found that African-American drivers often received one-third of the tip received by white drivers. They also found that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
 
@@ -202,7 +214,7 @@ Other non-tipping work related to the NYC dataset have been conducted, especiall
 
 Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and found that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempt to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other factors.
 
-## How did the research you gathered contribute to your question development? - Steven
+## Relationship to Current Project
 
 In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
 
@@ -225,14 +237,27 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
   The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
   
   The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations, which have prevented us from analyzing the entire dataset.
-
+  
+  Below is the summary of the random sampled dataset (min, max, unique, column type) table:
+  
+  Data dictionary link
+  
+  We need to pre process data -Tanaya
+  
+  Normality
+  Outlier
+  Missing values
+  Final EDA question with selected columns
+  
+  Below is the summary of the processed data:
+  
   Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
 
   A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage.
   
-  The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+  Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
   
-  Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
+  Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
 
 To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
@@ -251,8 +276,12 @@ Like every other data set, our data has also some limitations which may impact t
 </ul>
 
 
+<<<<<<< HEAD
 ##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
 =======
+=======
+## How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+>>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 Initally our dependent variable was tip amount adn focused . We noticed that it didnot have normal distribution. Below is the initial distribution:
 
@@ -295,44 +324,36 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior but we believe that can also serve to play an important part in tipping behavior.
 </ul>
 
+<<<<<<< HEAD
 
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
 
 =======
+=======
+# Conclusion
+## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
+
+>>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
-```{r anova_tip-percent_pu}
-# Run ANOVA
-anova_tipper_pu <- aov(per_tip ~ Borough_pu, data = processed_df)
-
-# Print ANOVA results
-anova_tipper_pu
-
-# Summarize ANOVA
-summary(anova_tipper_pu)
-```
-
-```{r anova_tip-percent_do}
-# Run ANOVA
-anova_tipper_do <- aov(per_tip ~ Borough_do, data = processed_df)
-
-# Print ANOVA results
-anova_tipper_do
-
-# Summarize ANOVA
-summary(anova_tipper_do)
-```
+For tip percentage and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping percentage: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip percentage and location are shown below:
 
 ```{r tipper_plot, include = T, echo = T}
-# Plot tip percentage by pickup location
-ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by pickup location
+ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 
-# Plot tip percentage by dropoff location
-ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by dropoff location
+ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
->>>>>>> c9ee7df9a9f2f2467d45f0f15858b67750368a02
-Quickly summarize what we found
+
+AMNA SUMMARY/GRAPH
+
+MADHURI SUMMARY/GRAPH
+
+TANAYA SUMMARY/GRAPH
+
+next steps:
 Linear regression; look at pearson correlation; then build linear model
 
 
