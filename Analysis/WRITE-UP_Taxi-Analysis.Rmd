@@ -206,7 +206,7 @@ As the literature review suggests, the provided dataset may provide some proxies
 Finally, focusing on the variables provided in the dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (such as on tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
 
 
-# Dataset Analysis
+# Dataset Description
 ## How was the information gathered? - Madhuri
 ## What do we know about this dataset? - Madhuri
 ## preprocessing part - Madhuri- 
@@ -236,13 +236,13 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
   
   Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
 
-  A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage.
+  A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tip-to-fare ratio (hereinafter referred to as "tip ratio" or "tipping ratio").
   
   Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
   
   Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
 
-To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
+To summarize, after removing outliers and creating new features we have 11881 observations and 33 features. 
 
 # Discussion
 
@@ -292,9 +292,7 @@ Factors that can affect tip amount:
 5. distance
 6. count of passengers
 7. weather
-```{r cars}
-summary(cars)
-```
+
 
 ## What additional information would be beneficial? - Amna
 
