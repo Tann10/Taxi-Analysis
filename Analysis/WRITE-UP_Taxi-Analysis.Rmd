@@ -251,7 +251,7 @@ Like every other data set, our data has also some limitations which may impact t
 </ul>
 
 
-##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+## How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
 
 Initally our dependent variable was tip amount adn focused . We noticed that it didnot have normal distribution. Below is the initial distribution:
 
@@ -295,6 +295,7 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior but we believe that can also serve to play an important part in tipping behavior.
 </ul>
 
+# Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
 <<<<<<< HEAD
