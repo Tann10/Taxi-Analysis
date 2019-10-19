@@ -307,6 +307,9 @@ The results obtained by our team can be significantly improved and made more rel
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
+Now that our dataset is fully understood after performing the EDA, we know exactly what data points were relevant to our scope of analysis and further perform other data mining algorithms/models like Linear Regression for decision/policy making on a large scale level. 
+
+
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
 For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
