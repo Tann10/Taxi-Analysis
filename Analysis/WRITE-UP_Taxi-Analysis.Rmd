@@ -175,9 +175,9 @@ Taxi cabs are an integral part of the New York City (NYC) experience. Widely rec
 
 This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
-## Literature Review
+# Literature Review
 
-### What Influences Tips?
+## What Influences Tips?
 
 Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done in regard to tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
 
@@ -187,11 +187,11 @@ Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010)
 
 Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
-### Taxicab Tipping
+## Taxicab Tipping
 
 There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017. Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, noting that the quality of the taxi service is not dependent on the driver.
 
-### Taxicab Data Analysis
+## Taxicab Data Analysis
 
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) found that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers found that African-American drivers often received one-third of the tip received by white drivers. They also found that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
 
