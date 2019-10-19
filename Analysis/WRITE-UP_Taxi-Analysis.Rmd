@@ -309,6 +309,9 @@ The results obtained by our team can be significantly improved and made more rel
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what data points were relevant to our scope of analysis and further perform other data mining algorithms/models like Linear Regression for decision/policy making on a large scale level. 
 
+While trying to find the the variation in tip-fare ratio between short and long distance commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
+
+
 
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
