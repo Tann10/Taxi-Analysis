@@ -89,6 +89,25 @@ unprocessed_data <- merge(x = unprocessed_data, y = taxi_zones, by.x = "DOLocati
 # Change taxi zone name column
 colnames(unprocessed_data)[colnames(unprocessed_data)=="Borough"] <- "Borough_do"
 ```
+```{r Pickup_time}
+#Pickup column
+#change factor type to datetime type
+unprocessed_data$pickup_datetime <- as.POSIXct(as.character(unprocessed_data$tpep_pickup_datetime), tz = "", format="%m/%d/%Y %H:%M")
+#extract only the time from datetime type
+unprocessed_data$pickup_time <- format(unprocessed_data$pickup_datetime, format = "%H:%M")
+#extract hours from the time extracted
+unprocessed_data$pickup_hrs <- format(strptime(unprocessed_data$pickup_time,"%H:%M"),'%H')
+#convert hrs column type to numeric
+unprocessed_data$pickup_hrs <- as.numeric(unprocessed_data$pickup_hrs)
+#convert numeric hrs type to pickup period
+unprocessed_data$pickup_period <- ifelse(unprocessed_data$pickup_hrs >= 05 & unprocessed_data$pickup_hrs <= 11, "Morning",
+            ifelse(unprocessed_data$pickup_hrs > 11 & unprocessed_data$pickup_hrs <= 16, "Afternoon",
+            ifelse(unprocessed_data$pickup_hrs > 16 & unprocessed_data$pickup_hrs <= 21, "Evening", "Night")))
+#convert pickup period from string type to factor
+unprocessed_data$pickup_period <- as.factor(unprocessed_data$pickup_period)
+#order the pickup_period column (this is of our interst in further analysis)
+unprocessed_data$pickup_period <- ordered(unprocessed_data$pickup_period, levels = c("Morning", "Afternoon", "Evening", "Night"))
+```
 
 ```{r Dropoff_time}
 #Dropoff column
@@ -116,6 +135,7 @@ unprocessed_data$drop_period <- ordered(unprocessed_data$drop_period, levels = c
 unprocessed_data$trip_duration <- difftime(unprocessed_data$dropoff_datetime, unprocessed_data$pickup_datetime, units = "mins")
 #conversion of trip duration from minutes to numeric(this is of our interst in further analysis)
 unprocessed_data$trip_duration <- floor(as.numeric(unprocessed_data$trip_duration))
+str(unprocessed_data)
 ```
 
 ```{r tip-percent-summary2, echo=F, include=T}
