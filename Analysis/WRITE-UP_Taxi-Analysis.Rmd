@@ -298,32 +298,9 @@ The results obtained by our team can be significantly improved and made more rel
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
-<<<<<<< HEAD
-
-=======
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
-```{r anova_tip-percent_pu}
-# Run ANOVA
-anova_tipper_pu <- aov(per_tip ~ Borough_pu, data = processed_df)
-
-# Print ANOVA results
-anova_tipper_pu
-
-# Summarize ANOVA
-summary(anova_tipper_pu)
-```
-
-```{r anova_tip-percent_do}
-# Run ANOVA
-anova_tipper_do <- aov(per_tip ~ Borough_do, data = processed_df)
-
-# Print ANOVA results
-anova_tipper_do
-
-# Summarize ANOVA
-summary(anova_tipper_do)
-```
+For tip percentage and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping percentage: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip percentage and location are shown below:
 
 ```{r tipper_plot, include = T, echo = T}
 # Plot tip percentage by pickup location
@@ -332,8 +309,14 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu))
 # Plot tip percentage by dropoff location
 ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
->>>>>>> c9ee7df9a9f2f2467d45f0f15858b67750368a02
-Quickly summarize what we found
+
+AMNA SUMMARY/GRAPH
+
+MADHURI SUMMARY/GRAPH
+
+TANAYA SUMMARY/GRAPH
+
+next steps:
 Linear regression; look at pearson correlation; then build linear model
 
 
