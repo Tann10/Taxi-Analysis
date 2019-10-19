@@ -233,6 +233,9 @@ Like every other data set, our data has also some limitations which may impact t
 
 
 ##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
+
+Initally our dependent variable was tip amount adn focused . We noticed that it didnot have normal distribution. Below is the initial distribution:
+
 Initial question
 -not normal, so we changed to tip amount
 -because only credit card tips, we changed our question to focus only on credit card tips
