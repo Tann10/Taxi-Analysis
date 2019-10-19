@@ -167,11 +167,8 @@ Taxi cabs are an integral part of the New York City (NYC) experience. Widely rec
 
 This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
-<<<<<<< HEAD
-
 =======
 # Literature Review
->>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 ##What analysis has already been completed related to the content in your dataset? -Steven
 What are tips
@@ -188,7 +185,6 @@ Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010)
 
 Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
-<<<<<<< HEAD
 In short, tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel).
 
 However, Devaraj and Patel argue that these factors have less influence in a taxi setting g
@@ -198,15 +194,9 @@ iven the standardized nature of the taxicab service and the minimal interaction 
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017) argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Alternatively, Flynn and Greenberg (date) disagree, saying that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 =======
 ## Taxicab Tipping
->>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
-
-<<<<<<< HEAD
 =======
 ### Taxicab Data Analysis
-=======
-## Taxicab Data Analysis
->>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) found that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers found that African-American drivers often received one-third of the tip received by white drivers. They also found that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
 
@@ -276,12 +266,8 @@ Like every other data set, our data has also some limitations which may impact t
 </ul>
 
 
-<<<<<<< HEAD
-##How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
-=======
 =======
 ## How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
->>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 
 Initally our dependent variable was tip amount adn focused . We noticed that it didnot have normal distribution. Below is the initial distribution:
 
@@ -324,17 +310,9 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior but we believe that can also serve to play an important part in tipping behavior.
 </ul>
 
-<<<<<<< HEAD
-
-## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
-
-
-=======
-=======
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
->>>>>>> 6decac220fd0ae9bc758026be411cdfa1637cc01
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
 For tip percentage and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping percentage: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip percentage and location are shown below:
