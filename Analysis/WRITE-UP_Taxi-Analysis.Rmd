@@ -175,9 +175,9 @@ Taxi cabs are an integral part of the New York City (NYC) experience. Widely rec
 
 This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
-## What analysis has already been completed related to the content in your dataset?
+## Literature Review
 
-### What influences tips
+### What Influences Tips?
 
 Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done in regard to tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
 
@@ -199,7 +199,7 @@ Other non-tipping work related to the NYC dataset have been conducted, especiall
 
 Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and found that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempt to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other factors.
 
-## How did the research you gathered contribute to your question development? - Steven
+## Relationship to Current Project
 
 In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
 
