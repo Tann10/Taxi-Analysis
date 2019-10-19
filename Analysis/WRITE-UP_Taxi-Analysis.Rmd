@@ -177,7 +177,7 @@ This study is relevant for a few reasons. Tips are an important part of the serv
 
 ## What analysis has already been completed related to the content in your dataset?
 
-### What influences tips
+### What influences tips?
 
 Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done in regard to tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
 
@@ -222,14 +222,27 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
   The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
   
   The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations, which have prevented us from analyzing the entire dataset.
-
+  
+  Below is the summary of the random sampled dataset (min, max, unique, column type) table:
+  
+  Data dictionary link
+  
+  We need to pre process data -Tanaya
+  
+  Normality
+  Outlier
+  Missing values
+  Final EDA question with selected columns
+  
+  Below is the summary of the processed data:
+  
   Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
 
   A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage.
   
-  The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+  Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
   
-  Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
+  Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
 
 To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
