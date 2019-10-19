@@ -604,10 +604,10 @@ Let us analyse the pickup period.
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Trip Frequency")
 
 # Plot tip percentage by Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -621,10 +621,11 @@ Let us analyse the dropoff period.
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Trip Frequency")
+
 
 # Plot tip percentage by Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -688,8 +689,9 @@ p-value observed is approximately zero of Evening-Morning and Evening-Afternoon 
 
 There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
-#plot a tip paid vs trip duration histogram
-hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of Trip Duration vs Tip Percentage", col = rainbow(40), breaks = 40, xlab = "Trip Duration (min)", ylab = "Tip Percentage" )
+#plot a frequency of tip paid vs trip duration histogram
+ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Trip Counts Based on Duration") + xlab("trip duration") +
+ylab("Trip Frequency")  + scale_fill_gradient("Count", low="blue", high="red")
 ```
 
 From the graph it is observed that tip is maximum for trips ranging from 5 to 10 minutes and decreases with the time. We perform Ttest hypothesis.

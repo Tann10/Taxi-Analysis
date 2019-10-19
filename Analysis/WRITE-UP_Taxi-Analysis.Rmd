@@ -25,25 +25,35 @@ What influences tips
 
 In short, tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel).
 
-However, Devaraj and Patel argue that these factors have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers.
+However, Devaraj and Patel argue that these factors have less influence in a taxi setting g
+##How did the research you gathered contribute to your question development? - Steven
+In this context, given the circumstances of taxicab tipping, this project seeks to identify if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior, there may be other factors, such as economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
+iven the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers.
 Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017) argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Alternatively, Flynn and Greenberg (date) disagree, saying that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
 
 
-##How did the research you gathered contribute to your question development? - Steven
-In this context, given the circumstances of taxicab tipping, this project seeks to identify if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior, there may be other factors, such as economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
-
-##What do we know about this dataset? - Madhuri
--provide some graphs and charts
-
 ##How was the information gathered? - Madhuri
--some examples: we merged dataset for location; we calculated morning/evening time zone based on time
+##What do we know about this dataset? - Madhuri
+##preprocessing part - Madhuri- 
+sampeling, provide some graphs and charts
 
---This was taken from COMBINED file & written by Steven, feel free to use/include
-The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+The source dataset used for the project was taken from https://www1.nyc.gov/
 
+Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
-A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage:
+  The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
+  
+  The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations, which have prevented us from analyzing the entire dataset.
 
+  Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
+
+  A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage.
+  
+  The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+  
+  Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
+
+To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
 ##What are the limitations of the dataset? - Amna
 Like every other data set, our data has also some limitations which may impact the results of our study.
