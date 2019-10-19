@@ -701,14 +701,15 @@ Concluding that we have enough evidence to reject the Null hypothesis in favor o
 
 The last factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
 
-First we take a look at summary of Trip Distance column... It shows that min is .. max.. mean and median however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
 
 ```{r dist_summary, include = T, echo = F}
 
-summary(processed_df$trip_distance)
+a <- summary(processed_df$trip_distance)
+a
 # str(processed_df)
-
+names(a)
 ```
+First we take a look at summary of Trip Distance column... It shows that min is `r a[['Min.']]`,  max is `r a[['Max.']]` and mean is `r a[['Mean']]`, however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
 
 This can visually be confirmed through a box plot and histogram. 
 ```{r dist_boxplot, include = T, echo = F}
@@ -800,28 +801,23 @@ d <- ggplot(df_dist, aes(x=per_tip, fill=trip_distance, color=trip_distance)) +
   labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
 d
 
-png("both_tip&dist")
-print(d)
-dev.off()
 ```
 
 
 ```{r t_test, include = T, echo = F}
 
-
-# Also add box plot to visually confirm the results of T-test
-
+# subsetting data on basis for distance travelled for t-test
 short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
-str(short_dist)
+# str(short_dist)
 long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
-str(long_dist)
+# str(long_dist)
 
 # Applying 2 Sample t-test below
-result <- t.test(short_dist$per_tip, long_dist$per_tip)
-print(result)
+result_t <- t.test(short_dist$per_tip, long_dist$per_tip)
+print(result_t)
 
 ```
-With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+With Significance level set to 5%, I get a P-value of `r result_t$p.value` that is very close to zero with confidence interval level of `r result_t$conf.int`. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alternate Hypothesis meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
 
 We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
