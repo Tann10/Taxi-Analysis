@@ -717,14 +717,7 @@ The last factor that we chose for our study is distance travelled and we try to 
 
 ```{r dist_summary, include = T, echo = F}
 
-<<<<<<< HEAD:Analysis/COMBINED_Taxi-Analysis.Rmd
 a <- summary(processed_df$trip_distance)
-a
-=======
-# Print summary
-summary(processed_df$trip_distance)
->>>>>>> dd0232e757de4c98372de4cd5a0f52c1ea6a3033:Analysis/Taxi-Analysis.Rmd
-# str(processed_df)
 names(a)
 ```
 First we take a look at summary of Trip Distance column... It shows that min is `r a[['Min.']]`,  max is `r a[['Max.']]` and mean is `r a[['Mean']]`, however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
