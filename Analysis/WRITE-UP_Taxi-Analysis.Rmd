@@ -235,8 +235,8 @@ Like every other data set, our data has also some limitations which may impact t
     <ul>
       <li>Removing extreme values and outliers that were causing our distribution to be abnormally skewed.
       <li>Central Limit Theorem (CLT) states that sample means of moderately large samples are often well-approximated by a normal distribution even if the data is not normally distributed. Our dataset contains a significant amount of observations thus qualifying it to be approximately normal under CLT. 
-      <li>No Cash Tip data provided: The data available contains tip amounts payed through Credit Card mode only. There might be observations where Tip amount column contains a value of zero when in reality the driver of cab was presented with tip in cash mode but since it was not recorded in data collected by TLC so we cannot be sure and consequently rendering our data to be incomplete. 
-      </ul>
+    </ul>
+  <li>No Cash Tip data provided: The data available contains tip amounts payed through Credit Card mode only. There might be observations where Tip amount column contains a value of zero when in reality the driver of cab was presented with tip in cash mode but since it was not recorded in data collected by TLC so we cannot be sure and consequently rendering our data to be incomplete. 
   <li>Limited Time and resources: We chose to work on only four features affecting the variation in the tipping amount but there could be a plethora of other reasons too. For example weather. A bright sunny and breezy day would encourage short distance commuters to walk to their destinations instead of using cab service altogether or it might positively impact the mood of the taxi passengers inclining them to tip more. But limited time restricted us to work only on few of data points available.
   <li>Human Errors in Data set: Some of the columns in our data set are prone to human errors. For example, passenger count (the number of passengers in the vehicle) is driver entered value and  might have the potential of some observations being inaccurately recorded.
 </ul>
@@ -285,6 +285,7 @@ The results obtained by our team can be significantly improved and made more rel
 </ul>
 
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
+
 
 Quickly summarize what we found
 Linear regression; look at pearson correlation; then build linear model
