@@ -414,7 +414,8 @@ dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[
 AMNA | ANOVA | number | means are equal | reject H0 |  
 pickup time | ANOVA | number | means are equal | reject H0 |  
 dropoff time| ANOVA | number | means are equal | reject H0 |  
-TANAYA | ANOVA | number | means are equal | reject H0 |  
+Passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail reject H0 |
+Vendor ID | t test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
 
 next steps:
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, XXXXXXX. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
