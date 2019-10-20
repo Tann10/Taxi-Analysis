@@ -750,7 +750,7 @@ summary(processed_df$tip_fare_ratio)
 # Create histogram
 c <- ggplot(processed_df, aes(x=tip_fare_ratio)) + 
   geom_histogram(binwidth=0.05, fill = "#FFDB6D", color = "#C4961A") + coord_cartesian(xlim=c(0,1)) + 
-  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram for Tip values")
+  labs(x="Tips to Fare Ratio", y = "Count") + ggtitle("Histogram for Tip values")
 c
 
 ```
@@ -808,7 +808,7 @@ Here is a Histogram where we combined values from both of my variables. It shows
 
 d <- ggplot(df_dist, aes(x=tip_fare_ratio, fill=trip_distance, color=trip_distance)) +
   geom_histogram(binwidth=0.05, position="identity", alpha=0.5)  + 
-  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
+  labs(x="Tips to Fare Ratio", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
 d
 
 png("both_tip&dist")

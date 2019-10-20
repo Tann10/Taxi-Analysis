@@ -400,6 +400,21 @@ ttest_vendor
 
 Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
+```{r dist_code, include = T, echo = F}
+# Subset data 
+df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
+# Bimodal so divided it into 2 chunks for normalization
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+str(short_dist)
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+str(long_dist)
+# Applying 2 Sample t-test below
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+
+```
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
@@ -411,7 +426,7 @@ Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H
 -----|-----|-----|--------|--------|  
 pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
-AMNA | ANOVA | number | means are equal | reject H0 |  
+distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
 pickup time | ANOVA | number | means are equal | reject H0 |  
 dropoff time| ANOVA | number | means are equal | reject H0 |  
 Passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail reject H0 |
