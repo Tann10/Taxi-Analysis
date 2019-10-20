@@ -559,9 +559,8 @@ processed_df %>%
 **Observation:** The mean of all the groups of passenger count is not varying much. 
 
 While performing anova our null hypothesis is the means across all groups of passenger count is same whereas alternate hypothesis is the mean is not same. 
+
 ```{r anova test for passenger_count, echo=T,  include=T}
-# Create factor
-processed_df$VendorID <- as.factor(processed_df$VendorID)
 
 # ANOVA test
 anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
@@ -589,6 +588,9 @@ processed_df %>%
 While performing anova our null hypothesis is the means across vendors is same whereas alternate hypothesis is the mean is not same. 
 
 ```{r t test for vendor ID, echo=T, include=T}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
 # t test for vendor
 ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
 ttest_vendor

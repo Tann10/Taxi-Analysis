@@ -350,8 +350,41 @@ ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pi
 ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 ```
 
-TANAYA SUMMARY/GRAPH
+TANAYA SUMMARY/GRAPH:
 
+We hyothesize that there is a relationship between the number of passenger in the car and  to the tip amount paid to the driver. The passenger count varies from 0 to 6.
+```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
+# Create factor data
+processed_df$passenger_count <- as.factor(processed_df$passenger_count)
+
+# Create boxplot
+processed_df %>%
+  ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
+  ggtitle("Box plot distribution for ratio of tip amount and passenger count")
+```
+
+```{r anova test for passenger_count, echo=F,  include=F}
+
+# ANOVA test
+anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
+summary(anova_tip_amount)
+
+```
+The mean of all the groups of passenger count is not varying much. Also the results of anova gives the P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
+
+```{r t test for vendor ID, echo=F, include=F}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
+# t test for vendor
+ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
+ttest_vendor
+```
+
+Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
