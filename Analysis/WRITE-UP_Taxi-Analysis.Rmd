@@ -296,6 +296,28 @@ To summarize, after preprocessing the number of rows and columns are : `r nrow(p
 After checking normality and treating outlier the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
 
 ## Correlation matrix 
+```{r corr}
+str(processed_df)
+# finding correlation between tip amount & distance travelled
+cor(processed_df$tip_fare_ratio, processed_df$trip_distance, method="pearson") 
+cor(processed_df$tip_fare_ratio, processed_df$trip_duration, method="pearson") 
+```
+```{r dist_code, include = T, echo = F}
+# Subset data 
+df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
+# Bimodal so divided it into 2 chunks for normalization
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+str(short_dist)
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+str(long_dist)
+# Applying 2 Sample t-test below
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+# result_t
+
+```
 # Analysis
 ## Trip location
 
@@ -392,21 +414,6 @@ ttest_vendor
 
 Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
-```{r dist_code, include = T, echo = F}
-# Subset data 
-df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
-# Bimodal so divided it into 2 chunks for normalization
-factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
-df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
-
-short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
-str(short_dist)
-long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
-str(long_dist)
-# Applying 2 Sample t-test below
-result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
-
-```
 # Conclusion
 
 We can summarize our results in this table:
