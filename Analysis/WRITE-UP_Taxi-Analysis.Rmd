@@ -184,10 +184,10 @@ unprocessed_data = subset(unprocessed_data, select = cols )
 
 ```{r Tip_ratio}
 # get tip ratio (tip amount to fare amount)
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
+unprocessed_data['tip_fare_ratio'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
 # Print standard deviation and amount
-print(sd(unprocessed_data$per_tip, na.rm = T))
-print(mean(unprocessed_data$per_tip, na.rm = T))
+print(sd(unprocessed_data$tip_fare_ratio, na.rm = T))
+print(mean(unprocessed_data$tip_fare_ratio, na.rm = T))
 ```
 
 ```{r merge location descriptions}
@@ -265,11 +265,11 @@ head(unprocessed_data, n = 5)
 # fare amount in negative & credit card payments & trip_distance > 0 & VendorID == 4
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) &  (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
 # removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
+# tip_fare_ratio laying outside IQR range in box plot
+while (length(boxplot(processed_df$tip_fare_ratio)$out) != 0){
   dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
+  tip_fare_ratio_outliers <- boxplot(processed_df$tip_fare_ratio, col = c("#0000FF"))
+  processed_df <- processed_df[ !processed_df$tip_fare_ratio %in% tip_fare_ratio_outliers$out,]
   dim(processed_df)
 }
 ```
@@ -336,9 +336,9 @@ For tip ratio and location, after running the ANOVA test, we reject the null hyp
 
 ```{r tipratio_plot, include = T, echo = T}
 # Plot tip ratio by pickup location
-ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
+ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 # Plot tip ratio by dropoff location
-ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
+ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
 
 AMNA SUMMARY/GRAPH
@@ -351,14 +351,14 @@ This tipping behaviour might happen because of psychological reasons e.g. passen
 ```{r box_plot, include = T, echo = T}
 
 # summary(processed_df$trip_distance)
-df_dist <- subset(processed_df, select=c(per_tip, trip_distance))
+df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
 
 # converting trip_distance col from numerical to factor type for performing 2-sample t-test
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
 df_dist$trip_distance <- factor_dist 
 
 # box-plot to see who pays more tips 
-e <- ggplot(data = df_dist, aes(x = trip_distance, y = per_tip, fill=trip_distance)) + 
+e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip_distance)) + 
   geom_boxplot()+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
   labs(x="Distance Travelled", y = "Tip-Fare Ratio") + ggtitle("Box Plot for Tip paid vs Distance Travelled")
 e
@@ -367,16 +367,13 @@ e
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
 
-MADHURI SUMMARY/GRAPH
-=======
 For tip ratio and time period, after running the ANOVA test, we reject the null hypothesis that the means are statistically different at a significance level of 0.05. The graphs for tip ratio vs time period are shown below:
 ```{r time period_plot, include = T, echo = T}
 # Tip Ratio vs Pickup Time Period
-ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 # Plot tip percentage by Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 ```
->>>>>>> 3859a2a65c610e819177c40c66b45a15eb22e31c
 
 TANAYA SUMMARY/GRAPH
 
