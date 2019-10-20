@@ -151,20 +151,20 @@ A normal distribution is often an assumption for many statistical analyses. Gene
 
 ```{r Tip_Percentage}
 # get percentage tip amount
-unprocessed_data['per_tip'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
+unprocessed_data['tip_fare_ratio'] = unprocessed_data['tip_amount'] / unprocessed_data['fare_amount']
 
 # Print standard deviation and amount
-print(sd(unprocessed_data$per_tip, na.rm = T))
-print(mean(unprocessed_data$per_tip, na.rm = T))
+print(sd(unprocessed_data$tip_fare_ratio, na.rm = T))
+print(mean(unprocessed_data$tip_fare_ratio, na.rm = T))
 ```
 
 Here is the structure, summary, and the first few rows of tip percentage: 
 
 ```{r tip-percent-summary4, echo=F, include=T}
 # Get structure
-str(unprocessed_data$per_tip)
+str(unprocessed_data$tip_fare_ratio)
 # Get summary
-summary(unprocessed_data$per_tip)
+summary(unprocessed_data$tip_fare_ratio)
 
 # Print first five rows
 head(unprocessed_data, n = 5)
@@ -278,11 +278,11 @@ Using the boxplot, we removed the outliers from the dataset.
 processed_df <- unprocessed_data %>% filter((fare_amount > 0) & (payment_type == 1) &  (passenger_count < 7) & (trip_distance > 0)  & (VendorID != 4) & (trip_duration > 0) & (trip_duration <= 37))
 
 # removing outliers:
-# per_tip laying outside IQR range in box plot
-while (length(boxplot(processed_df$per_tip)$out) != 0){
+# tip_fare_ratio laying outside IQR range in box plot
+while (length(boxplot(processed_df$tip_fare_ratio)$out) != 0){
   dim(processed_df)
-  per_tip_outliers <- boxplot(processed_df$per_tip, col = c("#0000FF"))
-  processed_df <- processed_df[ !processed_df$per_tip %in% per_tip_outliers$out,]
+  tip_fare_ratio_outliers <- boxplot(processed_df$tip_fare_ratio, col = c("#0000FF"))
+  processed_df <- processed_df[ !processed_df$tip_fare_ratio %in% tip_fare_ratio_outliers$out,]
   dim(processed_df)
 }
 
@@ -290,7 +290,7 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 
 Below is the box plot after outlier treatment 
 ```{r boxplot after outlier removal}
-ggplot(data = processed_df, aes(x=factor(0), per_tip)) + 
+ggplot(data = processed_df, aes(x=factor(0), tip_fare_ratio)) + 
   ggtitle("Tip Percentage distribution") + 
   geom_boxplot() + 
   xlab("Tip Percentage") + 
@@ -317,11 +317,11 @@ head(processed_df, n = 5)
 Here's a histogram of the NYC taxi tip data after the removal of outliers:
 
 ```{r normality check of processed data, echo=T, include=T}
-#ggplot histogram of per_tip for processed df
+#ggplot histogram of tip_fare_ratio for processed df
 processed_df %>%
-  ggplot(aes(per_tip)) +
+  ggplot(aes(tip_fare_ratio)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
-  stat_function(fun = dnorm, args = list(mean = mean(processed_df$per_tip), sd = sd(processed_df$per_tip))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+  stat_function(fun = dnorm, args = list(mean = mean(processed_df$tip_fare_ratio), sd = sd(processed_df$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 ```
 
 **Observation :** 
@@ -439,7 +439,7 @@ We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_tipper_pu <- aov(per_tip ~ Borough_pu, data = processed_df)
+anova_tipper_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
 anova_tipper_pu
@@ -450,7 +450,7 @@ summary(anova_tipper_pu)
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_tipper_do <- aov(per_tip ~ Borough_do, data = processed_df)
+anova_tipper_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
 anova_tipper_do
@@ -461,10 +461,10 @@ summary(anova_tipper_do)
 
 ```{r tipper_plot, include = T, echo = T}
 # Plot tip percentage by pickup location
-ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 
 # Plot tip percentage by dropoff location
-ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
 **Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
@@ -549,7 +549,7 @@ processed_df$passenger_count <- as.factor(processed_df$passenger_count)
 
 # Create boxplot
 processed_df %>%
-  ggplot(aes(passenger_count, per_tip, fill = passenger_count)) +
+  ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
   labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
@@ -564,7 +564,7 @@ While performing anova our null hypothesis is the means across all groups of pas
 processed_df$VendorID <- as.factor(processed_df$VendorID)
 
 # ANOVA test
-anova_tip_amount = aov(per_tip ~ passenger_count, data = processed_df)
+anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
 summary(anova_tip_amount)
 
 ```
@@ -577,7 +577,7 @@ Below is the box plot distribution for vendors 1 and 2. We hypothesise that the 
 ```{r hypothesis testing for vendor, echo=T,  include=T}
 # Create boxplot of vendor ID vs tip percentage
 processed_df %>%
-  ggplot(aes(VendorID, per_tip, fill = VendorID)) +
+  ggplot(aes(VendorID, tip_fare_ratio, fill = VendorID)) +
   geom_boxplot() +
   theme(legend.position = "none") +
   labs(y = "Percentage tip amount [$]", x = "Vendor ID") + 
@@ -590,7 +590,7 @@ While performing anova our null hypothesis is the means across vendors is same w
 
 ```{r t test for vendor ID, echo=T, include=T}
 # t test for vendor
-ttest_vendor = t.test(per_tip ~ VendorID, data = processed_df)
+ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
 ttest_vendor
 ```
 The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis. 
@@ -608,7 +608,7 @@ Let us analyse the pickup period.
 ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
 
 # Plot tip percentage by Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
+ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -624,8 +624,8 @@ Let us analyse the dropoff period.
 # Create barplot for trip counts based on Dropoff_Time
 ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
 
-# Plot tip percentage by Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+# Plot Tip ratio vs Dropoff_Time
+ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -640,7 +640,7 @@ Anova for pickup time periods
 ```{r Pick_up_time_Anova, include=TRUE, echo = FALSE}
 
 # Run ANOVA
-anova_pickup_period <- aov(per_tip ~ pickup_period, data = processed_df)
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = processed_df)
 
 # Print ANOVA results
 anova_pickup_period
@@ -653,7 +653,7 @@ Anova for dropoff time periods
 ```{r Dropoff_time_Anova, include=TRUE, echo = FALSE}
 
 # Run ANOVA
-anova_drop_period <- aov(per_tip ~ drop_period, data = processed_df)
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = processed_df)
 
 # Print ANOVA results
 anova_drop_period
@@ -699,14 +699,14 @@ From the graph it is observed that tip is maximum for trips ranging from 5 to 10
 ```{r Trip_duration_Two_Sample_Ttest, include=TRUE, echo = FALSE}
 
 #Run T-test
-trip_duration_ttest <- t.test(processed_df$per_tip, processed_df$trip_duration)
+trip_duration_ttest <- t.test(processed_df$tip_fare_ratio, processed_df$trip_duration)
 
 #Print T-test
 trip_duration_ttest
 ```
 
 From the results we observe that p-value is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
-null hyp = means for per_tip and trip_duration_min are equal
+null hyp = means for tip_fare_ratio and trip_duration_min are equal
 Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on duration of the trip.
 
 ## Tip payed vs distance travelled by passengers
@@ -743,10 +743,10 @@ Now coming towards our second and dependent variable. Tip percentage ...
 ```{r tip_summary, include = T, echo = F}
 
 # Print summary
-summary(processed_df$per_tip)
+summary(processed_df$tip_fare_ratio)
 
 # Create histogram
-c <- ggplot(processed_df, aes(x=per_tip)) + 
+c <- ggplot(processed_df, aes(x=tip_fare_ratio)) + 
   geom_histogram(binwidth=0.001, fill = "#FFDB6D", color = "#C4961A") + coord_cartesian(xlim=c(0,1)) + 
   labs(x="Tips(%)", y = "Count") + ggtitle("Histogram for Tip values")
 c
@@ -778,7 +778,7 @@ As always, First Step in every Significance testing:
 ```{r subset_2cols, include = T, echo = F}
 
 # Subset data and glimpse data
-df_dist <- subset(processed_df, select=c(per_tip, trip_distance))
+df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
 glimpse(df_dist)  # 12000 + obs
 ```
 
@@ -804,7 +804,7 @@ Here is a Histogram where we combined values from both of my variables. It shows
 # Use semi-transparent (alpha=0.5) fill 
 # plotting both my dependent & independent variable and trying to figure out if there is any relationship
 
-d <- ggplot(df_dist, aes(x=per_tip, fill=trip_distance, color=trip_distance)) +
+d <- ggplot(df_dist, aes(x=tip_fare_ratio, fill=trip_distance, color=trip_distance)) +
   geom_histogram(binwidth=0.001, position="identity", alpha=0.5)  + 
   labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
 d
@@ -817,7 +817,6 @@ dev.off()
 
 ```{r t_test, include = T, echo = F}
 
-
 # Also add box plot to visually confirm the results of T-test
 
 short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
@@ -826,9 +825,8 @@ long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
 str(long_dist)
 
 # Applying 2 Sample t-test below
-result <- t.test(short_dist$per_tip, long_dist$per_tip)
-print(result)
-
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+print(result_t)
 ```
 With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
@@ -838,7 +836,7 @@ We can do a little bit of further investigation as to whether they these 2 categ
 ```{r box_plot, include = T, echo = F}
 
 # box-plot to see who pays more tips 
-e <- ggplot(data = df_dist, aes(x = trip_distance, y = per_tip, fill=trip_distance)) + 
+e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip_distance)) + 
   geom_boxplot()+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
   labs(x="Distance Travelled", y = "Tip %") + ggtitle("Box Plot for Tip Percentages vs Distance Travelled")
 e
