@@ -224,7 +224,7 @@ kable(summaryy)
   
 The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
 
-# Dataset Processing
+# Data Pre-Processing
 
 ## Normality check
 
@@ -295,17 +295,9 @@ To summarize, after preprocessing the number of rows and columns are : `r nrow(p
 
 After checking normality and treating outlier the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
 
+## Correlation matrix 
 # Analysis
-
-
-
-
- 
-
-
-
-PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
-
+## Trip location
 
 ```{r anova_tipratio_location}
 # Run ANOVA
@@ -330,8 +322,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borou
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
 
-AMNA SUMMARY/GRAPH
-
+## Trip distance
 
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
 
@@ -356,6 +347,7 @@ e
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
 
+## Trip duration
 For tip ratio and time period, after running the ANOVA test, we reject the null hypothesis that the means are statistically different at a significance level of 0.05. The graphs for tip ratio vs time period are shown below:
 ```{r time period_plot, include = T, echo = T}
 # Tip Ratio vs Pickup Time Period
@@ -364,7 +356,7 @@ ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pi
 ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 ```
 
-TANAYA SUMMARY/GRAPH:
+## Number of passenger and vendor ID
 
 We hyothesize that there is a relationship between the number of passenger in the car and  to the tip amount paid to the driver. The passenger count varies from 0 to 6.
 ```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
@@ -416,11 +408,8 @@ result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 
 ```
 # Conclusion
-## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
 We can summarize our results in this table:
-
-I CREATED ROWS AND COLUMNS, SIMPLY FILL IN YOUR ROW WITH THE RELEVANT INFORMATION
 
 Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
 -----|-----|-----|--------|--------|  
