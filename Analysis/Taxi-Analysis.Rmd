@@ -604,10 +604,10 @@ Let us analyse the pickup period.
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Trip Frequency")
+ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
 
 # Plot tip percentage by Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
+ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -621,11 +621,10 @@ Let us analyse the dropoff period.
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Trip Frequency")
-
+ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
 
 # Plot tip percentage by Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
+ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Percentage")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -689,9 +688,8 @@ p-value observed is approximately zero of Evening-Morning and Evening-Afternoon 
 
 There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
-#plot a frequency of tip paid vs trip duration histogram
-ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Trip Counts Based on Duration") + xlab("trip duration") +
-ylab("Trip Frequency")  + scale_fill_gradient("Count", low="blue", high="red")
+#plot a tip paid vs trip duration histogram
+hist(processed_df$trip_duration, processed_df$per_tip, main = "Histogram of Trip Duration vs Tip Percentage", col = rainbow(40), breaks = 40, xlab = "Trip Duration (min)", ylab = "Tip Percentage" )
 ```
 
 From the graph it is observed that tip is maximum for trips ranging from 5 to 10 minutes and decreases with the time. We perform Ttest hypothesis.
@@ -714,13 +712,15 @@ Concluding that we have enough evidence to reject the Null hypothesis in favor o
 
 The last factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
 
+First we take a look at summary of Trip Distance column... It shows that min is .. max.. mean and median however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
 
 ```{r dist_summary, include = T, echo = F}
 
-a <- summary(processed_df$trip_distance)
-names(a)
+# Print summary
+summary(processed_df$trip_distance)
+# str(processed_df)
+
 ```
-First we take a look at summary of Trip Distance column... It shows that min is `r a[['Min.']]`,  max is `r a[['Max.']]` and mean is `r a[['Mean']]`, however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
 
 This can visually be confirmed through a box plot and histogram. 
 ```{r dist_boxplot, include = T, echo = F}
@@ -815,23 +815,28 @@ d <- ggplot(df_dist, aes(x=per_tip, fill=trip_distance, color=trip_distance)) +
   labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
 d
 
+png("both_tip&dist")
+print(d)
+dev.off()
 ```
 
 
 ```{r t_test, include = T, echo = F}
 
-# subsetting data on basis for distance travelled for t-test
+
+# Also add box plot to visually confirm the results of T-test
+
 short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
-# str(short_dist)
+str(short_dist)
 long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
-# str(long_dist)
+str(long_dist)
 
 # Applying 2 Sample t-test below
-result_t <- t.test(short_dist$per_tip, long_dist$per_tip)
-print(result_t)
+result <- t.test(short_dist$per_tip, long_dist$per_tip)
+print(result)
 
 ```
-With Significance level set to 5%, I get a P-value of `r result_t$p.value` that is very close to zero with confidence interval level of `r result_t$conf.int`. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alternate Hypothesis meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
 
 We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
