@@ -296,6 +296,8 @@ The description of the columns of dataset is [here](https://github.com/Tann10/Ta
   
 To summarize, after preprocessing the number of rows and columns are : `r nrow(processed_df)`, `r ncol(processed_df)`
 
+After checking normality and treating outlier the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
+
 # Discussion
 
 ## Dataset Limitations
@@ -387,6 +389,7 @@ ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period
 >>>>>>> 3859a2a65c610e819177c40c66b45a15eb22e31c
 
 TANAYA SUMMARY/GRAPH
+
 
 next steps:
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, XXXXXXX. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
