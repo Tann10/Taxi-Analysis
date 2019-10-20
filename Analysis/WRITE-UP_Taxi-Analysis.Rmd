@@ -319,6 +319,17 @@ anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
 anova_tiprat_do
+
+# Run ANOVA
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = processed_df)
+
+# Run ANOVA
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = processed_df)
+
+#Run T-test
+trip_duration_ttest <- t.test(processed_df$tip_fare_ratio, processed_df$trip_duration)
+trip_duration_ttest
+print(trip_duration_ttest$p.value)
 ```
 
 For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05 (the p-values are `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` for pickup and dropoff locations, respectively). While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
@@ -379,8 +390,9 @@ Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H
 pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 AMNA | ANOVA | number | means are equal | reject H0 |  
-pickup time | ANOVA | number | means are equal | reject H0 |  
-dropoff time| ANOVA | number | means are equal | reject H0 |  
+pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |  
+dropoff time| ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |
+Trip Duration|T-test| `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
 TANAYA | ANOVA | number | means are equal | reject H0 |  
 
 next steps:

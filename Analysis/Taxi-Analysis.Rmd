@@ -104,7 +104,7 @@ glimpse(taxi_zones)
 ```
 The total number of rows and columns are`r dim(taxi_zones)` in  df. And around `r count_numeric_columns(taxi_zones)[1]` columns with numerical type and `r count_numeric_columns(taxi_zones)[2]` columns with double for unprocessed taxi data. We need to convert columns Borough, Zone, service_zone to factor columns during analysis.  
 
-## Data statistics 
+## Data statistics
 
 ### Data Summary
 
