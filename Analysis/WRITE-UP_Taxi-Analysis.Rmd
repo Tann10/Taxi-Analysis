@@ -4,13 +4,14 @@ author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    code_folding: hide
+    code_folding: hide    # black code button
     fig_height: 4.5
     fig_width: 7
     highlight: tango
     number_sections: yes
     theme: cosmo
     toc: yes
+    toc_float: true
   pdf_document:
     toc: yes
 ---
@@ -350,7 +351,7 @@ ggplot(data = processed_df, aes(x = Borough_do, y = per_tip, fill = Borough_do))
 
 AMNA SUMMARY/GRAPH
 
-<<<<<<< HEAD
+
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
 
 This tipping behaviour might happen because of psychological reasons e.g. passengers whose average fare amount sums up to $10-$15 would feel guilt-ridden if they pay tip less than $2-$3. On the other hand, those passengers who are already paying big chunks of money from their pockets in the form of fare amount that ranges between $25-$30 per commute would not feel that bad paying the same amount of tip just to cut down their costs. But this is just a guess, there might be a variety of other reasons affecting this particular behaviour. 
