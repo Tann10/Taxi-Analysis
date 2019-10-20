@@ -164,6 +164,10 @@ while (length(boxplot(processed_df$per_tip)$out) != 0){
 }
 ```
 
+ALL NON-GRAPH CODE GOES HERE. FOR R CODE TO CREATE GRAPHS, PUT THEM WITH THE TEXT.
+
+
+# GUIDELINES
 Write a roughly 10-page (definitely no more than 4000 words) summary of the research and EDA process of your project. The summary should be prepared in R-markdown, and knitted into HTML. You may take some of the work in part B (such as graphs and results) to include here. They can overlap. This summary is to-be presented to your boss, your client, or to-be submitted for publication in journals. Potential area of topics to address in this summary may include:
 
 #******EACH PERSON SHOULD WRITE ABOUT 600-700 WORDS!!!!!!*******
@@ -171,42 +175,41 @@ Write a roughly 10-page (definitely no more than 4000 words) summary of the rese
 
 # Introduction
 
-Taxi cabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxi cabs in service today, worth about $800,000 each (Devaraj & Patel, 2007). The popularity of taxi cabs have come under siege recently with the growing popularity and use of competing ride-hailing services such as Lyft and Uber. There are 80,000 of these cars in New York City, with 50,000 drivers serving 236 million passengers per year (DeBoard, 2019).
+Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
 
-This study is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxi cab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxi cab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
+Our study looks at what affects the amount of tip paid to the driver. This is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn & Greenberg, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxicab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxicab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
 # Literature Review
 
-Tips can be defined as voluntary payments usually in the form of money—in addition to the obligatory transaction amount—from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done in regard to tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
+Tips can be defined as voluntary payments—in addition to the obligatory transaction amount—usually in the form of money from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done on tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
 
-Tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel, 2007). Economic reasons for tipping include providing an economic incentive for a higher quality of service (Flath, 2012) and wealth--although there are varying viewpoints amongst customers and waiters about the effect of a customer’s wealth on tip amount (Harris, 2012). Noneconomic factors include the idea of tipping being a social norm, where not tipping can cause a customer to feel guilty or embarrassed and where tipping can lead to positive feelings (Azar, 2010). Furthermore, tipping is also influenced by the fact that some customers recognize that their servers depend on tips to supplement their income.
+Tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel, 2007). Economic reasons for tipping include providing an economic incentive for a higher quality of service (Flath, 2012) and wealth--although there are varying viewpoints amongst customers and waiters about the effect of a customer’s wealth on tip amount (Harris, 1995). Noneconomic factors include the idea of tipping being a social norm, where not tipping can cause a customer to feel guilty or embarrassed and where tipping can lead to positive feelings (Azar, 2010). Furthermore, tipping is also influenced by the fact that some customers recognize that their servers depend on tips to supplement their income.
 
-Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010). The extent to which the quality of service, however, affects the tip amount is unclear. Bodvarsson, Luksetich, and McDermott (2003), Bodvarsson and Gibson (1997), and Lynn and McCall (2000) through interviews all found that service quality greatly affects a customer’s decision to tip. Alternatively, Azar (2007) stresses the need to consider what is said during an interview versus what a customer actually does. While a customer may in principle agree with the fact that tips should depend on the quality of service, in an actual situation, the social norm of tipping may take precedence over that principle.
+Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010). The extent to which the quality of service, however, affects the tip amount is unclear. Through interviews, Lynn (2001) found that service quality greatly affects a customer’s decision to tip. Alternatively, Azar (2007) stresses the need to consider what is said during an interview versus what a customer actually does. While a customer may in principle agree with the fact that tips should depend on the quality of service, in an actual situation, the social norm of tipping may take precedence over that principle.
 
-Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is an “institutional […] norm, rather than as a prosocial behavior that can be modulated by weather-induced changes in mood.”
+Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is a deeply embedded social norm not subject to changes in weather.
 
 ## Taxicab Tipping
 
-There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017. Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, noting that the quality of the taxi service is not dependent on the driver.
+There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017). Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, adding that the quality of the taxi service is not dependent on the driver.
 
-## Taxicab Data Analysis
+Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship is small, it is statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) find that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers observed that African-American drivers often received one-third of the tip received by white drivers. They also find that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
 
-Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship was small, it was statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) found that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers found that African-American drivers often received one-third of the tip received by white drivers. They also found that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
+## Previous NYC Taxicab Data Analysis
 
-Other non-tipping work related to the NYC dataset have been conducted, especially in regards to location, For example, Zhan, Hasan, Ukkusuri, and Kamga (2013) use the dataset to estimate potential travel times between a pick up and drop off location. Neutens et al. (2012) use the dataset to conduct a spatio-temporal analysis of taxi trips in New York City. The authors design and introduce a new system that enables users to visualize taxi trips based on pick up and drop off locations.
+Other non-tipping work related to the NYC dataset have been conducted, especially in regards to location, For example, Zhan, Hasan, Ukkusuri, and Kamga (2013) used the dataset to estimate potential travel times between a pick up and drop off location. Neutens, Delafontaine, Scott, and De Maeyer (2012) used the dataset to conduct a spatio-temporal analysis of taxi trips in New York City. The authors designed and introduced a new system that enables users to visualize taxi trips based on pick up and drop off locations.
 
-Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and found that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempt to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other factors.
+Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and find that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempted to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
 
 ## Relationship to Current Project
 
-In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip.
+In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip. Focusing on the variables provided in the NYC taxicab dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
 
-As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. The first reason is quite simple: Passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can also impact the amount of tipping. This is because each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2006). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough.Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether due to gender or race--which can affect their access to resources (Kwan, 1999; Neutens, Delafontaine, Scott, & De Maeyer, 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
-
-Finally, focusing on the variables provided in the dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (such as on tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
+As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. First, passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can thereby impact the amount of tipping; each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2004). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether by gender or race--which can affect their access to resources (Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
 
 
-# Dataset Analysis
+# Dataset Description
+
 ## How was the information gathered? - Madhuri
 ## What do we know about this dataset? - Madhuri
 ## preprocessing part - Madhuri- 
@@ -255,15 +258,13 @@ To summarize after removing outliers and creating new features we have 11881 obs
 
 After getting a good understanding of the data initial problem statement of idenitfying and anlaysing various factors attributing to tip amount paid to the driver was refined to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and fare amount paid by credit cards*
   
-  
-  Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
+Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
   
   Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
 
-
 # Discussion
 
-## What are the limitations of the dataset? - Amna
+## Dataset Limitations
 
 Like every other data set, our data has also some limitations which may impact the results of our study.
 <ul>
@@ -278,7 +279,11 @@ Like every other data set, our data has also some limitations which may impact t
   <li>Human Errors in Data set: Some of the columns in our data set are prone to human errors. For example, passenger count (the number of passengers in the vehicle) is driver entered value and  might have the potential of some observations being inaccurately recorded.
 </ul>
 
+
 ## What additional information would be beneficial? - Amna
+
+
+## Potential Future Work / Additional Data
 
 The results obtained by our team can be significantly improved and made more reliable if we were able to gather more features to consider. For instance:
 <ul>
@@ -291,11 +296,17 @@ The results obtained by our team can be significantly improved and made more rel
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
+Now that our dataset is fully understood after performing the EDA, we know exactly what data points were relevant to our scope of analysis and further perform other data mining algorithms/models like Linear Regression for decision/policy making on a large scale level. 
+
+While trying to find the the variation in tip-fare ratio between short and long distance commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
+
+
+
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
-For tip percentage and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping percentage: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip percentage and location are shown below:
+For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
 
-```{r tipper_plot, include = T, echo = T}
+```{r tipratio_plot, include = T, echo = T}
 # Plot tip ratio by pickup location
 ggplot(data = processed_df, aes(x = Borough_pu, y = per_tip, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 
@@ -315,44 +326,43 @@ Linear regression; look at pearson correlation; then build linear model
 
 # Sources
 
-Ayres, I., Vars, F. E., & Zakariya, N. (2005). To Insure Prejudice: Racial Disparities in Taxicab Tipping. Yale Law Journal, 114, 1613–1674. doi: 10.2139/ssrn.401201
+Ayres, I., Vars, F. E., & Zakariya, N. (2005). To insure prejudice: Racial disparities in taxicab tipping. <i>Yale Law Journal, 114</i>, 1613–1674. doi: 10.2139/ssrn.401201
 
-Azar, O. H. (2007). The Social Norm of Tipping: A Review. Journal of Applied Social Psychology, 37(2), 380–402. doi: 10.1111/j.0021-9029.2007.00165.x
+Azar, O. H. (2007). The social norm of tipping: A review. <i>Journal of Applied Social Psychology, 37</i>(2), 380–402. doi: 10.1111/j.0021-9029.2007.00165.x
 
-Azar, O. H. (2010). Tipping Motivations and Behavior in the U.S. and Israel. Journal of Applied Social Psychology, 40(2), 421–457. doi: 10.1111/j.1559-1816.2009.00581.x
+Azar, O. H. (2010). Tipping motivations and behavior in the U.S. and Israel. <i>Journal of Applied Social Psychology, 40</i>(2), 421–457. doi: 10.1111/j.1559-1816.2009.00581.x
 
-DeBord, M. (2019, April 1). Congestion pricing could mark the beginning of the end of New York's famous yellow taxis. Retrieved October 14, 2019, from https://www.businessinsider.com/congestion-pricing-end-of-new-yorks-famous-yellow-taxis-2019-4.
+Devaraj, S., & Patel, P. C. (2017). Taxicab tipping and sunlight. <i>PLoS One, 12</i>(6). doi: 10.1371/journal.pone.0179193
 
-Devaraj, S., & Patel, P. C. (2017). Taxicab tipping and sunlight. PLoS One, 12(6). doi: 10.1371/journal.pone.0179193
+Ferreira, N., Poco, J., Vo, H. T., Freire, J., & Silva, C. T. (2013). Visual exploration of big spatio-temporal urban data: A study of New York City taxi trips. <i>IEEE Transactions on Visualization and Computer Graphics, 19</i>(12), 2149–2158. doi: 10.1109/TVCG.2013.226
 
-Douriez, M., Doraiswamy, H., Freire, J., & Silva, C. T. (2016). Anonymizing NYC Taxi Data: Does It Matter? Proceedings - 3rd IEEE International Conference on Data Science and Advanced Analytics, 140–148. doi: 10.1109/DSAA.2016.21
+Flath, D. (2012). Why do we tip taxicab drivers? <i>Japanese Economy, 39</i>(3), 69–76. doi: 10.2753/JES1097-203X390304
 
-Ferreira, N., Poco, J., Vo, H. T., Freire, J., & Silva, C. T. (2013). Visual Exploration of Big Spatio-Temporal Urban Data: A Study of New York City Taxi Trips. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2149–2158. doi: 10.1109/TVCG.2013.226
+Flynn, S. M., & Greenberg, A. E. (2012). Does weather actually affect tipping? An empirical analysis of time-series data. <i>Journal of Applied Social Psychology 42</i>(3), 702–716. doi: 10.2139/ssrn.1617465
 
-Flath, D. (2012). Why Do We Tip Taxicab Drivers? Japanese Economy, 39(3), 69–76. doi: 10.2753/JES1097-203X390304
+Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). <i>Modeling taxi demand with GPS data from taxis and transit.</i> Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf
 
-Flynn, S. M., & Greenberg, A. E. (2012). Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data. Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data, 42(3), 702–716. doi: Does Weather Actually Affect Tipping? An Empirical Analysis of Time-Series Data
+Harris, M. B. (1995). Waiters, customers, and service: Some tips about tipping. <i>Journal of Applied Social Psychology, 25</i>(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
 
-Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). Modeling Taxi Demand with Gps Data from Taxis and Transit. Modeling Taxi Demand with GPS Data from Taxis and Transit. Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf
+Kwan, M. (1999). Gender and individual access to urban opportunities: A study using space–time measures. <i>The Professional Geographer, 51</i>, 211–227. doi: 10.1111/0033-0124.00158
 
-Harris, M. B. (1995). Waiters, Customers, and Service: Some Tips About Tipping. Journal OfApplied Social Psychology, 25(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
+Lee, J., Shin, I., & Park, G. (2008). Analysis of the passenger pick-up pattern for taxi location recommendation. <i>2008 Fourth International Conference on Networked Computing and Advanced Information Management.</i> doi: 10.1109/NCM.2008.24
 
-Kwan, M. (1999). Gender and Individual Access to Urban Opportunities: A Study Using Space–Time Measures. The Professional Geographer, 51, 211–227. doi: 10.1111/0033-0124.00158
+Lynn, M. (2001). Restaurant tipping and service quality: A tenuous relationship. <i>The Cornell Hotel and Restaurant Administration Quarterly, 42</i>(1), 14–20. doi: 10.1016/s0010-8804(01)90006-0
 
-Lee, J., Shin, I., & Park, G. (2008). Analysis of the Passenger Pick-Up Pattern for Taxi Location Recommendation. 2008 Fourth International Conference on Networked Computing and Advanced Information Management. doi: 10.1109/NCM.2008.24
+Lynn, W. M. (2004). Tipping in restaurants and around the globe: An interdisciplinary review. <i>Handbook of Contemporary Behavioral Economics: Foundations and Developments.</i> doi: https://ssrn.com/abstract=465942
 
-Lynn, W. M. (2004). Tipping in Restaurants and Around the Globe: An Interdisciplinary Review. Handbook of Contemporary Behavioral Economics: Foundations and Developments. doi: https://ssrn.com/abstract=465942
+Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. <i>Journal of Transport Geography, 23</i>, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
 
-Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. Journal of Transport Geography, 23, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
-
-Qian, X., & Ukkusuri, S. (2015). Spatial variation of the urban taxi ridership using GPS data. Applied Geography, 59, 31–42. doi: 10.1016/j.apgeog.2015.02.011
+Qian, X., & Ukkusuri, S. (2015). Spatial variation of the urban taxi ridership using GPS data. <i>Applied Geography, 59</i>, 31–42. doi: 10.1016/j.apgeog.2015.02.011
 
 Rivoli, D., & Jorgensen, J. (2018, July 31). City vows to crack down on taxis refusing service as it also looks to cap Uber. Retrieved October 14, 2019, from https://www.nydailynews.com/news/politics/ny-pol-tax-uber-refuse-service-20180731-story.html.
 
-Sun, H., & McIntosh, S. (2016). Big Data Mobile Services for New York City Taxi Riders and Drivers. 2016 IEEE International Conference on Mobile Services, 57–64. doi: 10.1109/MoSb.2S0e1r6v.128016.19
+Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi riders and drivers. <i>2016 IEEE International Conference on Mobile Services,</i> 57–64. doi: 10.1109/MoSb.2S0e1r6v.128016.19
 
-van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. Urban Geography, 37(7), 953–962. doi: 10.1080/02723638.2016.1142152
+van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
 
 Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
 
 https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page
+
