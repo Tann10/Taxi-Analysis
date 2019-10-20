@@ -439,24 +439,24 @@ We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_tipper_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
+anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
-anova_tipper_pu
+anova_tiprat_pu
 
 # Summarize ANOVA
-summary(anova_tipper_pu)
+summary(anova_tiprat_pu)
 ```
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_tipper_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
+anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
-anova_tipper_do
+anova_tiprat_do
 
 # Summarize ANOVA
-summary(anova_tipper_do)
+summary(anova_tiprat_do)
 ```
 
 ```{r tipper_plot, include = T, echo = T}
@@ -467,7 +467,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borou
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-**Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+**Observation**: The p-values are `r summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
@@ -542,7 +542,7 @@ tukey_tipamt_do
 
 ## Passenger count and Vendor
 
-We hyothesis that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
+We hyothesize that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
 ```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
 # Create factor data
 processed_df$passenger_count <- as.factor(processed_df$passenger_count)
@@ -552,16 +552,15 @@ processed_df %>%
   ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
-  ggtitle("Box plot distribution for % tip amount and passenger count")
+  labs(y = "Tip ratio", x = "Number of passengers") + 
+  ggtitle("Box plot distribution for ratio of tip amount and passenger count")
 ```
 
 **Observation:** The mean of all the groups of passenger count is not varying much. 
 
 While performing anova our null hypothesis is the means across all groups of passenger count is same whereas alternate hypothesis is the mean is not same. 
+
 ```{r anova test for passenger_count, echo=T,  include=T}
-# Create factor
-processed_df$VendorID <- as.factor(processed_df$VendorID)
 
 # ANOVA test
 anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
@@ -580,7 +579,7 @@ processed_df %>%
   ggplot(aes(VendorID, tip_fare_ratio, fill = VendorID)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Vendor ID") + 
+  labs(y = "Tip ratio", x = "Vendor ID") + 
   ggtitle("Box plot distribution for % tip amount and vendor")
 ```
 
@@ -589,6 +588,9 @@ processed_df %>%
 While performing anova our null hypothesis is the means across vendors is same whereas alternate hypothesis is the mean is not same. 
 
 ```{r t test for vendor ID, echo=T, include=T}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
 # t test for vendor
 ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
 ttest_vendor
@@ -747,8 +749,8 @@ summary(processed_df$tip_fare_ratio)
 
 # Create histogram
 c <- ggplot(processed_df, aes(x=tip_fare_ratio)) + 
-  geom_histogram(binwidth=0.001, fill = "#FFDB6D", color = "#C4961A") + coord_cartesian(xlim=c(0,1)) + 
-  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram for Tip values")
+  geom_histogram(binwidth=0.05, fill = "#FFDB6D", color = "#C4961A") + coord_cartesian(xlim=c(0,1)) + 
+  labs(x="Tips to Fare Ratio", y = "Count") + ggtitle("Histogram for Tip values")
 c
 
 ```
@@ -805,8 +807,8 @@ Here is a Histogram where we combined values from both of my variables. It shows
 # plotting both my dependent & independent variable and trying to figure out if there is any relationship
 
 d <- ggplot(df_dist, aes(x=tip_fare_ratio, fill=trip_distance, color=trip_distance)) +
-  geom_histogram(binwidth=0.001, position="identity", alpha=0.5)  + 
-  labs(x="Tips(%)", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
+  geom_histogram(binwidth=0.05, position="identity", alpha=0.5)  + 
+  labs(x="Tips to Fare Ratio", y = "Count") + ggtitle("Histogram of Tip values by Distance travelled") 
 d
 
 png("both_tip&dist")

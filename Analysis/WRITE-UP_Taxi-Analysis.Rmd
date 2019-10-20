@@ -224,7 +224,7 @@ kable(summaryy)
   
 The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
 
-# Dataset Processing
+# Data Pre-Processing
 
 ## Normality check
 
@@ -295,17 +295,31 @@ To summarize, after preprocessing the number of rows and columns are : `r nrow(p
 
 After checking normality and treating outlier the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
 
+## Correlation matrix 
+```{r corr}
+str(processed_df)
+# finding correlation between tip amount & distance travelled
+cor(processed_df$tip_fare_ratio, processed_df$trip_distance, method="pearson") 
+cor(processed_df$tip_fare_ratio, processed_df$trip_duration, method="pearson") 
+```
+```{r dist_code, include = T, echo = F}
+# Subset data 
+df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
+# Bimodal so divided it into 2 chunks for normalization
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+str(short_dist)
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+str(long_dist)
+# Applying 2 Sample t-test below
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+# result_t
+
+```
 # Analysis
-
-
-
-
- 
-
-
-
-PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
-
+## Trip location
 
 ```{r anova_tipratio_location}
 # Run ANOVA
@@ -328,8 +342,6 @@ anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = processed_df)
 
 #Run T-test
 trip_duration_ttest <- t.test(processed_df$tip_fare_ratio, processed_df$trip_duration)
-trip_duration_ttest
-print(trip_duration_ttest$p.value)
 ```
 
 For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05 (the p-values are `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` for pickup and dropoff locations, respectively). While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
@@ -341,8 +353,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borou
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
 
-AMNA SUMMARY/GRAPH
-
+## Trip distance
 
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
 
@@ -367,6 +378,7 @@ e
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
 
+## Trip duration
 For tip ratio and time period, after running the ANOVA test, we reject the null hypothesis that the means are statistically different at a significance level of 0.05. The graphs for tip ratio vs time period are shown below:
 ```{r time period_plot, include = T, echo = T}
 # Tip Ratio vs Pickup Time Period
@@ -375,25 +387,56 @@ ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pi
 ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 ```
 
-TANAYA SUMMARY/GRAPH
+## Number of passenger and vendor ID
 
+We hyothesize that there is a relationship between the number of passenger in the car and  to the tip amount paid to the driver. The passenger count varies from 0 to 6.
+```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
+# Create factor data
+processed_df$passenger_count <- as.factor(processed_df$passenger_count)
+
+# Create boxplot
+processed_df %>%
+  ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  labs(y = "Tip ratio", x = "Number of passengers") + 
+  ggtitle("Box plot distribution for ratio of tip amount and passenger count")
+```
+
+```{r anova test for passenger_count, echo=F,  include=F}
+
+# ANOVA test
+anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
+summary(anova_tip_amount)
+
+```
+The mean of all the groups of passenger count is not varying much. Also the results of anova gives the P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
+
+```{r t test for vendor ID, echo=F, include=F}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
+# t test for vendor
+ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
+ttest_vendor
+```
+
+Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
 # Conclusion
-## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
 We can summarize our results in this table:
-
-I CREATED ROWS AND COLUMNS, SIMPLY FILL IN YOUR ROW WITH THE RELEVANT INFORMATION
 
 Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
 -----|-----|-----|--------|--------|  
 pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
-AMNA | ANOVA | number | means are equal | reject H0 |  
+distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
 pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |  
 dropoff time| ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |
 Trip Duration|T-test| `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
-TANAYA | ANOVA | number | means are equal | reject H0 |  
+Passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail reject H0 |
+Vendor ID | t test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
 
 next steps:
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, XXXXXXX. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
@@ -476,4 +519,3 @@ Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi 
 van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
 
 Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
-
