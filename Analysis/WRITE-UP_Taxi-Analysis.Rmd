@@ -376,7 +376,7 @@ processed_df %>%
   ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
+  labs(y = "Tip ratio", x = "Number of passengers") + 
   ggtitle("Box plot distribution for ratio of tip amount and passenger count")
 ```
 

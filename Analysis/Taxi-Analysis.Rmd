@@ -552,8 +552,8 @@ processed_df %>%
   ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Number of passengers") + 
-  ggtitle("Box plot distribution for % tip amount and passenger count")
+  labs(y = "Tip ratio", x = "Number of passengers") + 
+  ggtitle("Box plot distribution for ratio of tip amount and passenger count")
 ```
 
 **Observation:** The mean of all the groups of passenger count is not varying much. 
@@ -579,7 +579,7 @@ processed_df %>%
   ggplot(aes(VendorID, tip_fare_ratio, fill = VendorID)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Percentage tip amount [$]", x = "Vendor ID") + 
+  labs(y = "Tip ratio", x = "Vendor ID") + 
   ggtitle("Box plot distribution for % tip amount and vendor")
 ```
 
