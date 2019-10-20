@@ -231,8 +231,10 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
   
    Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
   
-  ### Normality Test
+### Normality Test
+
   A normal distribution is often an assumption for many statistical analyses. In order to conduct hypothesis testing we need to first check if data is normally distributed.  Below is the distribtuion of the tip amount does not look normal and there are some outliers.
+  
 ```{r tipamount_distr, echo=F, include=T}
 # Create qqplot
 ggplot(unprocessed_data, aes(sample = tip_amount)) + 
@@ -240,8 +242,11 @@ ggplot(unprocessed_data, aes(sample = tip_amount)) +
   stat_qq_line() +
   ggtitle("QQ plot for tip amount") 
 ```
-As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable. 
-  ### Outlier detection and treatment
+
+As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
+
+### Outlier detection and treatment
+
   It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
 1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
 2. payment type = Only credit card details have corresponding tip amount value. Hence we will analysing only credit card payment types
