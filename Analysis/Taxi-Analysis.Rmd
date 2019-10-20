@@ -542,7 +542,7 @@ tukey_tipamt_do
 
 ## Passenger count and Vendor
 
-We hyothesis that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
+We hyothesize that there is a relationship between the number of passenger in the car to the tip amount paid to the driver. The passenger count varies from 0 to 6.  
 ```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
 # Create factor data
 processed_df$passenger_count <- as.factor(processed_df$passenger_count)
