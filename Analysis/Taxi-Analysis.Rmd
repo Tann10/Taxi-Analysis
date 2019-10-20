@@ -104,7 +104,7 @@ glimpse(taxi_zones)
 ```
 The total number of rows and columns are`r dim(taxi_zones)` in  df. And around `r count_numeric_columns(taxi_zones)[1]` columns with numerical type and `r count_numeric_columns(taxi_zones)[2]` columns with double for unprocessed taxi data. We need to convert columns Borough, Zone, service_zone to factor columns during analysis.  
 
-## Data statistics 
+## Data statistics
 
 ### Data Summary
 
@@ -574,13 +574,16 @@ Hence, we can conclude that the number of passenger in the car does not affect t
 Below is the box plot distribution for vendors 1 and 2. We hypothesise that the vendor brand name affects the % tip amount paid to the driver 
 
 ```{r hypothesis testing for vendor, echo=T,  include=T}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
 # Create boxplot of vendor ID vs tip percentage
 processed_df %>%
   ggplot(aes(VendorID, tip_fare_ratio, fill = VendorID)) +
   geom_boxplot() +
   theme(legend.position = "none") +
   labs(y = "Tip ratio", x = "Vendor ID") + 
-  ggtitle("Box plot distribution for % tip amount and vendor")
+  ggtitle("Box plot distribution for trip ratio and vendor")
 ```
 
 **observation:** Distribution for both the vendors looks almost same.
@@ -588,8 +591,6 @@ processed_df %>%
 While performing anova our null hypothesis is the means across vendors is same whereas alternate hypothesis is the mean is not same. 
 
 ```{r t test for vendor ID, echo=T, include=T}
-# Create factor
-processed_df$VendorID <- as.factor(processed_df$VendorID)
 
 # t test for vendor
 ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
