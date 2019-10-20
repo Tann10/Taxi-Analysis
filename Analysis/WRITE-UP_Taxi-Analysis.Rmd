@@ -225,17 +225,9 @@ kable(summaryy)
   
 The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
 
-## Dataset Processing
+# Dataset Processing
 
-### Outliers and normality test
-
-Below is the boxplot of the tip amount which we are interested for our analysis. 
-
-```{r unprocessed tip amount boxplot, echo=T, include=T}
-ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
-  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
-  labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
-```
+## Normality check
 
 Below is the QQ plot for the normality check of the tip amount.
 
@@ -247,13 +239,19 @@ ggplot(unprocessed_data, aes(sample = tip_amount)) +
   ggtitle("QQ plot for tip amount") 
 ```
 
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers. As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
 
-As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
+## Outlier detection and treatment
 
-### Outlier detection and treatment
+Below is the boxplot of the tip amount which we are interested for our analysis. 
 
-  It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
+```{r unprocessed tip amount boxplot, echo=T, include=T}
+ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
+  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
+```
+
+It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
   
 1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
 
