@@ -217,7 +217,8 @@ Below is the summary of the random sampled dataset:
 
 ```{r Summary_of_the_unprocessed_data, echo=F, include=T}
 # Get summary of data
-summaryy <- data.frame("Dtype" = sapply(unprocessed_data,class), "MAX" = apply(unprocessed_data,2,max),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean))
+summaryy <- data.frame("Dtype" = sapply(unprocessed_data,typeof),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean), "MAX" = apply(unprocessed_data,2,max))
+
 kable(summaryy)
 ```
   
@@ -283,7 +284,7 @@ Below is the summary of the processed data:
 ```{r Summary_of_processed_data, echo=F, include=T}
 # Get summary of data
 
-summary_after <- data.frame("Dtype" = sapply(processed_df,typeof), "MAX" = apply(processed_df,2,max),"MIN" = apply(processed_df,2,min), "MEDIAN" = apply(processed_df,2,median),  "MEAN" = apply(processed_df,2,mean))
+summary_after <- data.frame("Dtype" = sapply(processed_df,typeof), "MIN" = apply(processed_df,2,min), "MEDIAN" = apply(processed_df,2,median),  "MEAN" = apply(processed_df,2,mean), "MAX" = apply(processed_df,2,max))
 kable(summary_after)
 
 ```
