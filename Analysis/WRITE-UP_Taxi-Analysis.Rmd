@@ -178,7 +178,7 @@ Write a roughly 10-page (definitely no more than 4000 words) summary of the rese
 
 Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
 
-Our study looks at what affects the amount of tip paid to the driver. This is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn & Greenberg, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxicab drivers from refusing service, service refusal still happens (Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxicab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
+Our study looks at what affects the amount of tip paid to the driver. This is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn & Greenberg, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxicab drivers from refusing service, service refusal still happens (New York City Taxi and Limousine Commission, n.d.; Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxicab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
 
 # Literature Review
 
@@ -209,7 +209,7 @@ In this context, given the lack of research in taxicab tipping, this project see
 As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. First, passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can thereby impact the amount of tipping; each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2004). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether by gender or race--which can affect their access to resources (Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
 
 
-# Dataset Description
+# Dataset Procurement and Processing
 
 ## How was the information gathered? - Madhuri
 ## What do we know about this dataset? - Madhuri
@@ -217,20 +217,24 @@ As the literature review suggests, the provided dataset may provide some proxies
 
 sampeling, provide some graphs and charts
 
-The source dataset used for the project was taken from https://www1.nyc.gov/
+## Dataset Source
 
-Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+The source dataset used for the project was taken from New York City Taxi and Limousine Commission website (2019), an official NYC government webpage (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
-  The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
+The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
   
-  The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations, which have prevented us from analyzing the entire dataset.
-  
+The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly selected 20,000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations, which have prevented us from analyzing the entire dataset.
+
+## About the Dataset
+
   Below is the summary of the random sampled dataset (min, max, unique, column type) table:
   
-  Data dictionary link
+  The New York City Taxi and Limousine Commission (2018) also provides a data dictionary to describe the columns and values in the dataset.
   
    Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
-  
+
+## Dataset Processing
+
 ### Normality Test
 
   A normal distribution is often an assumption for many statistical analyses. In order to conduct hypothesis testing we need to first check if data is normally distributed.  Below is the distribtuion of the tip amount does not look normal and there are some outliers.
@@ -346,7 +350,7 @@ Flath, D. (2012). Why do we tip taxicab drivers? <i>Japanese Economy, 39</i>(3),
 
 Flynn, S. M., & Greenberg, A. E. (2012). Does weather actually affect tipping? An empirical analysis of time-series data. <i>Journal of Applied Social Psychology 42</i>(3), 702–716. doi: 10.2139/ssrn.1617465
 
-Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). <i>Modeling taxi demand with GPS data from taxis and transit.</i> Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf
+Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). <i>Modeling taxi demand with GPS data from taxis and transit.</i> Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf.
 
 Harris, M. B. (1995). Waiters, customers, and service: Some tips about tipping. <i>Journal of Applied Social Psychology, 25</i>(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
 
@@ -357,6 +361,12 @@ Lee, J., Shin, I., & Park, G. (2008). Analysis of the passenger pick-up pattern 
 Lynn, M. (2001). Restaurant tipping and service quality: A tenuous relationship. <i>The Cornell Hotel and Restaurant Administration Quarterly, 42</i>(1), 14–20. doi: 10.1016/s0010-8804(01)90006-0
 
 Lynn, W. M. (2004). Tipping in restaurants and around the globe: An interdisciplinary review. <i>Handbook of Contemporary Behavioral Economics: Foundations and Developments.</i> doi: https://ssrn.com/abstract=465942
+
+New York City Taxi and Limousine Commission. (n.d.). Passenger frequently asked questions. Retrieved October 14, 2019, from https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page.
+
+New York City Taxi and Limousine Commission. (2018, May 1). Data dictionary - Yellow taxi trip records. Retrieved October 14, 2019, from https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf.
+
+New York City Taxi and Limousine Commission. (2019). Yellow taxi trip records, June 2019 [Data set]. Retrieved from https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
 
 Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. <i>Journal of Transport Geography, 23</i>, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
 
@@ -369,6 +379,4 @@ Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi 
 van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
 
 Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
-
-https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page
 
