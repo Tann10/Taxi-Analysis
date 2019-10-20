@@ -439,24 +439,24 @@ We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_tipper_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
+anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
-anova_tipper_pu
+anova_tiprat_pu
 
 # Summarize ANOVA
-summary(anova_tipper_pu)
+summary(anova_tiprat_pu)
 ```
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_tipper_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
+anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
-anova_tipper_do
+anova_tiprat_do
 
 # Summarize ANOVA
-summary(anova_tipper_do)
+summary(anova_tiprat_do)
 ```
 
 ```{r tipper_plot, include = T, echo = T}
@@ -467,7 +467,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borou
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-**Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+**Observation**: The p-values are `r summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
