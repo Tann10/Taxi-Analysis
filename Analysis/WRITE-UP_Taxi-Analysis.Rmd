@@ -225,24 +225,41 @@ Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
   
   Data dictionary link
   
-  We need to pre process data -Tanaya
+   Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
   
-  Normality
-  Outlier
-  Missing values
-  Final EDA question with selected columns
+  ### Normality Test
+  A normal distribution is often an assumption for many statistical analyses. In order to conduct hypothesis testing we need to first check if data is normally distributed.  Below is the distribtuion of the tip amount does not look normal and there are some outliers.
+```{r tipamount_distr, echo=F, include=T}
+# Create qqplot
+ggplot(unprocessed_data, aes(sample = tip_amount)) + 
+  stat_qq() + 
+  stat_qq_line() +
+  ggtitle("QQ plot for tip amount") 
+```
+As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable. 
+  ### Outlier detection and treatment
+  It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
+1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
+2. payment type = Only credit card details have corresponding tip amount value. Hence we will analysing only credit card payment types
+3. fare_amount = Data has negative fare amount, such entries are outliers hence removed
+4. passenger count = According to the law maximum 7 passengers are allowed in a taxi
+5. trip distance = there are some observation with 0 trip distance, maybe a cancelled taxi. These observations are not considered for the analysis
+6. trip duration = the values >=37 and <=0 fall outside the boxplot. These are removed.
+Using the boxplot, we removed the outliers from the dataset. 
+
+Apart from this data lying outside the interquantile range for ratio of tip to the fare amount was removed. 
   
   Below is the summary of the processed data:
   
-  Before preprocessing we have 20,000 observations and 19 features. To bring the dataset to our EDA standards we performed preprocessing on it, thins involved column creations, outlier detection and treatment. 
+To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
-  A normal distribution is often an assumption for many statistical analyses. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, there is often a standardized percentage that a customer gives (for example, 15% at restaurants). We divided the fare amount by the tip amount to obtain a tipping percentage.
+After getting a good understanding of the data initial problem statement of idenitfying and anlaysing various factors attributing to tip amount paid to the driver was refined to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and fare amount paid by credit cards*
+  
   
   Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
   
   Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
 
-To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
 
 # Discussion
 
@@ -260,41 +277,6 @@ Like every other data set, our data has also some limitations which may impact t
   <li>Limited Time and resources: We chose to work on only four features affecting the variation in the tipping amount but there could be a plethora of other reasons too. For example weather. A bright sunny and breezy day would encourage short distance commuters to walk to their destinations instead of using cab service altogether or it might positively impact the mood of the taxi passengers inclining them to tip more. But limited time restricted us to work only on few of data points available.
   <li>Human Errors in Data set: Some of the columns in our data set are prone to human errors. For example, passenger count (the number of passengers in the vehicle) is driver entered value and  might have the potential of some observations being inaccurately recorded.
 </ul>
-
-
-## How did your question change, if at all, after Exploratory Data Analysis? - Tanaya
-
-Initally our dependent variable was tip amount adn focused . We noticed that it didnot have normal distribution. Below is the initial distribution:
-
-Initial question
--not normal, so we changed to tip amount
--because only credit card tips, we changed our question to focus only on credit card tips
-
--put updated research questions here
-
-from COMBINED file
-
-QUESTION: For those who pay tip by credit card, what factors influence the amount of tip given?
-Should you pay tip to the taxi driver? If yes, how much?
-
-Analyse the factors which takes place to determine the tip amount paid to the driver
-
-Why?
-Benefits?
-Use?
-
-Hypothesis:
-Factors that can affect tip amount:
-1. Vendor service
-2. Driver service
-3. Location :  (generous locations)
-4. duration of day 
-5. distance
-6. count of passengers
-7. weather
-```{r cars}
-summary(cars)
-```
 
 ## What additional information would be beneficial? - Amna
 
@@ -372,3 +354,5 @@ Sun, H., & McIntosh, S. (2016). Big Data Mobile Services for New York City Taxi 
 van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. Urban Geography, 37(7), 953–962. doi: 10.1080/02723638.2016.1142152
 
 Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
+
+https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page
