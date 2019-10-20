@@ -11,6 +11,7 @@ output:
     number_sections: yes
     theme: cosmo
     toc: yes
+    toc_float: true
   pdf_document:
     toc: yes
 ---
@@ -107,8 +108,6 @@ The total number of rows and columns are`r dim(taxi_zones)` in  df. And around `
 
 ### Data Summary
 
-Before preprocessing the number of rows and columns are : `r nrow(unprocessed_data)`, `r ncol(unprocessed_data)`
-
 Here is a summary of the subset taxi data:
 ```{r Summary_if_the_data, echo=F, include=T}
 # Get summary of data
@@ -144,18 +143,6 @@ ggplot(unprocessed_data, aes(sample = tip_amount)) +
 ```
 
 Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
-
-##Drop columns which are not of interest
-The columns which are not used for analysis can be deleted.
-```{r Drop_columns }
-#colnames(unprocessed_data)
-#create a list of columns that are needed
-cols = c("DOLocationID", "PULocationID", "VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime", "passenger_count", "trip_distance", "RatecodeID", "payment_type", "fare_amount", "tip_amount", "total_amount")
-#keep only the columns of list created above
-unprocessed_data = subset(unprocessed_data, select = cols )
-#colnames(unprocessed_data)
-
-```
 
 ## Column Creation
 
@@ -311,8 +298,6 @@ ggplot(data = processed_df, aes(x=factor(0), per_tip)) +
 ```
 
 **Observation :** All outliers are removed after treatment
-
-After preprocessing the number of rows and columns are : `r nrow(processed_df)`, `r ncol(processed_df)`
 
 Here is the structure, summary, and the first few rows of the processed dataset: 
 
@@ -622,8 +607,8 @@ Let us analyse the pickup period.
 # Create barplot for trip counts based on Pickup_Time
 ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Trip Frequency")
 
-# Tip Ratio vs Pickup Time Period
-ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+# Plot tip percentage by Pickup_Time
+ggplot(data = processed_df, aes(x = pickup_period, y = per_tip, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -641,7 +626,7 @@ ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar
 
 
 # Plot tip percentage by Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+ggplot(data = processed_df, aes(x = drop_period, y = per_tip, fill = drop_period)) + ggtitle("Tip Percentage by Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -705,8 +690,8 @@ p-value observed is approximately zero of Evening-Morning and Evening-Afternoon 
 
 There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
-#plot a frequency of Tip Ratio vs trip duration histogram
-ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Tip Ratio Based on Duration") + xlab("Trip Frequency") +
+#plot a frequency of tip paid vs trip duration histogram
+ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Trip Counts Based on Duration") + xlab("trip duration") +
 ylab("Trip Frequency")  + scale_fill_gradient("Count", low="blue", high="red")
 ```
 
@@ -734,6 +719,7 @@ The last factor that we chose for our study is distance travelled and we try to 
 ```{r dist_summary, include = T, echo = F}
 
 a <- summary(processed_df$trip_distance)
+a
 names(a)
 ```
 First we take a look at summary of Trip Distance column... It shows that min is `r a[['Min.']]`,  max is `r a[['Max.']]` and mean is `r a[['Mean']]`, however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
