@@ -301,6 +301,7 @@ str(processed_df)
 # finding correlation between tip amount & distance travelled
 cor(processed_df$tip_fare_ratio, processed_df$trip_distance, method="pearson") 
 cor(processed_df$tip_fare_ratio, processed_df$trip_duration, method="pearson") 
+
 ```
 ```{r dist_code, include = T, echo = F}
 # Subset data 
