@@ -217,7 +217,8 @@ Below is the summary of the random sampled dataset:
 
 ```{r Summary_of_the_unprocessed_data, echo=F, include=T}
 # Get summary of data
-summaryy <- data.frame("Dtype" = sapply(unprocessed_data,class), "MAX" = apply(unprocessed_data,2,max),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean))
+summaryy <- data.frame("Dtype" = sapply(unprocessed_data,typeof),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean), "MAX" = apply(unprocessed_data,2,max))
+
 kable(summaryy)
 ```
   
@@ -237,7 +238,7 @@ ggplot(unprocessed_data, aes(sample = tip_amount)) +
   ggtitle("QQ plot for tip amount") 
 ```
 
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers. As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, 15% is the tipping standard (Azar, 2007). As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
 
 ## Outlier detection and treatment
 
@@ -283,7 +284,7 @@ Below is the summary of the processed data:
 ```{r Summary_of_processed_data, echo=F, include=T}
 # Get summary of data
 
-summary_after <- data.frame("Dtype" = sapply(processed_df,typeof), "MAX" = apply(processed_df,2,max),"MIN" = apply(processed_df,2,min), "MEDIAN" = apply(processed_df,2,median),  "MEAN" = apply(processed_df,2,mean))
+summary_after <- data.frame("Dtype" = sapply(processed_df,typeof), "MIN" = apply(processed_df,2,min), "MEDIAN" = apply(processed_df,2,median),  "MEAN" = apply(processed_df,2,mean), "MAX" = apply(processed_df,2,max))
 kable(summary_after)
 
 ```
@@ -305,9 +306,22 @@ After checking normality and treating outlier the scope of the initial question 
 
 PUT ONLY THE RELEVANT GRAPHS HERE, ONE FOR EACH OF YOUR VARIABLES
 
-For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05. While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
 
+```{r anova_tipratio_location}
+# Run ANOVA
+anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
+# Print ANOVA results
+anova_tiprat_pu
+
+# Run ANOVA
+anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
+
+# Print ANOVA results
+anova_tiprat_do
+```
+
+For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05 (the p-values are `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` for pickup and dropoff locations, respectively). While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
 
 ```{r tipratio_plot, include = T, echo = T}
 # Plot tip ratio by pickup location
@@ -389,6 +403,18 @@ Similarly we check the distribution for the vendor ID and run t test to check th
 # Conclusion
 ## Based on EDA can you begin to sketch out an answer to your question? - EVERYONE ON SUNDAY
 
+We can summarize our results in this table:
+
+I CREATED ROWS AND COLUMNS, SIMPLY FILL IN YOUR ROW WITH THE RELEVANT INFORMATION
+
+Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
+-----|-----|-----|--------|--------|  
+pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
+dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
+AMNA | ANOVA | number | means are equal | reject H0 |  
+pickup time | ANOVA | number | means are equal | reject H0 |  
+dropoff time| ANOVA | number | means are equal | reject H0 |  
+TANAYA | ANOVA | number | means are equal | reject H0 |  
 
 next steps:
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, XXXXXXX. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
