@@ -63,115 +63,6 @@ unprocessed_data = read.csv("../Data/trips_zones_20000_v2.csv")
 taxi_zones <- read.csv("../Data/taxi_zone_lookup.csv")
 ```
 
-
-# Introduction
-
-Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
-
-Our study looks at what affects the amount of tip paid to the driver. This is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn & Greenberg, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxicab drivers from refusing service, service refusal still happens (New York City Taxi and Limousine Commission, n.d.; Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxicab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
-
-# Literature Review
-
-Tips can be defined as voluntary payments—in addition to the obligatory transaction amount—usually in the form of money from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done on tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
-
-Tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel, 2007). Economic reasons for tipping include providing an economic incentive for a higher quality of service (Flath, 2012) and wealth--although there are varying viewpoints amongst customers and waiters about the effect of a customer’s wealth on tip amount (Harris, 1995). Noneconomic factors include the idea of tipping being a social norm, where not tipping can cause a customer to feel guilty or embarrassed and where tipping can lead to positive feelings (Azar, 2010). Furthermore, tipping is also influenced by the fact that some customers recognize that their servers depend on tips to supplement their income.
-
-Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010). The extent to which the quality of service, however, affects the tip amount is unclear. Through interviews, Lynn (2001) found that service quality greatly affects a customer’s decision to tip. Alternatively, Azar (2007) stresses the need to consider what is said during an interview versus what a customer actually does. While a customer may in principle agree with the fact that tips should depend on the quality of service, in an actual situation, the social norm of tipping may take precedence over that principle.
-
-Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is a deeply embedded social norm not subject to changes in weather.
-
-## Taxicab Tipping
-
-There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017). Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, adding that the quality of the taxi service is not dependent on the driver.
-
-Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship is small, it is statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) find that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers observed that African-American drivers often received one-third of the tip received by white drivers. They also find that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
-
-## Previous NYC Taxicab Data Analysis
-
-Other non-tipping work related to the NYC dataset have been conducted, especially in regards to location, For example, Zhan, Hasan, Ukkusuri, and Kamga (2013) used the dataset to estimate potential travel times between a pick up and drop off location. Neutens, Delafontaine, Scott, and De Maeyer (2012) used the dataset to conduct a spatio-temporal analysis of taxi trips in New York City. The authors designed and introduced a new system that enables users to visualize taxi trips based on pick up and drop off locations.
-
-Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and find that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempted to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
-
-## Relationship to Current Project
-
-In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip. Focusing on the variables provided in the NYC taxicab dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
-
-As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. First, passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can thereby impact the amount of tipping; each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2004). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether by gender or race--which can affect their access to resources (Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
-
-# Dataset Description
-
-## Dataset Source
-  The source dataset used for the project was taken from the New York city government website.
-
-  Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
-
-  The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
-  
-  The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly sampled and selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations.
-
-## About the Dataset
-
-Before preprocessing the number of rows and columns is : `r nrow(unprocessed_data)`,`r ncol(unprocessed_data)`
-
-Below is the summary of the random sampled dataset:
-
-```{r Summary_of_the_unprocessed_data, echo=F, include=T}
-# Get summary of data
-summaryy <- data.frame("Dtype" = sapply(unprocessed_data,class), "MAX" = apply(unprocessed_data,2,max),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean))
-kable(summaryy)
-```
-  
-The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
-
-## Dataset Processing
-
-### Outliers and normality test
-
-Below is the boxplot of the tip amount which we are interested for our analysis. 
-
-```{r unprocessed tip amount boxplot, echo=T, include=T}
-ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
-  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
-  labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
-```
-
-Below is the QQ plot for the normality check of the tip amount.
-
-```{r tipamount_distr, echo=F, include=T}
-# Create qqplot
-ggplot(unprocessed_data, aes(sample = tip_amount)) + 
-  stat_qq() + 
-  stat_qq_line() +
-  ggtitle("QQ plot for tip amount") 
-```
-
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
-
-As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
-
-### Outlier detection and treatment
-
-  It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
-1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
-2. payment type = Only credit card details have corresponding tip amount value. Hence we will analysing only credit card payment types
-3. fare_amount = Data has negative fare amount, such entries are outliers hence removed
-4. passenger count = According to the law maximum 7 passengers are allowed in a taxi
-5. trip distance = there are some observation with 0 trip distance, maybe a cancelled taxi. These observations are not considered for the analysis
-6. trip duration = the values >=37 and <=0 fall outside the boxplot. These are removed.
-Using the boxplot, we removed the outliers from the dataset. 
-
-Apart from this data lying outside the interquantile range for ratio of tip to the fare amount was removed. 
-  
-  Below is the summary of the processed data:
-  
-To summarize after removing outliers and creating new features we have 11881 observations and 33 features. 
-
-After getting a good understanding of the data initial problem statement of idenitfying and anlaysing various factors attributing to tip amount paid to the driver was refined to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and fare amount paid by credit cards*
-  
-Analysis: The dataset provides a location ID that corresponds to a taxi zone in each of the five boroughs. These nominal variables do not provide much value in its integer format since we do not know the geographical locations of each location ID. We downloaded a taxi zone and ID dataset that provides the boroughs for each location ID. The dataset also indicates the specific neighborhoods within each borough. We merged that dataset to the taxi dataset to identify the borough for both pick up and drop off.
-  
-  Analysis: Pickup and Dropoff was in datetime format we changed it to categorical data with 4 values involving division of day into 4 major periods namely “Morning”, “Afternoon”, “Evening” or “Night”. Further we also calculated the trip duration in minutes based on these two columns, for our analysis.
-
 ```{r Drop_columns }
 #colnames(unprocessed_data)
 #create a list of columns that are needed
@@ -273,6 +164,123 @@ while (length(boxplot(processed_df$tip_fare_ratio)$out) != 0){
   dim(processed_df)
 }
 ```
+
+
+# Introduction
+
+Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
+
+Our study looks at what affects the amount of tip paid to the driver. This is relevant for a few reasons. Tips are an important part of the service industry, which includes taxicab drivers (Devaraj & Patel, 2017; Azar, 2007; Azar, 2010; Flynn & Greenberg, 2012). In general, tips average around 15% and generate billions of dollars each year (Azar, 2007). Thus, knowing the likelihood and the amount of tips have the potential to provide greater financial certainty for workers. In addition, despite New York law preventing taxicab drivers from refusing service, service refusal still happens (New York City Taxi and Limousine Commission, n.d.; Rivoli & Jorgensen, 2018). It is possible that drivers making assumptions about how likely a customer is to tip (Ayres, Vars, & Zakariya, 2005). Finally, taxicab data can also provide valuable information on city life, city culture, human behavior, and various socioeconomic variables such as economic activity (Ferreira, Poco, Vo, Freire, & Silva, 2013).
+
+# Literature Review
+
+Tips can be defined as voluntary payments—in addition to the obligatory transaction amount—usually in the form of money from the customer to service worker who performs a service for them (Devaraj & Patel, 2017). There has been substantial research done on tipping in the restaurant industry, mostly through empirical studies (Azar, 2007).
+
+Tipping behavior can be explained by both economic and noneconomic factors (Devaraj & Patel, 2007). Economic reasons for tipping include providing an economic incentive for a higher quality of service (Flath, 2012) and wealth--although there are varying viewpoints amongst customers and waiters about the effect of a customer’s wealth on tip amount (Harris, 1995). Noneconomic factors include the idea of tipping being a social norm, where not tipping can cause a customer to feel guilty or embarrassed and where tipping can lead to positive feelings (Azar, 2010). Furthermore, tipping is also influenced by the fact that some customers recognize that their servers depend on tips to supplement their income.
+
+Finally, gratitude or appreciation of service was cited as a reason (Azar, 2010). The extent to which the quality of service, however, affects the tip amount is unclear. Through interviews, Lynn (2001) found that service quality greatly affects a customer’s decision to tip. Alternatively, Azar (2007) stresses the need to consider what is said during an interview versus what a customer actually does. While a customer may in principle agree with the fact that tips should depend on the quality of service, in an actual situation, the social norm of tipping may take precedence over that principle.
+
+Another point of disagreement amongst researchers is the effect of weather on tip amounts. Flynn and Greenberg (2012) found that there is no statistically significant relationship between the two variables. They instead argue that tipping is a deeply embedded social norm not subject to changes in weather.
+
+## Taxicab Tipping
+
+There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017). Devaraj and Patel (2017) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Flath (2012) agrees, adding that the quality of the taxi service is not dependent on the driver.
+
+Various factors have been claimed to affect taxicab tipping. For instance, Devaraj and Patel (2017), who used NYC taxicab datasets, argue that taxicab tipping is associated with weather. While the relationship is small, it is statistically significant: The sunnier the weather, the greater amount of tipping. Moreover, Ayres et al. (2005) find that there is a racial disrimination in tipping. Conducting their study in New Hampshire, the researchers observed that African-American drivers often received one-third of the tip received by white drivers. They also find that African-American and Hispanic passengers also tended to tip less than their white counterparts. They conclude by hypothesizing that this may be more of an indicator of wealth.
+
+## Previous NYC Taxicab Data Analysis
+
+Other non-tipping work related to the NYC dataset have been conducted, especially in regards to location, For example, Zhan, Hasan, Ukkusuri, and Kamga (2013) used the dataset to estimate potential travel times between a pick up and drop off location. Neutens, Delafontaine, Scott, and De Maeyer (2012) used the dataset to conduct a spatio-temporal analysis of taxi trips in New York City. The authors designed and introduced a new system that enables users to visualize taxi trips based on pick up and drop off locations.
+
+Work has also been conducted in relation to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and find that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) attempted to use socioeconomic data in conjunction with the taxicab dataset to model taxi demand, in particular from the NYC airports. Similar to Qian and Ukkusuri (2015), they conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
+
+## Relationship to Current Project
+
+In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping. If weather has the potential to affect behavior for tipping in taxicabs (Devaraj & Patel, 2017), there may be other factors, such as socio-economic variables, that may affect a person’s behavior and thus the amount they choose to tip. Focusing on the variables provided in the NYC taxicab dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005).
+
+As the literature review suggests, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons. First, passengers may use taxis to go from home to work and from work to home (Lee, Shin, & Park, 2008). Location can thereby impact the amount of tipping; each location has its own set of customs and traditions and socioeconomic variables that affect tipping (Lynn, 2004). In this context, a person's wealth may also impact the amount that he or she tips to the taxi driver. While most of this analysis was done on a larger, regional scale, given the distinct cultures of each borough in New York, there may be microcosms of tipping culture found in the city that differ between each borough. Secondly, each individual has their own time-space geography. Some geographers have argued that people's time-spaces are often segregated--whether by gender or race--which can affect their access to resources (Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015). Therefore, this may provide some context into how an individual lives and their background.
+
+# Dataset Description
+
+## Dataset Source
+  The source dataset used for the project was taken from the New York city government website.
+
+  Source: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+
+  The New York City Taxi and Limousine Commission (TLC), was created in 1971.  The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
+  
+  The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 till date. The total size of the complete dataset is around 10 GB. We have randomly sampled and selected 20000 observations from the latest dataset ie 2019 June from Yellow Taxi Records. due to hardware limitations.
+
+## About the Dataset
+
+Before preprocessing the number of rows and columns is : `r nrow(unprocessed_data)`,`r ncol(unprocessed_data)`
+
+Below is the summary of the random sampled dataset:
+
+```{r Summary_of_the_unprocessed_data, echo=F, include=T}
+# Get summary of data
+summaryy <- data.frame("Dtype" = sapply(unprocessed_data,class), "MAX" = apply(unprocessed_data,2,max),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean))
+kable(summaryy)
+```
+  
+The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
+
+## Dataset Processing
+
+### Outliers and normality test
+
+Below is the boxplot of the tip amount which we are interested for our analysis. 
+
+```{r unprocessed tip amount boxplot, echo=T, include=T}
+ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
+  geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
+```
+
+Below is the QQ plot for the normality check of the tip amount.
+
+```{r tipamount_distr, echo=F, include=T}
+# Create qqplot
+ggplot(unprocessed_data, aes(sample = tip_amount)) + 
+  stat_qq() + 
+  stat_qq_line() +
+  ggtitle("QQ plot for tip amount") 
+```
+
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers.
+
+As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
+
+### Outlier detection and treatment
+
+  It is vital to remove outliers from the data to get reliable results. Following filters are applied on the data set:
+  
+1. VendorID = Data has vendor id 4, but according to the data dictionary only 1 and 2 should be present.
+
+2. payment type = Only credit card details have corresponding tip amount value. Hence we will analysing only credit card payment types
+
+3. fare_amount = Data has negative fare amount, such entries are outliers hence removed
+
+4. passenger count = According to the law maximum 7 passengers are allowed in a taxi
+
+5. trip distance = there are some observation with 0 trip distance, maybe a cancelled taxi. These observations are not considered for the analysis
+
+6. trip duration = the values >=37 and <=0 fall outside the boxplot. These are removed.
+Using the boxplot, we removed the outliers from the dataset. 
+
+Apart from this data lying outside the interquantile range for ratio of tip to the fare amount was removed. Below is the histogram of the NYC taxi data ratio of tip after the removal of outliers.
+
+```{r normality check of processed data, echo=T, include=T}
+#ggplot histogram of tip_fare_ratio for processed df
+processed_df %>%
+  ggplot(aes(tip_fare_ratio)) +
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
+  stat_function(fun = dnorm, args = list(mean = mean(processed_df$tip_fare_ratio), sd = sd(processed_df$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+```
+
+Now the data is approximately normally distributed ready to use for analysis. There are lesser points on the left side of the mean.
+  
+
   
 Below is the summary of the processed data:
 
