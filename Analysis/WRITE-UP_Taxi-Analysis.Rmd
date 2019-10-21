@@ -240,7 +240,7 @@ ggplot(unprocessed_data, aes(sample = tip_amount)) +
   ggtitle("QQ plot for tip amount") 
 ```
 
-Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, 15% is the tipping standard (Azar, 2007). As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable.
+Looking at the distribution of raw tip amount, it is clear that it is not normally distributed and that there are some outliers. Generally. raw tip amounts vary because the fare amounts vary. One factor that may not necessarily vary is tipping percentage. In the US, 15% is the tipping standard (Azar, 2007). As the data is not normally distributed, a ratio of tip amount to the fare amount was calculated and used as a dependent variable (hereinafter referred to as "tip ratio").
 
 ## Outlier detection and treatment
 
@@ -402,8 +402,8 @@ processed_df %>%
   ggplot(aes(passenger_count, tip_fare_ratio, fill = passenger_count)) +
   geom_boxplot() +
   theme(legend.position = "none") +
-  labs(y = "Tip ratio", x = "Number of passengers") + 
-  ggtitle("Box plot distribution for ratio of tip amount and passenger count")
+  labs(y = "Tip Ratio", x = "Number of Passengers") + 
+  ggtitle("Box plot distribution for tip ratio and passenger count")
 ```
 
 ```{r anova test for passenger_count, echo=F,  include=F}
@@ -430,19 +430,20 @@ Similarly we check the distribution for the vendor ID and run t test to check th
 
 We can summarize our results in this table:
 
-Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
+Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0* |  
 -----|-----|-----|--------|--------|  
 pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
 pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |  
 dropoff time| ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)`  | means are equal | reject H0 |
-Trip Duration|T-test| `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
-Passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail reject H0 |
-Vendor ID | t test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
+trip duration | T-test| `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
+passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail to reject H0 |
+vendor ID | T-test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
 
-next steps:
-Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, XXXXXXX. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
+* based on based on a significance level of 0.05
+
+Based on our EDA, we can begin to sketch out an answer to our question. It appears that all our variables analyzed except for passenger count have an effect on the tip ratio. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
 
 Based on our literature, where different factors come into play for longer taxicab trips, and our analysis, which reveals that tip ratio is lower for longer trips, there may be a nonlinear relationship. We could potentially use a random forest classifier (which works with categorical data) to build a model and test how well that model would perform.
 
