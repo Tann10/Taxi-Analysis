@@ -442,7 +442,7 @@ ttest_vendor
 
 Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
-# Summarizing the Results 
+## Summarizing the Results 
 
 We can summarize our results in this table:
 
@@ -459,7 +459,7 @@ vendor ID | T-test | `r ttest_vendor$p.value` | means are not equal | reject H0 
 
 *based on based on a significance level of 0.05
 
-## Final Conclusion 
+# Final Conclusion 
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
 
@@ -538,4 +538,4 @@ Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi 
 
 van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
 
-Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
+Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. <i>Transportation Research Part C, 33</i>, 37–49. doi: 10.1016/j.trc.2013.04.001
