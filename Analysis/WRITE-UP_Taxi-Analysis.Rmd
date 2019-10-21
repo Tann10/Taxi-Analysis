@@ -455,7 +455,7 @@ pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1
 dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
 trip duration | T-test | `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
 passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail to reject H0 |
-vendor ID | T-test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
+vendor ID | T-test | `r ttest_vendor$p.value` | means are equal | reject H0 | 
 
 *based on based on a significance level of 0.05
 
