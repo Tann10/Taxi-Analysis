@@ -54,6 +54,8 @@ loadPkg("ggplot2")
 loadPkg("data.table")
 loadPkg("nortest")
 loadPkg("corrplot")
+# centered chart titles
+theme_update(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r read data files}
@@ -316,7 +318,7 @@ long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
 str(long_dist)
 # Applying 2 Sample t-test below
 result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
-# result_t
+# result_t$p.value
 
 ```
 # Analysis

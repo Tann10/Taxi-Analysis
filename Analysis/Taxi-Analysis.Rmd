@@ -849,4 +849,4 @@ e
 # dev.off()
 ```
 
-Honestly speaking I was a bit surprised to see the results that short distance travellers pay more tip in terms of fare percentage amount than those who travelled more miles. I think that this result deserve a separate study on their own, why short distance travellers pay more like maybe because of pshychological reasons or why long distance travellers pay less maybe because of phychological or socio-economic reasons or they are tired of the commute which affects their mood but that is another topic. 
+Honestly speaking we were a bit surprised to see the results that short distance travellers pay more tip in terms of fare percentage amount than those who travelled more miles. We think that this result deserves a separate study of its own, why short distance travellers pay more, like maybe because of pshychological reasons or why long distance travellers pay less maybe because of phychological or socio-economic reasons or they are tired of the commute which affects their mood but that is another topic. 
