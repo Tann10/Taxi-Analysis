@@ -1,5 +1,5 @@
 ---
-title: "Write-Up_Taxi-Analysis"
+title: "Write-Up Taxi-Analysis"
 author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
 date: "`r Sys.Date()`"
 output:
@@ -297,31 +297,36 @@ To summarize, after preprocessing the number of rows and columns are : `r nrow(p
 
 After checking normality and treating outlier the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
 
-## Correlation matrix 
-```{r corr}
-str(processed_df)
+## Correlation Coefficients 
+```{r corr, echo=F, include=F}
 # finding correlation between tip amount & distance travelled
-cor(processed_df$tip_fare_ratio, processed_df$trip_distance, method="pearson") 
-cor(processed_df$tip_fare_ratio, processed_df$trip_duration, method="pearson") 
+corr_dist <- cor(processed_df$tip_fare_ratio, processed_df$trip_distance, method="pearson") 
+corr_dur <- cor(processed_df$tip_fare_ratio, processed_df$trip_duration, method="pearson") 
+```
+For our continuous variables that is trip distance and trip duration first we try to find correlation coefficients to determine if they are related with tip to fare ration. Values obtained are `r format(corr_dist, digits=3)` and `r format(corr_dur, digits=3)` respectively which implies a weak downhill (negative) relationship. The same can be confirmed from scatter plot below.
+
+But since correlation does not mean causation we need to apply statistical tests on these variables to determine if they are related.
+
+```{r scatterplot, echo=F, include=T, message=FALSE, warning=FALSE }
+p1 <- ggplot() +
+      # blue plot
+      geom_point(data=processed_df, aes(x=trip_distance, y=tip_fare_ratio)) + 
+      geom_smooth(data=processed_df, aes(x=trip_distance, y=tip_fare_ratio), fill="blue",
+        colour="darkblue", size=1) + ggtitle("Scatterplot for Distance") 
+      # red plot
+p2 <- ggplot() +    
+      geom_point(data=processed_df, aes(x=trip_duration, y=tip_fare_ratio)) + 
+      geom_smooth(data=processed_df, aes(x=trip_duration, y=tip_fare_ratio), fill="red",
+        colour="red", size=1) + ggtitle("Scatterplot for Duration") 
+require(gridExtra)    # plotting for 2 graphs side by side
+grid.arrange(p1, p2)
 
 ```
-```{r dist_code, include = T, echo = F}
-# Subset data 
-df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
-# Bimodal so divided it into 2 chunks for normalization
-factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
-df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 
-short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
-str(short_dist)
-long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
-str(long_dist)
-# Applying 2 Sample t-test below
-result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
-# result_t$p.value
+# Feature Analysis
 
-```
-# Analysis
+In this section we analyze various factors which may affect the tipping amount paid to the cab drivers using a subset of yellow taxi New York City data pertaining to June 2019.
+
 ## Trip location
 
 ```{r anova_tipratio_location}
@@ -361,15 +366,25 @@ ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borou
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
 
 This tipping behaviour might happen because of psychological reasons e.g. passengers whose average fare amount sums up to $10-$15 would feel guilt-ridden if they pay tip less than $2-$3. On the other hand, those passengers who are already paying big chunks of money from their pockets in the form of fare amount that ranges between $25-$30 per commute would not feel that bad paying the same amount of tip just to cut down their costs. But this is just a guess, there might be a variety of other reasons affecting this particular behaviour. 
-
-```{r box_plot, include = T, echo = T}
-
-# summary(processed_df$trip_distance)
+```{r dist_code, include = F, echo = F}
+# Subset data 
 df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
-
 # converting trip_distance col from numerical to factor type for performing 2-sample t-test
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
-df_dist$trip_distance <- factor_dist 
+df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
+
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+str(short_dist)
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+str(long_dist)
+# Applying 2 Sample t-test below
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+# result_t$p.value
+```
+
+```{r box_plot_dist, include = T, echo = T}
+
+# summary(processed_df$trip_distance)
 
 # box-plot to see who pays more tips 
 e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip_distance)) + 
@@ -378,8 +393,6 @@ e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip
 e
 
 ```
-
-Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
 
 ## Trip duration
 For tip ratio and time period, after running the ANOVA test, we reject the null hypothesis that the means are statistically different at a significance level of 0.05. The graphs for tip ratio vs time period are shown below:
@@ -426,7 +439,7 @@ ttest_vendor
 
 Similarly we check the distribution for the vendor ID and run t test to check the results. The P value `r ttest_vendor$p.value` is > 0.05, hence we fail to reject null hypothesis and conclude that the vendor does affect tip amount
 
-# Conclusion
+# Summarizing the Results 
 
 We can summarize our results in this table:
 
@@ -441,16 +454,23 @@ trip duration | T-test| `r format(trip_duration_ttest$p.value, digits=3)` | mean
 passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail to reject H0 |
 vendor ID | T-test | `r ttest_vendor$p.value` | means are not equal | reject H0 | 
 
+<<<<<<< HEAD
 * based on based on a significance level of 0.05
 
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that all our variables analyzed except for passenger count have an effect on the tip ratio. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
+=======
+##  Final Conclusion 
+
+Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
+
+Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables affect the tip ratio: pickup loation, dropoff location, distance travelled in miles, time of day. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
+>>>>>>> 10f9016eff99d7e7781c919fb1e7c3d2ac903d5a
 
 Based on our literature, where different factors come into play for longer taxicab trips, and our analysis, which reveals that tip ratio is lower for longer trips, there may be a nonlinear relationship. We could potentially use a random forest classifier (which works with categorical data) to build a model and test how well that model would perform.
 
 Linear regression; look at pearson correlation; then build linear model
 
-
-# Considerations and Next Steps
+# Additional Information
 
 ## Dataset Limitations
 
@@ -467,7 +487,7 @@ Like every other data set, our data has also some limitations which may impact t
   <li>Human Errors in Data set: Some of the columns in our data set are prone to human errors. For example, passenger count (the number of passengers in the vehicle) is driver entered value and  might have the potential of some observations being inaccurately recorded.
 </ul>
 
-## Potential Future Work / Additional Data
+## Potential Future Enhancements 
 
 The results obtained by our team can be significantly improved and made more reliable if we were able to gather more features to consider. For instance:
 <ul>
@@ -476,7 +496,6 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Geographical Coordinates: The availability of geographical coordinates data would not only have led us to pinpoint the exact localities/neighborhoods to figure out the tipping intention based on different demographics but also projected this data in the form of visually appealing maps.
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior but we believe that can also serve to play an important part in tipping behavior.
 </ul>
-
 
 # Sources
 
