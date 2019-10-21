@@ -233,7 +233,7 @@ The description of the columns of dataset is [here](https://github.com/Tann10/Ta
 Below is the QQ plot for the normality check of the tip amount.
 
 ```{r tipamount_distr, echo=F, include=T}
-# Create qqplot
+# Create qqplot to check normality
 ggplot(unprocessed_data, aes(sample = tip_amount)) + 
   stat_qq() + 
   stat_qq_line() +
@@ -247,6 +247,7 @@ Looking at the distribution of raw tip amount, it is clear that it is not normal
 Below is the boxplot of the tip amount which we are interested for our analysis. 
 
 ```{r unprocessed tip amount boxplot, echo=T, include=T}
+# Create boxplot of NYC taxi tip amount
 ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
   geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
   labs(x=" ", y = "Tip amount (dollars)") + ggtitle("Boxplot of NYC Taxi Tip Amount")
@@ -309,15 +310,16 @@ But since correlation does not mean causation we need to apply statistical tests
 
 ```{r scatterplot, echo=F, include=T, message=FALSE, warning=FALSE }
 p1 <- ggplot() +
-      # blue plot
+      # blue plot tip ratio vs trip distance
       geom_point(data=processed_df, aes(x=trip_distance, y=tip_fare_ratio)) + 
       geom_smooth(data=processed_df, aes(x=trip_distance, y=tip_fare_ratio), fill="blue",
-        colour="darkblue", size=1) + ggtitle("Scatterplot for Distance") 
-      # red plot
+        colour="darkblue", size=1) + ggtitle("Scatterplot for Distance") + xlab("Trip Distance (miles)") + ylab("Tip Ratio")
+
+# red plot tip ratio vs trip duration
 p2 <- ggplot() +    
       geom_point(data=processed_df, aes(x=trip_duration, y=tip_fare_ratio)) + 
       geom_smooth(data=processed_df, aes(x=trip_duration, y=tip_fare_ratio), fill="red",
-        colour="red", size=1) + ggtitle("Scatterplot for Duration") 
+        colour="red", size=1) + ggtitle("Scatterplot for Duration") + xlab("Trip Duration (minutes)") + ylab("Tip Ratio")
 require(gridExtra)    # plotting for 2 graphs side by side
 grid.arrange(p1, p2)
 
@@ -373,6 +375,7 @@ df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
 df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 
+# Subset data
 short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
 str(short_dist)
 long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
@@ -383,7 +386,7 @@ result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 ```
 
 ```{r box_plot_dist, include = T, echo = T}
-
+# get summary
 # summary(processed_df$trip_distance)
 
 # box-plot to see who pays more tips 
