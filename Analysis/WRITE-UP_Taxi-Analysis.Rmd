@@ -457,7 +457,7 @@ vendor ID | T-test | `r ttest_vendor$p.value` | means are not equal | reject H0 
 * based on based on a significance level of 0.05
 
 Based on our EDA, we can begin to sketch out an answer to our question. It appears that all our variables analyzed except for passenger count have an effect on the tip ratio. In this context, we can incorporate these variables into our future analysis. We can conduct a linear regression analysis--which allows for the independent (x) variable to be either categorical or continuous--on each individual variable and with all relevant variables combined (i.e. such as through the use of interaction terms) to see how they affect the tip ratio.
-=======
+
 ##  Final Conclusion 
 
 Now that our dataset is fully understood after performing the EDA, we know exactly what anomalies were present in our data set, which allowed us to frame our hypothesis accordingly and figure out the feautures most relevant to our scope of analysis. Now the next step is to find a good fitting model (if one exists).
