@@ -213,7 +213,7 @@ The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Record
 
 ## About the Dataset
 
-Before preprocessing the number of rows and columns is : `r nrow(unprocessed_data)`,`r ncol(unprocessed_data)`
+Before preprocessing the number of rows and columns is: `r nrow(unprocessed_data)`,`r ncol(unprocessed_data)`.
 
 Below is the summary of the random sampled dataset:
 
@@ -365,9 +365,9 @@ ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borou
 
 ## Trip distance
 
-While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
+While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay larger share of tips relative to their overall fare than those who travel longer distances within NYC radius. 
 
-This tipping behaviour might happen because of psychological reasons e.g. passengers whose average fare amount sums up to $10-$15 would feel guilt-ridden if they pay tip less than $2-$3. On the other hand, those passengers who are already paying big chunks of money from their pockets in the form of fare amount that ranges between $25-$30 per commute would not feel that bad paying the same amount of tip just to cut down their costs. But this is just a hypothesis; there might be a variety of other reasons affecting this particular behaviour, as discussed in our literature review. 
+This tipping behaviour might happen because of psychological reasons e.g. passengers whose average fare amount sums up to $10-$15 would feel guilt-ridden if they pay less than $2-$3 in tips. On the other hand, those passengers who are already paying high fare amounts, such as $25-$30 per commute, would not feel that bad paying the same amount of tip just to cut down their costs. However, this is just a hypothesis; there might be a variety of other reasons affecting this particular behaviour, as discussed in our literature review (Sun & McIntosh, 2016). 
 
 ```{r dist_code}
 # Subset data 
@@ -442,7 +442,7 @@ ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
 ttest_vendor
 ```
 
-Similarly, we check the distribution for the vendor ID and run t test to check the results. The P value `format(r ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
+Similarly, we check the distribution for the vendor ID and run t test to check the results. The P value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
 
 ## Summarizing the Results 
 
@@ -456,8 +456,8 @@ distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | r
 pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
 trip duration | T-test | `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
-passenger count | ANOVA | `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` | means are equal | fail to reject H0 |
-vendor ID | T-test | `r ttest_vendor$p.value` | means are equal | reject H0 | 
+passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | fail to reject H0 |
+vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equal | reject H0 | 
 
 *based on a significance level of 0.05
 
@@ -482,7 +482,7 @@ Like every other data set, our data has also some limitations that may impact th
       <li>Central Limit Theorem (CLT) states that sample means of moderately large samples are often well-approximated by a normal distribution even if the data is not normally distributed. Our dataset contains a significant amount of observations thus qualifying it to be approximately normal under CLT. 
     </ul>
   <li>No Cash Tip data provided: The data available contains tip amounts paid through credit card mode only. There might be observations where Tip amount column contains a value of zero when in reality the driver of cab was presented with tip in cash mode, but since it was not recorded in data collected by TLC we cannot be sure, consequently rendering our data to be incomplete. 
-  <li>Limited Time and resources: We chose to work on only four features affecting the variation in the tipping ratio, but there could be a plethora of other reasons too. For example, weather: A bright sunny and breezy day would encourage short distance commuters to walk to their destinations instead of using cab service altogether or it might positively impact the mood of the taxi passengers inclining them to tip more. However, limited time restricted us to work only on few of data points available.
+  <li>Limited Time and resources: We chose to work on only four features affecting the variation in the tipping ratio, but there could be a plethora of other reasons too. For example, weather (Devaraj & Patel, 2007): A bright sunny and breezy day would encourage short distance commuters to walk to their destinations instead of using cab service altogether or it might positively impact the mood of the taxi passengers inclining them to tip more. However, limited time restricted us to work only on few of data points available.
   <li>Human Errors in Data set: Some of the columns in our data set are prone to human errors. For example, passenger count (the number of passengers in the vehicle) is driver entered value and  might have the potential of some observations being inaccurately recorded.
 </ul>
 
