@@ -204,7 +204,10 @@ As the literature review suggests, the provided dataset may provide some proxies
 
 # Dataset Description
 
+Now we are going to share the original source from where data was gathered, along with a brief summary of what is contained inside this data set.
+
 ## Dataset Source
+
 The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website, which is an official NYC government webpage (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
 The New York City Taxi and Limousine Commission (TLC), was created in 1971. The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
@@ -228,9 +231,11 @@ The description of the columns of dataset is [here](https://github.com/Tann10/Ta
 
 # Data Pre-Processing
 
+Now that we have had a glimpse of our data set, next step is to clean it for drawing accurate conclusions. These are the steps that we followed:
+
 ## Normality check
 
-Below is the QQ plot for the normality check of the tip amount.
+Below is the QQ plot for the normality check of the dependent variable i.e. tip amount.
 
 ```{r tipamount_distr, echo=F, include=T}
 # Create qqplot to check normality
@@ -244,7 +249,7 @@ Looking at the distribution of raw tip amount, it is clear that it is not normal
 
 ## Outlier detection and treatment
 
-Below is the boxplot of the tip amount which we are interested for our analysis:
+Below is the boxplot of the tip amount which we are interested in for our analysis:
 
 ```{r unprocessed tip amount boxplot, echo=F, include=T}
 # Create boxplot of NYC taxi tip amount
@@ -280,8 +285,6 @@ processed_df %>%
 
 Now the data is approximately normally distributed ready to use for analysis. There are lesser points on the left side of the mean.
   
-
-  
 Below is the summary of the processed data:
 
 ```{r Summary_of_processed_data, echo=F, include=T}
@@ -296,7 +299,7 @@ The description of the columns of dataset is [here](https://github.com/Tann10/Ta
   
 To summarize, after preprocessing the number of rows and columns are : `r nrow(processed_df)`, `r ncol(processed_df)`
 
-After checking normality and treating outliers, the scope of the initial question was changed to *analysing if factors such as location, duration, passenger count and time of the day affect to the ratio of the tip amount and the fare amount paid by credit card*
+After checking normality and treating outliers, the scope of the initial question was changed to analysing if factors such as location, duration, passenger count and time of the day affect the ratio of the tip amount and the fare amount paid by credit card.
 
 ## Correlation Coefficients 
 ```{r corr, echo=F, include=F}
@@ -327,7 +330,7 @@ grid.arrange(p1, p2)
 
 # Feature Analysis
 
-In this section, we analyze various factors that may affect the tipping amount paid to the cab drivers using a subset of yellow taxi New York City data pertaining to June 2019.
+In this section, we analyze various factors shortlisted from our data set that may affect the tipping amount paid to the cab drivers.
 
 ## Trip location
 
@@ -470,6 +473,8 @@ Based on our EDA, we can begin to sketch out an answer to our question: It appea
 Based on our literature, where different factors come into play for longer taxicab trips, and our analysis, which reveals that tip ratio is lower for longer trips, there may be a nonlinear relationship. We could potentially use a random forest classifier (which appears to work with categorical data) to build a model and test how well that model would perform.
 
 # Additional Information
+
+After completion of our analysis we would like to mention some constraints and their implications, along with additions to the data set which would have led to more reliable results.
 
 ## Dataset Limitations
 
