@@ -496,7 +496,7 @@ The results obtained by our team can be significantly improved and made more rel
   <li>Gender Dynamics, Personality type, Mood: These factors due to their qualitative nature receive limited attention as predictor of tipping behavior, but we believe that can also serve to play an important part in tipping behavior.
 </ul>
 
-# Sources
+# References
 
 Ayres, I., Vars, F. E., & Zakariya, N. (2005). To insure prejudice: Racial disparities in taxicab tipping. <i>Yale Law Journal, 114</i>, 1613–1674. doi: 10.2139/ssrn.401201
 
