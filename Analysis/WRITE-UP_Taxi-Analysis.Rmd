@@ -246,7 +246,7 @@ Looking at the distribution of raw tip amount, it is clear that it is not normal
 
 Below is the boxplot of the tip amount which we are interested for our analysis. 
 
-```{r unprocessed tip amount boxplot, echo=T, include=T}
+```{r unprocessed tip amount boxplot, echo=F, include=T}
 # Create boxplot of NYC taxi tip amount
 ggplot(data = unprocessed_data, aes(x = "", y = tip_amount)) + 
   geom_boxplot(color="#00AFBB")+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
@@ -356,7 +356,7 @@ trip_duration_ttest <- t.test(processed_df$tip_fare_ratio, processed_df$trip_dur
 
 For tip ratio and location, after running the ANOVA test, we reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05 (the p-values are `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` for pickup and dropoff locations, respectively). While the means are overall not the same, the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant. The graphs for tip ratio and location are shown below:
 
-```{r tipratio_plot, include = T, echo = T}
+```{r tipratio_plot, include = T, echo = F}
 # Plot tip ratio by pickup location
 ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 # Plot tip ratio by dropoff location
@@ -368,7 +368,7 @@ ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borou
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay more tips than those who travel longer distances within NYC radius. 
 
 This tipping behaviour might happen because of psychological reasons e.g. passengers whose average fare amount sums up to $10-$15 would feel guilt-ridden if they pay tip less than $2-$3. On the other hand, those passengers who are already paying big chunks of money from their pockets in the form of fare amount that ranges between $25-$30 per commute would not feel that bad paying the same amount of tip just to cut down their costs. But this is just a guess, there might be a variety of other reasons affecting this particular behaviour. 
-```{r dist_code, include = F, echo = F}
+```{r dist_code}
 # Subset data 
 df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
 # converting trip_distance col from numerical to factor type for performing 2-sample t-test
@@ -385,7 +385,7 @@ result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 # result_t$p.value
 ```
 
-```{r box_plot_dist, include = T, echo = T}
+```{r box_plot_dist, include = T, echo = F}
 # get summary
 # summary(processed_df$trip_distance)
 
@@ -399,7 +399,7 @@ e
 
 ## Trip duration
 For tip ratio and time period, after running the ANOVA test, we reject the null hypothesis that the means are statistically different at a significance level of 0.05. The graphs for tip ratio vs time period are shown below:
-```{r time period_plot, include = T, echo = T}
+```{r time period_plot, include = T, echo = F}
 # Tip Ratio vs Pickup Time Period
 ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
 # Plot tip percentage by Dropoff_Time
@@ -409,7 +409,7 @@ ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop
 ## Number of passenger and vendor ID
 
 We hyothesize that there is a relationship between the number of passenger in the car and  to the tip amount paid to the driver. The passenger count varies from 0 to 6.
-```{r hypothesis testing for passenger count and vendor, echo=T,  include=T}
+```{r hypothesis testing for passenger count and vendor, echo=F,  include=T}
 # Create factor data
 processed_df$passenger_count <- as.factor(processed_df$passenger_count)
 
@@ -422,7 +422,7 @@ processed_df %>%
   ggtitle("Box plot distribution for tip ratio and passenger count")
 ```
 
-```{r anova test for passenger_count, echo=F,  include=F}
+```{r anova test for passenger_count}
 
 # ANOVA test
 anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
@@ -431,7 +431,7 @@ summary(anova_tip_amount)
 ```
 The mean of all the groups of passenger count is not varying much. Also the results of anova gives the P value `r summary(anova_tip_amount)[[1]][["Pr(>F)"]][1]` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
 
-```{r t test for vendor ID, echo=F, include=F}
+```{r t test for vendor ID}
 # Create factor
 processed_df$VendorID <- as.factor(processed_df$VendorID)
 
