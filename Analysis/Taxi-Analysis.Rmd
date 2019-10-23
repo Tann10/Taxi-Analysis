@@ -460,11 +460,11 @@ summary(anova_tipper_do)
 ```
 
 ```{r tipper_plot, include = T, echo = T}
-# Plot tip percentage by pickup location
-ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by pickup location
+ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 
-# Plot tip percentage by dropoff location
-ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by dropoff location
+ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
 
 **Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
