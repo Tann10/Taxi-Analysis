@@ -439,24 +439,24 @@ We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
+anova_tipper_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
-anova_tiprat_pu
+anova_tipper_pu
 
 # Summarize ANOVA
-summary(anova_tiprat_pu)
+summary(anova_tipper_pu)
 ```
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
+anova_tipper_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
-anova_tiprat_do
+anova_tipper_do
 
 # Summarize ANOVA
-summary(anova_tiprat_do)
+summary(anova_tipper_do)
 ```
 
 ```{r tipper_plot, include = T, echo = T}
@@ -467,7 +467,7 @@ ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borou
 ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
 ```
 
-**Observation**: The p-values are `r summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+**Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
@@ -608,10 +608,10 @@ Let us analyse the pickup period.
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Trip Frequency")
 
-# Plot tip percentage by Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
+# Tip to Fare Ratio vs Pickup Time Period
+ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip to Fare Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip to Fare Ratio")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -625,10 +625,10 @@ Let us analyse the dropoff period.
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Trip Frequency")
 
-# Plot Tip ratio vs Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+# Plot Tip to Fare Ratio vs Dropoff_Time
+ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip to Fare Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip to Fare Ratio")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -691,6 +691,7 @@ p-value observed is approximately zero of Evening-Morning and Evening-Afternoon 
 ## Impacts of Duration of trip on Tip
 
 There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
+
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
 #plot a frequency of tip paid vs trip duration histogram
 ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Trip Counts Based on Duration") + xlab("trip duration") +

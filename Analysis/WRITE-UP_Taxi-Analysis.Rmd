@@ -72,7 +72,6 @@ cols = c("DOLocationID", "PULocationID", "VendorID", "tpep_pickup_datetime", "tp
 #keep only the columns of list created above
 unprocessed_data = subset(unprocessed_data, select = cols )
 #colnames(unprocessed_data)
-
 ```
 
 ```{r Tip_ratio}
@@ -222,9 +221,16 @@ Below is the summary of the random sampled dataset:
 
 ```{r Summary_of_the_unprocessed_data, echo=F, include=T}
 # Get summary of data
-summaryy <- data.frame("Dtype" = sapply(unprocessed_data,typeof),"MIN" = apply(unprocessed_data,2,min), "MEDIAN" = apply(unprocessed_data,2,median),  "MEAN" = apply(unprocessed_data,2,mean), "MAX" = apply(unprocessed_data,2,max))
 
-kable(summaryy)
+#data types of the columns
+kable(t(sapply(unprocessed_data,class)))
+unprocessed_data <- na.omit(unprocessed_data)
+
+#Mean Median Min Max Mode of numeric columns
+summary1<- data.frame("Min" = t(unprocessed_data %>% summarise_if(is.numeric, min)), "Mean" = t(unprocessed_data %>% summarise_if(is.numeric, mean)), "Median" = t(unprocessed_data %>% summarise_if(is.numeric, median)), "Max" = t(unprocessed_data %>% summarise_if(is.numeric, max)))
+
+kable(summary1)
+
 ```
   
 The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary.xlsx).
@@ -290,11 +296,17 @@ Below is the summary of the processed data:
 ```{r Summary_of_processed_data, echo=F, include=T}
 # Get summary of data
 
-summary_after <- data.frame("Dtype" = sapply(processed_df,typeof), "MIN" = apply(processed_df,2,min), "MEDIAN" = apply(processed_df,2,median),  "MEAN" = apply(processed_df,2,mean), "MAX" = apply(processed_df,2,max))
-kable(summary_after)
+#data types of the columns
+kable(t(sapply(processed_df,class)))
+
+#Mean Median Min Max Mode of numeric columns
+summary2<- data.frame("Min" = t(processed_df %>% summarise_if(is.numeric, min)), "Mean" = t(processed_df %>% summarise_if(is.numeric, mean)), "Median" = t(processed_df %>% summarise_if(is.numeric, median)), "Max" = t(processed_df %>% summarise_if(is.numeric, max)))
+
+kable(summary2)
 
 ```
-  
+
+
 The description of the columns of dataset is [here](https://github.com/Tann10/Taxi-Analysis/blob/master/Data/Data_Dictionary_After_Processing.xlsx).
   
 To summarize, after preprocessing the number of rows and columns are : `r nrow(processed_df)`, `r ncol(processed_df)`
@@ -458,7 +470,6 @@ dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[
 distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
 pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
-trip duration | T-test | `r format(trip_duration_ttest$p.value, digits=3)` | means are equal | reject H0 |
 passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | fail to reject H0 |
 vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equal | reject H0 | 
 
