@@ -59,7 +59,7 @@ loadPkg("corrplot")
 
 # Introduction
 
-This r markdown file contains code used to analyse New York City yellow taxi dataset. Our objective is to identify what factors contribute to tipping amount for taxicab services.
+This R markdown file contains code used to analyse New York City yellow taxi dataset. Our objective is to identify what factors contribute to tipping amount for taxicab services.
 
 # Data preprocessing
 
@@ -439,35 +439,35 @@ We used the ANOVA test. Here are the results:
 
 ```{r anova_tip-percent_pu, include = T, echo = F}
 # Run ANOVA
-anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
+anova_tipper_pu <- aov(tip_fare_ratio ~ Borough_pu, data = processed_df)
 
 # Print ANOVA results
-anova_tiprat_pu
+anova_tipper_pu
 
 # Summarize ANOVA
-summary(anova_tiprat_pu)
+summary(anova_tipper_pu)
 ```
 
 ```{r anova_tip-percent_do, include = T, echo = F}
 # Run ANOVA
-anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
+anova_tipper_do <- aov(tip_fare_ratio ~ Borough_do, data = processed_df)
 
 # Print ANOVA results
-anova_tiprat_do
+anova_tipper_do
 
 # Summarize ANOVA
-summary(anova_tiprat_do)
+summary(anova_tipper_do)
 ```
 
 ```{r tipper_plot, include = T, echo = T}
-# Plot tip percentage by pickup location
-ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Percentage by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by pickup location
+ggplot(data = processed_df, aes(x = Borough_pu, y = tip_fare_ratio, fill = Borough_pu)) + ggtitle("Tip Ratio by Pickup Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 
-# Plot tip percentage by dropoff location
-ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Percentage by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Percentage")
+# Plot tip ratio by dropoff location
+ggplot(data = processed_df, aes(x = Borough_do, y = tip_fare_ratio, fill = Borough_do)) + ggtitle("Tip Ratio by Dropoff Location") + geom_boxplot() + xlab("Location") + ylab("Tip Ratio")
 ```
 
-**Observation**: The p-values are `r summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
+**Observation**: The p-values are `r summary(anova_tipper_pu)[[1]][["Pr(>F)"]][[1]]` and `r summary(anova_tipper_do)[[1]][["Pr(>F)"]][[1]]` for pick up and drop off, respectively. Both of these are smaller than a significance level of 0.05 (a 0.95 confidence level). Thus, we can reject the null hypothesis that the means are the same and say the means are statistically different at a significance level of 0.05.
 
 Because they are significant, the next step would be to conduct a Tukey's HSD test, which looks at each pair of variables to see if they are significantly different. Here are the results from that analysis:
 
@@ -608,10 +608,10 @@ Let us analyse the pickup period.
 
 ```{r Pickup_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = pickup_period, fill = pickup_period)) + geom_bar() + ggtitle("Trip Counts Based on Pickup Time") + xlab("Time Period") + ylab("Trip Frequency")
 
-# Plot tip percentage by Pickup_Time
-ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip Percentage by Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Trip Frequency")
+# Tip to Fare Ratio vs Pickup Time Period
+ggplot(data = processed_df, aes(x = pickup_period, y = tip_fare_ratio, fill = pickup_period)) + ggtitle("Tip to Fare Ratio vs Pickup Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip to Fare Ratio")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Pickup Time", col = "#CCFF99")
@@ -625,10 +625,10 @@ Let us analyse the dropoff period.
 
 ```{r Dropoff_time1, include=TRUE, echo = FALSE}
 # Create barplot for trip counts based on Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Tip Percentage")
+ggplot(data = processed_df, aes(x = drop_period, fill = drop_period)) + geom_bar() + ggtitle("Trip Counts Based on Dropoff Time") + xlab("Time Period") + ylab("Trip Frequency")
 
-# Plot Tip ratio vs Dropoff_Time
-ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip Ratio")
+# Plot Tip to Fare Ratio vs Dropoff_Time
+ggplot(data = processed_df, aes(x = drop_period, y = tip_fare_ratio, fill = drop_period)) + ggtitle("Tip to Fare Ratio vs Dropoff Time Period") + geom_boxplot() + xlab("Time Period") + ylab("Tip to Fare Ratio")
 
 # Create qqplot
 qqnorm(processed_df$pickup_hrs, main = "Q-Q plot of Dropoff Time", col = "#FFCC99")
@@ -691,6 +691,7 @@ p-value observed is approximately zero of Evening-Morning and Evening-Afternoon 
 ## Impacts of Duration of trip on Tip
 
 There might be a relation between the tip paid vs trip duration. We plot a tip paid vs trip duration histogram to observe the pattern.
+
 ```{r Trip_duration2, include=TRUE, echo = FALSE}
 #plot a frequency of tip paid vs trip duration histogram
 ggplot(data = processed_df, aes(x=trip_duration)) + geom_histogram(stat="bin", position = "stack",binwidth = 0.5, col="red", aes(fill=..count..))+ ggtitle("Trip Counts Based on Duration") + xlab("trip duration") +
@@ -715,11 +716,10 @@ Concluding that we have enough evidence to reject the Null hypothesis in favor o
 ## Tip payed vs distance travelled by passengers
 
 
-The last factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
+The last independent factor that we chose for our study is distance travelled and we try to investigate if it has anything to do with amount tipped. Or in other words does amount tipped varies for passengers who travel shorter distances vs those who travel longer distances.
 
-First we take a look at summary of Trip Distance column... It shows that min is .. max.. mean and median however are closer to min as compared to max which indicates that we have some outliers in distance data but we should not worry because it is our independent variable.
+First we take a look at summary of Trip Distance column. We can visually confirm these values through a box plot and histogram. 
 
-This can visually be confirmed through a box plot and histogram. 
 ```{r dist_boxplot, include = T, echo = F}
 
 theme_update(plot.title = element_text(hjust = 0.5))   # once I run this line all chart titles onwards will be centered instead of default left-aligned
@@ -740,7 +740,6 @@ b
 ```
 
 
-
 Now coming towards our second and dependent variable. Tip percentage ...
 
 ```{r tip_summary, include = T, echo = F}
@@ -758,12 +757,12 @@ c
 
 It looks pretty normal. It also fulfills the CLT for normality so with a normal dependent variable we are all set to move forward.  
 
-Now that I know my variables, the question is which test to apply and why when comparing tip paid with distance travelled?
-I cannot use z-test because I dont know population mean & std dev. I also cannot use one sample t-test because I dont have a pre-determined population mean or some other theoretically derived value with which i could compare the mean value of my observed sample. 
+Now that we know my variables, the question is which test to apply and why when comparing tip paid with distance travelled?
+Z-test cannot be used because we dont know population mean & std dev. We also cannot use one sample t-test because we dont have a pre-determined population mean or some other theoretically derived value with which could be compared with the mean value of our observed sample. 
 
 So the simplest option that comes to mind is to use independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
 
-But before applying the 2 sampled t-test, I first need to fulfull some conditions for reliable results. i.e. random, normal, independent
+But before applying the 2 sampled t-test, we first need to fulfull some conditions for reliable results. i.e. random, normal, independent
 
 Assumptions/Criteria to be fulfilled:
 <ul>
@@ -785,22 +784,19 @@ df_dist <- subset(processed_df, select=c(tip_fare_ratio, trip_distance))
 glimpse(df_dist)  # 12000 + obs
 ```
 
-Since i am going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so just for my own ease subsetting my variables into a new df.
+Since we are going to work on 2 variable cols, dependent variable is tip_amount & independent variable is trip_distance so just for own own ease subsetting my variables into a new df.
 
-Since I chose "2-sample" t test, I divide my independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. I divided this column into 2 factors based on mean value of distance travelled. you can see that from glimpse of dataset provided. 
+Since we chose "2-sample" t test, we divide independent variable i.e. distances covered in miles during each ride into "two factored categorical data" Short & Long. We divided this column into 2 factors based on mean value of distance travelled, which can be seen from glimpse of dataset provided. 
 
 ```{r factor_dist, include = T, echo = F}
-
-
 # Bimodal so divided it into 2 chunks for normalization
 
 factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
 df_dist$trip_distance <- factor_dist   # assigning factored col to the original df
 glimpse(df_dist)
-
 ```
 
-Here is a Histogram where we combined values from both of my variables. It shows the frequency of %tips paid by both short & long distance travellers. We can get a rough idea about the means of tip percentages paid by both short & long distance travellers but we cant be sure. Just Judging by the shape of this plot, I am unable to say whether there is a Relationship between these two variables or not.
+Here is a Histogram where we combined values from both of my variables. It shows the frequency of %tips paid by both short & long distance travellers. We can get a rough idea about the means of tip percentages paid by both short & long distance travellers but we cant be sure. Just Judging by the shape of this plot, we are unable to say whether there is a Relationship between these two variables or not.
 
 ```{r plot_both_var, include = T, echo = F}
 
@@ -831,10 +827,9 @@ str(long_dist)
 result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 print(result_t)
 ```
-With Significance level set to 5%, I get a P-value very close to zero. Concluding that I have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+With Significance level set to 5%, we get a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
-
-We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so I plot a box plot to compare means of both groups. 
+We can do a little bit of further investigation as to whether they these 2 categories of travellers tip more or less when compared with each other so we plot a box plot to compare means of both groups. 
 
 ```{r box_plot, include = T, echo = F}
 
