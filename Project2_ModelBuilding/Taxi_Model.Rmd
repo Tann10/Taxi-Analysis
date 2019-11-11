@@ -57,6 +57,9 @@ loadPkg("nortest")
 loadPkg("corrplot")
 ```
 
+NOTE: USE TAXIDATA_PROCESSED_PROJECT2.CSV DATASET UNDER DATA FOLDER
+
+
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
