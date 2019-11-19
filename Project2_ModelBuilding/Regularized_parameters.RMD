@@ -1,0 +1,47 @@
+---
+title: "Regularized_models"
+author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    fig_height: 4.5
+    fig_width: 7
+    highlight: tango
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_float: true
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r }
+df <- read.csv("../Data/taxidata_processed_project2.csv")
+colnames(df)
+
+df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "Zone", "pickup_period", "drop_period", "trip_duration")]
+
+# convert to factors:
+
+df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
+```
+
+```{ r scale parameter}
+scalediris <- as.data.frame(scale(iris[1:4], center = TRUE, scale = TRUE))
+```
+
+```{r correlation}
+
+cor(df_sub[,(!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
+
+```
+
+Linear model:
+```{r }
+lm(tip_fare_ratio ~ VendorID, data=df_sub)
+```
