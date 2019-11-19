@@ -20,6 +20,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r loadlibraries}
+loadPkg("glmnet")
+loadPkg("dplyr")
+```
+
 ```{r }
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 colnames(df)
@@ -27,21 +32,34 @@ colnames(df)
 df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "Zone", "pickup_period", "drop_period", "trip_duration")]
 
 # convert to factors:
-
 df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
+
+#numerical_col:
+condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
-```{ r scale parameter}
-scalediris <- as.data.frame(scale(iris[1:4], center = TRUE, scale = TRUE))
+```{r scale parameter}
+df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
 ```
 
 ```{r correlation}
-
-cor(df_sub[,(!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
+cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
 
 ```
 
-Linear model:
+Ridge model:
 ```{r }
-lm(tip_fare_ratio ~ VendorID, data=df_sub)
+
+df_sub <- na.omit(df_sub)
+x=model.matrix(tip_fare_ratio~.,df_sub)[,-1]
+y = df_sub %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
+
+grid = 10^seq(10, -2, length = 100)
+ridge_mod = glmnet(x, y, alpha = 0, lambda = grid)
+dim(coef(ridge_mod))
+plot(ridge_mod)
+
 ```
