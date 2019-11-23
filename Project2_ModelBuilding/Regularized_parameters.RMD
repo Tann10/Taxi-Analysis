@@ -29,6 +29,8 @@ loadPkg("caret")
 loadPkg("dataPreparation")
 ```
 
+# Data
+
 ```{r }
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 colnames(df)
@@ -41,11 +43,20 @@ df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "pas
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
+# EDA
+
 ```{r correlation}
 cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
 
 ```
 
+```{r scatterplots}
+
+```
+
+# Model building
+
+## Test train split
 To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps.
 
 To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
@@ -64,6 +75,7 @@ X_test <- df_sub[-training.samples, names(df_sub) != "tip_fare_ratio"]
 y_test <- df_sub[-training.samples, "tip_fare_ratio"]
 ```
 
+## Scaling variables 
 We need to scale the test and train using train scale values hence first compute scales 
 ```{r scale parameter}
 scales <- build_scales(dataSet = train.data, cols = c(names(df_sub[,condition])), verbose = TRUE)
@@ -84,6 +96,22 @@ train <- cbind(X_train, data.frame("tip_fare_ratio" = y_train))
 test <- cbind(X_test, data.frame("tip_fare_ratio" = y_test))
 ```
 
+## Variable selection
+Stepwise regression
+```{r }
+loadPkg("olsrr")
+model <- lm(tip_fare_ratio ~ ., data = train)
+k <- ols_step_all_possible(model)
+plot(k)
+
+write.csv(k, "stepwise_models.csv")
+
+write.csv(train, "train.csv")
+
+```
+
+## Linear models:
+### Ridge
 Ridge model:
 ```{r }
 #train <- na.omit(train)
@@ -110,6 +138,8 @@ dim(coef(ridge_mod))
 plot(ridge_mod)
 
 ```
+
+
 
 ```{r }
 wmape <- function(actual,pred){
@@ -139,9 +169,7 @@ data.frame(
 check <- data.frame(predictions, test.data$tip_fare_ratio)
 ```
 
-
-
-Computing lasso regression
+### Lasso
 ```{r }
 # Find the best lambda using cross-validation
 set.seed(123) 
@@ -171,6 +199,5 @@ data.frame(
 ```
 
 
-```{}
+### Elastic net
 
-```
