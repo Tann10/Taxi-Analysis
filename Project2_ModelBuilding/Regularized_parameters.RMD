@@ -228,7 +228,7 @@ data.frame(
 
 ```{r dt_growtreelog}
 # Grow decision tree
-taxi_tree_log <- tree(tip_fare_ratio ~ ., data = train_set, mindev=0.001)
+taxi_tree_log <- tree(tip_fare_ratio ~ ., data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree_log)
@@ -263,8 +263,8 @@ optimal_tree_log_train = which(log_prune_train_seq$dev == min(log_prune_train_se
 min(log_prune_train_seq$size[optimal_tree_log_train])
 ```
 ```{r}
-tree_pred = predict(taxi_tree_log, newdata = test_set)
-tree_mse1 = (sum((tree_pred - test_set$tip_fare_ratio)^2)) / nrow(test_set)
+tree_pred = predict(taxi_tree_log, newdata = test)
+tree_mse1 = (sum((tree_pred - test$tip_fare_ratio)^2)) / nrow(test)
 tree_mse1
 ```
 
