@@ -201,3 +201,48 @@ data.frame(
 
 ### Elastic net
 
+
+### Decision Tree
+
+```{r dt_growtreelog}
+# Grow decision tree
+taxi_tree_log <- tree(tip_fare_ratio ~ ., data = train_set, mindev=0.001)
+
+# Print results
+summary(taxi_tree_log)
+#png(file="test.png",width=900,height=900,res=30)
+plot(taxi_tree_log) 
+text(taxi_tree_log, cex = 0.75) #2.5)
+#dev.off()
+```
+
+
+```{r dt_prunetreelogtrain}
+# Return best pruned tree with 5 leaves, evaluating error on training data 
+taxi_tree_log_prune_train <- prune.tree(taxi_tree_log, best = 5)
+
+# Print results
+summary(taxi_tree_log_prune_train)
+plot(taxi_tree_log_prune_train) 
+text(taxi_tree_log_prune_train, cex = 0.75)
+
+
+# Create sequence of pruned tree sizes/errors
+log_prune_train_seq = prune.tree(taxi_tree_log)
+
+# Plot error versus plot size
+plot(log_prune_train_seq) 
+
+log_prune_train_seq$dev # Vector of error
+# rates for prunings, in order
+optimal_tree_log_train = which(log_prune_train_seq$dev == min(log_prune_train_seq$dev)) 
+# Positions of
+# optimal (with respect to error) trees 
+min(log_prune_train_seq$size[optimal_tree_log_train])
+```
+```{r}
+tree_pred = predict(taxi_tree_log, newdata = test_set)
+tree_mse1 = (sum((tree_pred - test_set$tip_fare_ratio)^2)) / nrow(test_set)
+tree_mse1
+```
+
