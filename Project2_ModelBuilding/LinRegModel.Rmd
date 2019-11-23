@@ -71,31 +71,32 @@ taxiprocor
 #correlation plot
 corrplot.mixed(taxiprocor,lower.col="black", number.cex = 0.7)
 
-fit1 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
+fit0 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
+summary(fit0)
+vif(fit0)
+plot(fit0)
+
+fit1 <- lm(tip_fare_ratio ~ fare_amount+trip_duration, data = taxipro )
 summary(fit1)
 vif(fit1)
 plot(fit1)
 
-
-fit2 <- lm(tip_fare_ratio ~ fare_amount+pickup_hrs, data = taxipro )
+fit2 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance, data = taxipro )
 summary(fit2)
 vif(fit2)
 plot(fit2)
 
-
-fit3 <- lm(tip_fare_ratio ~ fare_amount+pickup_hrs+dropoff_hrs, data = taxipro )
+fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs, data = taxipro )
 summary(fit3)
 vif(fit3)
 plot(fit3)
 
-
-
-fit4 <- lm(tip_fare_ratio ~ fare_amount+pickup_hrs+dropoff_hrs+trip_distance, data = taxipro )
+fit4 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID, data = taxipro )
 summary(fit4)
 vif(fit4)
 plot(fit4)
 
-fit5 <- lm(tip_fare_ratio ~ fare_amount+pickup_hrs+dropoff_hrs+trip_distance+DOLocationID, data = taxipro )
+fit5 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs, data = taxipro )
 summary(fit5)
 vif(fit5)
 plot(fit5)
@@ -103,7 +104,7 @@ plot(fit5)
 
 ```{r include=TRUE}
 
-fit6 <- lm(tip_fare_ratio ~ fare_amount+pickup_hrs+dropoff_hrs+trip_distance+DOLocationID+PULocationID, data = taxipro )
+fit6 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs+DOLocationID, data = taxipro )
 summary(fit6)
 vif(fit6)
 plot(fit6)
@@ -144,7 +145,7 @@ head(Model_Summary)
 
 We learned how to use ANOVA to test mean values (quantitative variable) of different samples. We can actually also use ANOVA to compare linear models:
 ```{r modelanova, echo=FALSE}
-anova(fit1,fit2,fit3,fit4,fit5,fit6)
+anova(fit0,fit1,fit2,fit3,fit4,fit5,fit6)
 ```
 
 Predict
