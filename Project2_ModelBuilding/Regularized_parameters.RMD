@@ -43,6 +43,26 @@ df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "pas
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
+```{r }
+pr.out =prcomp(df_sub[, condition] , scale =TRUE)
+summary(pr.out)
+pr.out
+```
+
+```{r}
+pca_scaled = data.frame(scale(dfpca))
+vars = setdiff(colnames(pca_scaled), "cal")
+
+train <- as.matrix(pca_scaled[,vars])
+princ <- prcomp(train,center = TRUE,scale. = TRUE) 
+
+pca_scaled.pc <- as.data.frame(predict(princ,train), stringsAsFactors = FALSE)
+pca_scaled.pc$cal <- pca_scaled$cal  # append back the y-column
+
+head(pca_scaled.pc)
+
+```
+
 # EDA
 
 ```{r correlation}
@@ -97,6 +117,7 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = y_test))
 ```
 
 ## Variable selection
+
 Stepwise regression
 ```{r }
 loadPkg("olsrr")
