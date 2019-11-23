@@ -18,48 +18,186 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
-```{r loadlibraries}
+```{r loadlibraries, include=F}
+loadPkg("tidyverse")
 loadPkg("glmnet")
 loadPkg("dplyr")
+loadPkg("caret")
+loadPkg("dataPreparation")
 ```
+
+# Data
 
 ```{r }
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 colnames(df)
 
-df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "Zone", "pickup_period", "drop_period", "trip_duration")]
+df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
-# convert to factors:
 df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
 
 #numerical_col:
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
-```{r scale parameter}
-df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
-```
+# EDA
 
 ```{r correlation}
 cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
 
 ```
 
+```{r scatterplots}
+
+```
+
+# Model building
+
+## Test train split
+To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps.
+
+To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
+
+```{r split the data}
+# Split the data into training and test set
+set.seed(123)
+training.samples <- df_sub$tip_fare_ratio %>%
+  createDataPartition(p = 0.8, list = FALSE)
+
+# Build X_train, y_train, X_test, y_test
+X_train <- df_sub[training.samples, names(df_sub) != "tip_fare_ratio"]
+y_train <- df_sub[training.samples, "tip_fare_ratio"]
+
+X_test <- df_sub[-training.samples, names(df_sub) != "tip_fare_ratio"]
+y_test <- df_sub[-training.samples, "tip_fare_ratio"]
+```
+
+## Scaling variables 
+We need to scale the test and train using train scale values hence first compute scales 
+```{r scale parameter}
+scales <- build_scales(dataSet = train.data, cols = c(names(df_sub[,condition])), verbose = TRUE)
+print(scales)
+
+#df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
+```
+
+All the variables has different means and std hence we need to scale all the variables present above.
+
+```{r }
+X_train <- fastScale(dataSet = X_train, scales = scales, verbose = TRUE)
+X_test <- fastScale(dataSet = X_test, scales = scales, verbose = TRUE)
+```
+
+```{r }
+train <- cbind(X_train, data.frame("tip_fare_ratio" = y_train))
+test <- cbind(X_test, data.frame("tip_fare_ratio" = y_test))
+```
+
+## Variable selection
+Stepwise regression
+```{r }
+loadPkg("olsrr")
+model <- lm(tip_fare_ratio ~ ., data = train)
+k <- ols_step_all_possible(model)
+plot(k)
+
+write.csv(k, "stepwise_models.csv")
+
+write.csv(train, "train.csv")
+
+```
+
+## Linear models:
+### Ridge
 Ridge model:
 ```{r }
-
-df_sub <- na.omit(df_sub)
-x=model.matrix(tip_fare_ratio~.,df_sub)[,-1]
-y = df_sub %>%
+#train <- na.omit(train)
+x=model.matrix(tip_fare_ratio~.,train)[,-1]
+y = train %>%
   select(tip_fare_ratio) %>%
   unlist() %>%
   as.numeric()
 
-grid = 10^seq(10, -2, length = 100)
-ridge_mod = glmnet(x, y, alpha = 0, lambda = grid)
+#grid = 10^seq(10, -2, length = 100)
+set.seed(123)
+cv_lamda = cv.glmnet(x, y, alpha = 0)
+# Display the best lambda value
+cv_lamda$lambda.min
+
+
+# Fit the final model on the training data
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
+# Display regression coefficients
+coef(ridge_model)
+
+predict.glmnet(ridge_mod, s = 0, exact = T)
 dim(coef(ridge_mod))
 plot(ridge_mod)
 
 ```
+
+
+
+```{r }
+wmape <- function(actual,pred){
+           wmape <- (mean(abs(actual - pred))/sum(abs(actual)))*100
+           mape <- mean(abs((actual - pred)/actual))*100
+           return (wmape)
+}
+
+mape <- function(actual,pred){
+           mape <- mean(abs((actual - pred)/actual))*100
+           return (mape)
+}
+
+```
+
+```{r }
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  wmape = wmape(predictions, test.data$tip_fare_ratio),
+  mape = mape(predictions, test.data$tip_fare_ratio),
+  Rsquare = R2(predictions, test.data$tip_fare_ratio)
+)
+
+check <- data.frame(predictions, test.data$tip_fare_ratio)
+```
+
+### Lasso
+```{r }
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1)
+# Display the best lambda value
+lasso_cv$lambda.min
+```
+
+```{r }
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+# Dsiplay regression coefficients
+coef(lasso_model)
+```
+
+
+```{r }
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  wmape = wmape(predictions, test.data$tip_fare_ratio),
+  mape = mape(predictions, test.data$tip_fare_ratio),
+  Rsquare = R2(predictions, test.data$tip_fare_ratio)
+)
+```
+
+
+### Elastic net
+
