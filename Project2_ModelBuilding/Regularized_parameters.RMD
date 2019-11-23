@@ -93,10 +93,51 @@ y = train %>%
   unlist() %>%
   as.numeric()
 
-grid = 10^seq(10, -2, length = 100)
-ridge_mod = glmnet(x, y, alpha = 0, lambda = grid)
+#grid = 10^seq(10, -2, length = 100)
+set.seed(123)
+cv_lamda = cv.glmnet(x, y, alpha = 0)
+# Display the best lambda value
+cv_lamda$lambda.min
+
+
+# Fit the final model on the training data
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
+# Display regression coefficients
+coef(ridge_model)
+
 predict.glmnet(ridge_mod, s = 0, exact = T)
 dim(coef(ridge_mod))
 plot(ridge_mod)
 
 ```
+
+```{r }
+wmape <- function(actual,pred){
+           wmape <- (mean(abs(actual - pred))/sum(abs(actual)))*100
+           mape <- mean(abs((actual - pred)/actual))*100
+           return (wmape)
+}
+
+mape <- function(actual,pred){
+           mape <- mean(abs((actual - pred)/actual))*100
+           return (mape)
+}
+
+```
+
+```{r }
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  wmape = wmape(predictions, test.data$tip_fare_ratio),
+  mape = mape(predictions, test.data$tip_fare_ratio),
+  Rsquare = R2(predictions, test.data$tip_fare_ratio)
+)
+
+check <- data.frame(predictions, test.data$tip_fare_ratio)
+```
+
+
+
