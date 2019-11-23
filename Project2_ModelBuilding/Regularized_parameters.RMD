@@ -50,15 +50,29 @@ To simulate a train and test set we are going to split randomly this data set in
 set.seed(123)
 training.samples <- df_sub$tip_fare_ratio %>%
   createDataPartition(p = 0.8, list = FALSE)
-train.data  <- df_sub[training.samples, ]
-test.data <- df_sub[-training.samples, ]
+
+# Build X_train, y_train, X_test, y_test
+X_train <- df_sub[training.samples, names(df_sub) != "tip_fare_ratio"]
+y_train <- df_sub[training.samples, "tip_fare_ratio"]
+
+X_test <- df_sub[-training.samples, names(df_sub) != "tip_fare_ratio"]
+y_test <- df_sub[-training.samples, "tip_fare_ratio"]
 ```
 
 We need to scale the test and train using train scale values hence first compute scales 
 ```{r scale parameter}
 scales <- build_scales(dataSet = train.data, cols = c(names(df_sub[,condition])), verbose = TRUE)
+print(scales)
 
-df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
+#df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
+```
+
+All the variables has different means and std hence we need to scale all the variables present above.
+
+```{r }
+X_train <- fastScale(dataSet = tes, scales = scales, verbose = TRUE)
+X_test <- fastScale(dataSet = X_test, scales = scales, verbose = TRUE)
+
 ```
 
 ```{r correlation}
