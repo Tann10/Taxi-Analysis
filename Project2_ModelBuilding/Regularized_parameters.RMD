@@ -141,3 +141,36 @@ check <- data.frame(predictions, test.data$tip_fare_ratio)
 
 
 
+Computing lasso regression
+```{r }
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1)
+# Display the best lambda value
+lasso_cv$lambda.min
+```
+
+```{r }
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+# Dsiplay regression coefficients
+coef(lasso_model)
+```
+
+
+```{r }
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  wmape = wmape(predictions, test.data$tip_fare_ratio),
+  mape = mape(predictions, test.data$tip_fare_ratio),
+  Rsquare = R2(predictions, test.data$tip_fare_ratio)
+)
+```
+
+
+```{}
+
+```
