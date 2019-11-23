@@ -27,6 +27,7 @@ loadPkg("glmnet")
 loadPkg("dplyr")
 loadPkg("caret")
 loadPkg("dataPreparation")
+loadPkg("factoextra")
 ```
 
 # Data
@@ -98,7 +99,7 @@ y_test <- df_sub[-training.samples, "tip_fare_ratio"]
 ## Scaling variables 
 We need to scale the test and train using train scale values hence first compute scales 
 ```{r scale parameter}
-scales <- build_scales(dataSet = train.data, cols = c(names(df_sub[,condition])), verbose = TRUE)
+scales <- build_scales(dataSet = X_train, cols = c(names(df_sub[,condition])), verbose = TRUE)
 print(scales)
 
 #df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
