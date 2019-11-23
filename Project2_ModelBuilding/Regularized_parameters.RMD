@@ -41,6 +41,11 @@ df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "pas
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
+```{r correlation}
+cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
+
+```
+
 To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps.
 
 To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
@@ -70,22 +75,20 @@ print(scales)
 All the variables has different means and std hence we need to scale all the variables present above.
 
 ```{r }
-X_train <- fastScale(dataSet = tes, scales = scales, verbose = TRUE)
+X_train <- fastScale(dataSet = X_train, scales = scales, verbose = TRUE)
 X_test <- fastScale(dataSet = X_test, scales = scales, verbose = TRUE)
-
 ```
 
-```{r correlation}
-cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
-
+```{r }
+train <- cbind(X_train, data.frame("tip_fare_ratio" = y_train))
+test <- cbind(X_test, data.frame("tip_fare_ratio" = y_test))
 ```
 
 Ridge model:
 ```{r }
-
-df_sub <- na.omit(df_sub)
-x=model.matrix(tip_fare_ratio~.,df_sub)[,-1]
-y = df_sub %>%
+#train <- na.omit(train)
+x=model.matrix(tip_fare_ratio~.,train)[,-1]
+y = train %>%
   select(tip_fare_ratio) %>%
   unlist() %>%
   as.numeric()
