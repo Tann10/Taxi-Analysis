@@ -18,27 +18,42 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
-```{r loadlibraries}
+```{r loadlibraries, include=F}
+loadPkg("tidyverse")
 loadPkg("glmnet")
 loadPkg("dplyr")
+loadPkg("caret")
 ```
 
 ```{r }
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 colnames(df)
 
-df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "Zone", "pickup_period", "drop_period", "trip_duration")]
+df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
-# convert to factors:
 df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
 
 #numerical_col:
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
+```{r split the data}
+# Split the data into training and test set
+set.seed(123)
+training.samples <- df_sub$tip_fare_ratio %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- df_sub[training.samples, ]
+test.data <- df_sub[-training.samples, ]
+```
+
+We need to scale the test and train using train scale values hence first compute scales 
 ```{r scale parameter}
+
+scales <- build_scales(dataSet = X_train, cols = c("capital_gain", "capital_loss"), verbose = TRUE)
+
 df_sub[,condition] <- as.data.frame(scale(df_sub[,condition], center = TRUE, scale = TRUE))
 ```
 
@@ -59,6 +74,7 @@ y = df_sub %>%
 
 grid = 10^seq(10, -2, length = 100)
 ridge_mod = glmnet(x, y, alpha = 0, lambda = grid)
+predict.glmnet(ridge_mod, s = 0, exact = T)
 dim(coef(ridge_mod))
 plot(ridge_mod)
 
