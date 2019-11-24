@@ -361,7 +361,7 @@ Reference: https://daviddalpiaz.github.io/r4sl/elastic-net.html
 
 ```{r dt_growtreelog}
 # Grow decision tree
-taxi_tree_log <- tree(tip_fare_ratio ~ ., data = train, mindev=0.001) # Borough_do_Staten Island + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + passenger_count_0 + passenger_count_1 + passenger_count_2 + passenger_count_3 + passenger_count_4 + passenger_count_5 + passenger_count_6 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night
+taxi_tree_log <- tree(log(tip_fare_ratio) ~ ., data = train, mindev=0.001) # Borough_do_Staten Island + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + passenger_count_0 + passenger_count_1 + passenger_count_2 + passenger_count_3 + passenger_count_4 + passenger_count_5 + passenger_count_6 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night
 
 # Print results
 summary(taxi_tree_log)
@@ -388,16 +388,76 @@ log_prune_train_seq = prune.tree(taxi_tree_log)
 # Plot error versus plot size
 plot(log_prune_train_seq) 
 
-log_prune_train_seq$dev # Vector of error
-# rates for prunings, in order
+# Get vector of error
+log_prune_train_seq$dev
+
+# Identify optimal tree where vector of error is minimized
 optimal_tree_log_train = which(log_prune_train_seq$dev == min(log_prune_train_seq$dev)) 
-# Positions of
-# optimal (with respect to error) trees 
+# Positions of optimal (with respect to error) trees 
 min(log_prune_train_seq$size[optimal_tree_log_train])
 ```
-```{r}
-tree_pred = predict(taxi_tree_log, newdata = test)
-tree_mse1 = (sum((tree_pred - test$tip_fare_ratio)^2)) / nrow(test)
-tree_mse1
+
+```{r dt_accuracylog}
+# Predict test values using tree
+tree_pred_log = predict(taxi_tree_log, newdata = test)
+
+# Obtain MSE
+tree_mse_log = (sum((tree_pred_log - test$tip_fare_ratio)^2)) / nrow(test)
+
+# Print MSE
+tree_mse_log
+```
+
+```{r dt_growtree}
+# Grow decision tree
+taxi_tree <- tree(tip_fare_ratio ~ ., data = train, mindev=0.001)
+
+# Print results
+summary(taxi_tree)
+#png(file="test.png",width=900,height=900,res=30)
+plot(taxi_tree) 
+text(taxi_tree, cex = 0.75) #2.5)
+#dev.off()
+```
+
+
+```{r dt_prunetreetrain}
+# Return best pruned tree with 5 leaves, evaluating error on training data 
+taxi_tree_prune_train <- prune.tree(taxi_tree, best = 5)
+
+# Print results
+summary(taxi_tree_prune_train)
+plot(taxi_tree_prune_train) 
+text(taxi_tree_prune_train, cex = 0.75)
+
+
+# Create sequence of pruned tree sizes/errors
+prune_train_seq = prune.tree(taxi_tree)
+
+# Plot error versus plot size
+plot(prune_train_seq) 
+
+# Get vector of error
+prune_train_seq$dev
+
+# Identify optimal tree where vector of error is minimized
+optimal_tree_train = which(prune_train_seq$dev == min(prune_train_seq$dev))
+
+# Positions of optimal (with respect to error) trees 
+min(prune_train_seq$size[optimal_tree_train])
+```
+
+```{r dt_accuracy}
+# Predict test values using tree
+tree_pred = predict(taxi_tree, newdata = test)
+
+# Obtain MSE
+tree_mse = (sum((tree_pred - test$tip_fare_ratio)^2)) / nrow(test)
+
+# Print MSE
+tree_mse
+
+# Get MAPE
+mape(test$tip_fare_ratio, tree_pred)
 ```
 
