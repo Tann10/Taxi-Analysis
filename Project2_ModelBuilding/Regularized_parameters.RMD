@@ -29,6 +29,8 @@ loadPkg("caret")
 loadPkg("dataPreparation")
 loadPkg("factoextra")
 loadPkg("dummies")
+loadPkg("olsrr")
+
 ```
 
 ```{r udf}
@@ -160,14 +162,10 @@ summary(model)
 
 Stepwise regression
 ```{r }
-# loadPkg("olsrr")
 # model <- lm(tip_fare_ratio ~ ., data = train)
 # k <- ols_step_all_possible(model)
 # plot(k)
-# 
-# write.csv(k, "stepwise_models.csv")
-# 
-# write.csv(train, "train.csv")
+
 
 ```
 
