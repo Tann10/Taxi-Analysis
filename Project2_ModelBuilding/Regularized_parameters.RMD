@@ -30,6 +30,7 @@ loadPkg("dataPreparation")
 loadPkg("factoextra")
 loadPkg("dummies")
 loadPkg("olsrr")
+loadPkg("tree")
 ```
 
 ```{r udf}
@@ -269,7 +270,7 @@ predictions <- lasso_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
 data.frame(
   mape = mape(predictions, test$tip_fare_ratio),
-  Rsquare = R2(predictions, test$tip_fare_ratio)
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
 ```
 
