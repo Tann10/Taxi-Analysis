@@ -160,14 +160,14 @@ summary(model)
 
 Stepwise regression
 ```{r }
-loadPkg("olsrr")
-model <- lm(tip_fare_ratio ~ ., data = train)
-k <- ols_step_all_possible(model)
-plot(k)
-
-write.csv(k, "stepwise_models.csv")
-
-write.csv(train, "train.csv")
+# loadPkg("olsrr")
+# model <- lm(tip_fare_ratio ~ ., data = train)
+# k <- ols_step_all_possible(model)
+# plot(k)
+# 
+# write.csv(k, "stepwise_models.csv")
+# 
+# write.csv(train, "train.csv")
 
 ```
 
@@ -194,9 +194,9 @@ ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 # Display regression coefficients
 coef(ridge_model)
 
-predict.glmnet(ridge_mod, s = 0, exact = T)
-dim(coef(ridge_mod))
-plot(ridge_mod)
+# predict.glmnet(ridge_mod, s = 0, exact = T)
+# dim(coef(ridge_mod))
+# plot(ridge_mod)
 
 ```
 
@@ -217,17 +217,17 @@ mape <- function(actual,pred){
 ```
 
 ```{r }
-# Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
-predictions <- ridge_model %>% predict(x.test) %>% as.vector()
-# Model performance metrics
-data.frame(
-  wmape = wmape(predictions, test.data$tip_fare_ratio),
-  mape = mape(predictions, test.data$tip_fare_ratio),
-  Rsquare = R2(predictions, test.data$tip_fare_ratio)
-)
-
-check <- data.frame(predictions, test.data$tip_fare_ratio)
+# # Make predictions on the test data
+# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+# predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+# # Model performance metrics
+# data.frame(
+#   wmape = wmape(predictions, test.data$tip_fare_ratio),
+#   mape = mape(predictions, test.data$tip_fare_ratio),
+#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
+# )
+# 
+# check <- data.frame(predictions, test.data$tip_fare_ratio)
 ```
 
 ### Lasso
@@ -248,20 +248,99 @@ coef(lasso_model)
 
 
 ```{r }
-# Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
-predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-# Model performance metrics
-data.frame(
-  wmape = wmape(predictions, test.data$tip_fare_ratio),
-  mape = mape(predictions, test.data$tip_fare_ratio),
-  Rsquare = R2(predictions, test.data$tip_fare_ratio)
-)
+# # Make predictions on the test data
+# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+# predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+# # Model performance metrics
+# data.frame(
+#   wmape = wmape(predictions, test.data$tip_fare_ratio),
+#   mape = mape(predictions, test.data$tip_fare_ratio),
+#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
+# )
 ```
 
 
 ### Elastic net
 
+Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune lambda and alpha. 
+
+```{r }
+# The glmnet package allows to tune λ via cross-validation for a fixed α, but it does not support α-tuning, so we will turn to caret for this job.
+# simply use all of the data as training data
+
+set.seed(123) 
+# setting up 5-fold Cross Validation strategy for resampling
+cv_5 = trainControl(method = "cv", number = 5)
+
+# We then use train() with method = "glmnet" which is actually fitting the elastic net
+elnet_model = train(
+  tip_fare_ratio ~ ., data = df_sub,
+  method = "glmnet",
+  trControl = cv_5
+)
+# note that since we are using caret() directly, it is taking care of dummy variable creation. So unlike before when we used glmnet(), we do not need to manually create a model matrix.
+
+elnet_model
+
+```
+
+So by default, train() from caret library tried only three α values, 0.10, 0.55, and 1. Here, the best result uses α=0.55, so this result is somewhere between ridge and lasso (slightly more closer to lasso than ridge).
+
+Now we expand our model search. First we expand the feature space to include all interactions. Also by setting tuneLength = 10, we will search 10 α values and 10 λ values for each.
+```{r }
+elnet_model_exp = train(
+  tip_fare_ratio ~ .^2, data = df_sub,
+  method = "glmnet",
+  trControl = cv_5,
+  tuneLength = 10
+)
+```
+
+The results will be very large so to deal with this, a quick helper function is used to extract the row with the best tuning parameters.
+
+```{r }
+# helper function to extract row with the best tuning parameters.
+get_best_result = function(caret_fit) {
+  best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
+  best_result = caret_fit$results[best, ]
+  rownames(best_result) = NULL
+  best_result
+}
+
+# calling helper fn on trained object
+get_best_result(elnet_model_exp)
+
+```
+
+
+```{r }
+# Find the best lambda using cross-validation
+set.seed(123) 
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
+# Display the best lambda value
+best_lambda = 0.0006670847
+```
+
+```{r }
+# Fit the final model on the training data
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda)
+# Dsiplay regression coefficients
+coef(elnet_model)
+```
+
+```{r }
+# # Make predictions on the test data
+# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+# predictions <- elnet_model %>% predict(x.test) %>% as.vector()
+# # Model performance metrics
+# data.frame(
+#   wmape = wmape(predictions, test.data$tip_fare_ratio),
+#   mape = mape(predictions, test.data$tip_fare_ratio),
+#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
+# )
+```
+
+Reference: https://daviddalpiaz.github.io/r4sl/elastic-net.html
 
 ### Decision Tree
 
