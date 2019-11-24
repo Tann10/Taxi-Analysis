@@ -117,20 +117,45 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 # Principal component analysis
 
 We have to use one hot encoding to convert factor variables into numerical variables
-```{r }
-sub_factor_col <- (!names(df_sub) == "tip_fare_ratio") & (sapply(df_sub, class) == "factor")
-new_df_sub <- dummy.data.frame(df_sub[,c(sub_factor_col)],  sep="_")
-
-com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
-
-splitted_dfs <- train_test_split(com_df_sub)
-
-X_train <- splitted_dfs["X_train"]$X_train
-
+```{r pca}
 pr.out =prcomp(X_train)
 summary(pr.out)
-pr.out
+pr.out$rotation[1:5,1:4]
+
+biplot(pr.out)
+
+dim(pr.out$x)
+
 ```
+
+```{r }
+prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
+
+plot(prop_varex, xlab = "Principal Component",
+             ylab = "Proportion of Variance Explained",
+             type = "b")
+
+
+plot(cumsum(prop_varex), xlab = "Principal Component",
+              ylab = "Cumulative Proportion of Variance Explained",
+              type = "b")
+
+
+```
+
+```{r }
+#add a training set with principal components
+
+pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train, pr.out$x)[,1:21]
+
+#transform test into PCA
+test.data <- predict(pr.out, newdata = X_test)
+test.data <- as.data.frame(test.data)
+
+model <- lm(tip_fare_ratio ~ ., data = pca_train)
+summary(model)
+```
+
 ## Variable selection
 
 Stepwise regression
