@@ -30,7 +30,6 @@ loadPkg("dataPreparation")
 loadPkg("factoextra")
 loadPkg("dummies")
 loadPkg("olsrr")
-
 ```
 
 ```{r udf}
@@ -65,20 +64,20 @@ mape <- function(actual,pred){
 ```{r }
 #read_file
 df <- read.csv("../Data/taxidata_processed_project2.csv")
-colnames(df)
+# remove zero passenger count
+df <- df %>% filter(passenger_count>0)
 
 # select the required files
 df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
-# convert vendor and passenger count to factor
-df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
+# convert vendor to factor
+df_sub$VendorID <- as.factor(df_sub$VendorID)
 
-#numerical_col:
+# numerical_col
 condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "factor")
 ```
 
 # EDA
-
 ```{r correlation}
 cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
 
@@ -101,7 +100,7 @@ ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio")
+       x="Congestion surcharge", y = "Tip fare ratio")
 ```
 
 
@@ -116,6 +115,11 @@ To simulate a train and test set we are going to split randomly this data set in
 # one hot encoding 
 sub_factor_col <- (!names(df_sub) == "tip_fare_ratio") & (sapply(df_sub, class) == "factor")
 new_df_sub <- dummy.data.frame(df_sub[,c(sub_factor_col)],  sep="_")
+
+colnames(new_df_sub)
+
+# add underscore if space in colname
+names(new_df_sub) <- gsub(" ", "_", names(new_df_sub))
 
 com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
 
@@ -232,7 +236,7 @@ predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
 data.frame(
-  mape = mape(predictions, test$tip_fare_ratio),
+  mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = R2(predictions, test$tip_fare_ratio)
 )
 
