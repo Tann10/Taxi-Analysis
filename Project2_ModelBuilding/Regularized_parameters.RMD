@@ -52,6 +52,12 @@ train_test_split = function(df_sub) {
   return(dfs_list)
 }
 
+# Accuracy metric MAPE (Mean absolute percentage error)
+mape <- function(actual,pred){
+           mape <- mean(abs((actual - pred)/actual))*100
+           return (mape)
+}
+
 ```
 
 # Data
@@ -94,9 +100,10 @@ ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
 
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
+  geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
        x="Trip duration", y = "Tip fare ratio")
 ```
+
 
 # Model building
 
@@ -143,11 +150,12 @@ pr.out =prcomp(X_train)
 summary(pr.out)
 pr.out$rotation[1:5,1:4]
 
-biplot(pr.out)
-
 dim(pr.out$x)
 
+biplot(pr.out)
+
 ```
+
 
 ```{r }
 prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
@@ -163,6 +171,7 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
 
 
 ```
+
 
 ```{r }
 #add a training set with principal components
@@ -211,40 +220,23 @@ ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 # Display regression coefficients
 coef(ridge_model)
 
-# predict.glmnet(ridge_mod, s = 0, exact = T)
-# dim(coef(ridge_mod))
-# plot(ridge_mod)
+plot(cv_lamda)
 
 ```
 
 
-
 ```{r }
-wmape <- function(actual,pred){
-           wmape <- (mean(abs(actual - pred))/sum(abs(actual)))*100
-           mape <- mean(abs((actual - pred)/actual))*100
-           return (wmape)
-}
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
-mape <- function(actual,pred){
-           mape <- mean(abs((actual - pred)/actual))*100
-           return (mape)
-}
+# Model performance metrics
+data.frame(
+  mape = mape(predictions, test$tip_fare_ratio),
+  Rsquare = R2(predictions, test$tip_fare_ratio)
+)
 
-```
-
-```{r }
-# # Make predictions on the test data
-# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
-# predictions <- ridge_model %>% predict(x.test) %>% as.vector()
-# # Model performance metrics
-# data.frame(
-#   wmape = wmape(predictions, test.data$tip_fare_ratio),
-#   mape = mape(predictions, test.data$tip_fare_ratio),
-#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
-# )
-# 
-# check <- data.frame(predictions, test.data$tip_fare_ratio)
+check <- data.frame(predictions, test$tip_fare_ratio)
 ```
 
 ### Lasso
@@ -266,14 +258,13 @@ coef(lasso_model)
 
 ```{r }
 # # Make predictions on the test data
-# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
-# predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-# # Model performance metrics
-# data.frame(
-#   wmape = wmape(predictions, test.data$tip_fare_ratio),
-#   mape = mape(predictions, test.data$tip_fare_ratio),
-#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
-# )
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  mape = mape(predictions, test$tip_fare_ratio),
+  Rsquare = R2(predictions, test$tip_fare_ratio)
+)
 ```
 
 
