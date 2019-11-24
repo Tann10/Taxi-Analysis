@@ -69,7 +69,7 @@ df <- read.csv("../Data/taxidata_processed_project2.csv")
 df <- df %>% filter(passenger_count>0)
 
 # select the required files
-df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
+df_sub <- df[,c("tip_fare_ratio", "tip_amount", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
 # convert vendor to factor
 df_sub$VendorID <- as.factor(df_sub$VendorID)
@@ -79,10 +79,40 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 ```
 
 # EDA
-```{r correlation}
-cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
+Here is the correlation with tip_fare_ratio
+```{r correlation1}
+tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
 
-colnames(df_sub)
+tip_fare_ratio_cor
+```
+
+The trip distance, fare amount, and trip duration are negatively correlated. Passenger count and congestion surcharge are not correlated. 
+
+Here is the correlation with tip_amount:
+```{r correlation2}
+cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
+
+```
+
+The trip distance, fare amount, and trip duration are negatively correlated. Passenger count and congestion surcharge are not correlated. 
+
+```{r scatterplots2}
+
+ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) + 
+  geom_point(color = "blue")+
+  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip fare ratio",
+       x="Trip distance", y = "Tip fare ratio")
+
+
+ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) + 
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
+       x="Trip duration", y = "Tip fare ratio")
+
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) + 
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
+       x="Congestion surcharge", y = "Tip fare ratio")
 ```
 
 ```{r scatterplots}
@@ -104,6 +134,47 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
        x="Congestion surcharge", y = "Tip fare ratio")
 ```
 
+```{r normality check of processed data, echo=T, include=T}
+#ggplot histogram of tip_fare_ratio for processed df
+df_sub %>%
+  ggplot(aes(x=tip_fare_ratio)) +
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
+  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+
+df_sub %>%
+  ggplot(aes(x=tip_amount)) +
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
+  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+
+```
+
+
+```{r }
+model <- lm(tip_amount ~ fare_amount, data = df_sub)
+cooksd <- cooks.distance(model)
+
+sample_size <- nrow(df_sub)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4/sample_size, col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+
+```{r }
+model <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
+cooksd <- cooks.distance(model)
+
+# Building boxplot for multiple variables
+ggplot(df_sub, aes(y=tip_amount)) +
+  geom_boxplot(outlier.colour="red", 
+             outlier.shape=16,
+             outlier.size=2, notch=FALSE)
+
+sample_size <- nrow(df_sub)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 15/sample_size, col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+```
 
 # Model building
 
@@ -145,6 +216,14 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 ```{r }
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train))
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test))
+```
+
+```{r }
+model_1 <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
+summary(model_1)
+
+model_2 <- lm(tip ~ ., data = df_sub)
+summary(model_2)
 ```
 
 # Principal component analysis
@@ -244,6 +323,7 @@ data.frame(
 
 
 check <- data.frame(predictions, test$tip_fare_ratio)
+
 ```
 
 ### Lasso
