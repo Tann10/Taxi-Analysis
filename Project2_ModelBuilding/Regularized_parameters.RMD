@@ -331,31 +331,29 @@ get_best_result(elnet_model_exp)
 ```{r }
 # Find the best lambda using cross-validation
 set.seed(123) 
-elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
+elnet_cv <- cv.glmnet(x, y, alpha = 0.4)
 # Display the best lambda value
 best_lambda = 0.0006670847
 ```
 
 ```{r }
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda)
+elnet_model <- glmnet(x, y, alpha = 0.4, lambda = best_lambda)
 # Dsiplay regression coefficients
 coef(elnet_model)
 ```
 
 ```{r }
 # # Make predictions on the test data
-# x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
-# predictions <- elnet_model %>% predict(x.test) %>% as.vector()
-# # Model performance metrics
-# data.frame(
-#   wmape = wmape(predictions, test.data$tip_fare_ratio),
-#   mape = mape(predictions, test.data$tip_fare_ratio),
-#   Rsquare = R2(predictions, test.data$tip_fare_ratio)
-# )
+x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+predictions <- elnet_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  mape = mape(predictions, test$tip_fare_ratio),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
 ```
 
-Reference: https://daviddalpiaz.github.io/r4sl/elastic-net.html
 
 ### Decision Tree
 
