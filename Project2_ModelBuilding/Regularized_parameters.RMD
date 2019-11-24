@@ -57,11 +57,14 @@ train_test_split = function(df_sub) {
 # Data
 
 ```{r }
+#read_file
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 colnames(df)
 
+# select the required files
 df_sub <- df[,c("tip_fare_ratio", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
+# convert vendor and passenger count to factor
 df_sub[,c("VendorID",  "passenger_count")] <- lapply(df_sub[,c("VendorID",  "passenger_count")], factor)
 
 #numerical_col:
@@ -73,10 +76,26 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 ```{r correlation}
 cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson", "kendall", "spearman"))
 
+colnames(df_sub)
 ```
 
 ```{r scatterplots}
 
+ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) + 
+  geom_point(color = "blue")+
+  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip fare ratio",
+       x="Trip distance", y = "Tip fare ratio")
+
+
+ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) + 
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
+       x="Trip duration", y = "Tip fare ratio")
+
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
+       x="Trip duration", y = "Tip fare ratio")
 ```
 
 # Model building
