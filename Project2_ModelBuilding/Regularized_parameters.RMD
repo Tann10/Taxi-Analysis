@@ -240,6 +240,8 @@ data.frame(
   Rsquare = R2(predictions, test$tip_fare_ratio)
 )
 
+
+
 check <- data.frame(predictions, test$tip_fare_ratio)
 ```
 
@@ -358,7 +360,7 @@ Reference: https://daviddalpiaz.github.io/r4sl/elastic-net.html
 
 ```{r dt_growtreelog}
 # Grow decision tree
-taxi_tree_log <- tree(tip_fare_ratio ~ trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + passenger_count_0 + passenger_count_1 + passenger_count_2 + passenger_count_3 + passenger_count_4 + passenger_count_5 + passenger_count_6 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night, data = train, mindev=0.001) # Borough_do_Staten Island + 
+taxi_tree_log <- tree(tip_fare_ratio ~ ., data = train, mindev=0.001) # Borough_do_Staten Island + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + passenger_count_0 + passenger_count_1 + passenger_count_2 + passenger_count_3 + passenger_count_4 + passenger_count_5 + passenger_count_6 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night
 
 # Print results
 summary(taxi_tree_log)
