@@ -31,6 +31,7 @@ loadPkg("factoextra")
 loadPkg("dummies")
 loadPkg("olsrr")
 loadPkg("tree")
+loadPkg("rpart")
 ```
 
 ```{r udf}
@@ -406,16 +407,16 @@ tree_mse_log = (sum((tree_pred_log - test$tip_fare_ratio)^2)) / nrow(test)
 tree_mse_log
 ```
 
-```{r dt_growtree}
+```{r dt_growtree, out.width='100%', out.height='100%'}
 # Grow decision tree
 taxi_tree <- tree(tip_fare_ratio ~ ., data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree)
-#png(file="test.png",width=900,height=900,res=30)
+png(file="test.png",width=900,height=900,res=30)
 plot(taxi_tree) 
-text(taxi_tree, cex = 0.75) #2.5)
-#dev.off()
+text(taxi_tree, cex = 2.5) #0.75) #2.5)
+dev.off()
 ```
 
 
@@ -433,7 +434,7 @@ text(taxi_tree_prune_train, cex = 0.75)
 prune_train_seq = prune.tree(taxi_tree)
 
 # Plot error versus plot size
-plot(prune_train_seq) 
+plot(prune_train_seq, main = "Error versus Decision Tree Plot Size")
 
 # Get vector of error
 prune_train_seq$dev
@@ -458,4 +459,5 @@ tree_mse
 # Get MAPE
 mape(test$tip_fare_ratio, tree_pred)
 ```
+
 
