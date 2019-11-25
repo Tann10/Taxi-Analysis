@@ -367,9 +367,7 @@ model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
 ```
 
-## Variable selection
-
-Stepwise regression
+## Stepwise regression
 ```{r }
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 # k <- ols_step_all_possible(model)
@@ -382,10 +380,18 @@ Stepwise regression
 ```
 
 ## Tip Fare Ratio
+
+Let build linear models on tip fare ratio 
+
+### Stepwise regression
+```{r }
+# model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
+# k <- ols_step_all_possible(model)
+# plot(k)
 ### Ridge
 
 ```{r }
-#train <- na.omit(train)
+
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -398,17 +404,9 @@ cv_lamda = cv.glmnet(x, y, alpha = 0)
 # Display the best lambda value
 cv_lamda$lambda.min
 
-
 # Fit the final model on the training data
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
-# Display regression coefficients
-coef(ridge_model)
-plot(cv_lamda)
 
-```
-
-
-```{r }
 # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
@@ -419,9 +417,12 @@ data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
 
-check <- data.frame(predictions, test$tip_fare_ratio)
+# Display regression coefficients
+coef(ridge_model)
+plot(cv_lamda)
 
 ```
+
 ### Lasso
 
 ```{r }
