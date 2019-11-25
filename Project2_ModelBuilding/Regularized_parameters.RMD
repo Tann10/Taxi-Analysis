@@ -262,11 +262,11 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
 
 ```
 
-
+Tip Fare Ratio
 ```{r }
 #add a training set with principal components
 
-pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train, pr.out$x)[,1:21]
+pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:21]
 
 #transform test into PCA
 test.data <- predict(pr.out, newdata = X_test)
@@ -276,14 +276,31 @@ model <- lm(tip_fare_ratio ~ ., data = pca_train)
 summary(model)
 ```
 
+Tip amount
+```{r }
+#add a training set with principal components
+
+pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:21]
+
+#transform test into PCA
+test.data <- predict(pr.out, newdata = X_test)
+test.data <- as.data.frame(test.data)
+
+model <- lm(tip_amount ~ ., data = pca_train)
+summary(model)
+```
+
 ## Variable selection
 
 Stepwise regression
 ```{r }
-# model <- lm(tip_fare_ratio ~ ., data = train)
+# model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 # k <- ols_step_all_possible(model)
 # plot(k)
 
+# model <- lm(tip_amount ~ .-tip_fare_ratio, data = train)
+# k <- ols_step_all_possible(model)
+# plot(k)
 
 ```
 
@@ -348,7 +365,7 @@ coef(lasso_model)
 
 ```{r }
 # # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- lasso_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
 data.frame(
