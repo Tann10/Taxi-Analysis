@@ -511,6 +511,10 @@ best_lambda = 0.003474875
 elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda)
 # Dsiplay regression coefficients
 coef(elnet_model)
+
+# printing only the non-zero coefficients
+tmp_coeffs <- coef(elnet_model)
+data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x)
 ```
 
 ```{r }
@@ -518,10 +522,12 @@ coef(elnet_model)
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- elnet_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
-data.frame(
+df_elnet <- data.frame(
   mape = mape(predictions, test$tip_amount),
   Rsquare = caret::R2(predictions, test$tip_amount)
 )
+
+df_elnet
 ```
 
 
@@ -637,4 +643,25 @@ tree_ratio_mse
 mape(test$tip_fare_ratio, tree_ratio_pred)
 ```
 
+# Summary of Model results
 
+```{r summary, include=TRUE}
+
+loadPkg("data.table")
+loadPkg("formattable")
+loadPkg("tidyr")
+
+
+Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
+Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
+MAPE <- c(1,2,3, df_elnet$mape, 5)
+Significant_Variables <- c(1,2,3,20,5)
+
+result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
+formattable(result_tbl, 
+            align =c("l","c","c","c","c"), 
+            list(`Model` = formatter(
+              "span", style = ~ style(color = "grey",font.weight = "bold"))
+              # `Rsquared` = color_bar("pink")
+))
+```
