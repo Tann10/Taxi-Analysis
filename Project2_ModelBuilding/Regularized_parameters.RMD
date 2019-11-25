@@ -35,8 +35,9 @@ loadPkg("rpart")
 ```
 
 ```{r udf}
+# Split the data into training and test set
+
 train_test_split = function(df_sub) {
-  # Split the data into training and test set
   set.seed(123)
   training.samples <- df_sub$tip_fare_ratio %>%
     createDataPartition(p = 0.8, list = FALSE)
@@ -57,6 +58,17 @@ train_test_split = function(df_sub) {
 mape <- function(actual,pred){
            mape <- mean(abs((actual - pred)/actual))*100
            return (mape)
+}
+
+# Plot cooks distance
+cooks_distance <- function(df){
+  
+  cooksd <- cooks.distance(model)
+  sample_size <- nrow(df)
+  plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+  abline(h = 4/sample_size, col="red")  # add cutoff line
+  text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+  
 }
 
 ```
@@ -152,12 +164,8 @@ df_sub %>%
 
 ```{r }
 model <- lm(tip_amount ~ fare_amount, data = df_sub)
-cooksd <- cooks.distance(model)
 
-sample_size <- nrow(df_sub)
-plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-abline(h = 4/sample_size, col="red")  # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+
 ```
 
 ```{r }
