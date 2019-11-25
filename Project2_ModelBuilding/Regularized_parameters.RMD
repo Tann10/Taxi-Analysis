@@ -60,6 +60,12 @@ mape <- function(actual,pred){
            return (mape)
 }
 
+
+corr_eqn <- function(x,y, digits = 2) {
+  corr_coef <- round(cor(x, y), digits = digits)
+  paste("italic(r) == ", corr_coef)
+}
+
 # Plot cooks distance
 cooks_distance <- function(df, model){
   
@@ -96,6 +102,8 @@ df <- df %>% filter(passenger_count>0)
 # select the required files
 df_sub <- df[,c("tip_fare_ratio", "tip_amount", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
 
+print(dim(df_sub))
+
 # convert vendor to factor
 df_sub$VendorID <- as.factor(df_sub$VendorID)
 
@@ -113,6 +121,7 @@ tip_fare_ratio_cor
 
 The trip distance, fare amount, and trip duration are negatively correlated. Passenger count and congestion surcharge are not correlated. 
 
+
 Here is the correlation with tip_amount:
 ```{r correlation2}
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
@@ -121,43 +130,62 @@ cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
 
 The trip distance, fare amount, and trip duration are negatively correlated. Passenger count and congestion surcharge are not correlated. 
 
+Below are the scatter plot along with correlation and regression line for numerical variables
+
+For tip amount
 ```{r scatterplots2}
 
 ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) + 
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio")
+  geom_smooth(method=lm, color = "black") +  
+  labs(title="Variation in trip distance and tip amount",
+       x="Trip distance", y = "Tip fare ratio") + 
+  geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
+                             df_sub$tip_amount), parse = TRUE)
 
 
 ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) + 
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio")
+  geom_smooth(method=lm) +  
+  labs(title="Variation in trip duration and tip amount",
+       x="Trip duration", y = "Tip fare ratio")+ 
+  geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
+                             df_sub$tip_amount), parse = TRUE)
 
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) + 
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio")
+  geom_smooth(method=lm) +  
+  labs(title="Variation in congestion surcharge and tip amount",
+       x="Congestion surcharge", y = "Tip fare ratio")+ 
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
+                             df_sub$tip_amount), parse = TRUE)
 ```
 
 ```{r scatterplots}
 
 ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) + 
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio")
-
+  geom_smooth(method=lm, color = "black") +  
+  labs(title="Variation in trip distance and tip fare ratio",
+       x="Trip distance", y = "Tip fare ratio") + 
+  geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 
 ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio")
+       x="Trip duration", y = "Tip fare ratio") + 
+  geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio")
+       x="Congestion surcharge", y = "Tip fare ratio") + 
+  geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 ```
+
 
 ```{r normality check of processed data, echo=T, include=T}
 #ggplot histogram of tip_fare_ratio for processed df
