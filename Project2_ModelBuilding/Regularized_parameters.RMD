@@ -467,6 +467,7 @@ elnet_model = train(
 
 elnet_model
 
+
 ```
 
 So by default, train() from caret library tried only three α values, 0.10, 0.55, and 1. Here, the best result uses α=0.55, so this result is somewhere between ridge and lasso (slightly more closer to lasso than ridge).
@@ -515,6 +516,28 @@ coef(elnet_model)
 # printing only the non-zero coefficients
 tmp_coeffs <- coef(elnet_model)
 data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x)
+
+# finding significant variables i.e. calculating p-values for all coefficients
+# library(ISLR)
+W <- as.matrix(coef(elnet_model))
+W
+keep_X <- rownames(W)[W!=0]
+keep_X <- keep_X[!keep_X == "(Intercept)"]
+x <- x[,keep_X]
+lm_elnet <- lm(y~x)
+
+# # extracting only the p-values of all variables
+# a <- summary(lm(y~x))$coefficients[,"Pr(>|t|)"]
+# a
+
+library(broom)
+tm = tidy(lm_elnet)
+options(scipen = 999)
+# removing 1st row i.e. intercept 
+tm <- tm[-1, ]
+tm
+# get variables with p value less than 0.05
+sig_var_elnet <- tm$term[tm$p.value < 0.05]
 ```
 
 ```{r }
@@ -655,7 +678,7 @@ loadPkg("tidyr")
 Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
 Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
 MAPE <- c(1,2,3, df_elnet$mape, 5)
-Significant_Variables <- c(1,2,3,20,5)
+Significant_Variables <- c(1,2,3, 20, 5)
 
 result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
 formattable(result_tbl, 
