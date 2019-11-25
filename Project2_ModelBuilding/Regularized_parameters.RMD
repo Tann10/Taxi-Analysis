@@ -535,7 +535,7 @@ taxi_tree_tip <- tree(tip_amount ~ passenger_count + trip_distance + fare_amount
 
 # Print results
 summary(taxi_tree_tip)
-png(file="test.png",width=900,height=900,res=30)
+png(file="tree_tipamt.png",width=900,height=900,res=30)
 plot(taxi_tree_tip) 
 text(taxi_tree_tip, cex = 2.5) #0.75) #2.5)
 dev.off()
@@ -590,7 +590,7 @@ taxi_tree_ratio <- tree(tip_fare_ratio ~ passenger_count + trip_distance + fare_
 
 # Print results
 summary(taxi_tree_ratio)
-png(file="test.png",width=900,height=900,res=30)
+png(file="tree_ratio.png",width=900,height=900,res=30)
 plot(taxi_tree_ratio) 
 text(taxi_tree_ratio, cex = 2.5) #0.75) #2.5)
 dev.off()
