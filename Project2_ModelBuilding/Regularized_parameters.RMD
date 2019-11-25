@@ -73,30 +73,17 @@ cooks_distance <- function(df, model){
 
 # removing outlies
 influential_points <- function(df_out, model) {
-  # set dummy value in the beginning
-  influential <- dim(df_out)[1]
-  
-  # loop till all points are out from cooks distance
-  while(length(influential) != 0) {
-    
   cooksd <- cooks.distance(model)
   sample_size <- nrow(df_out)
   # influential row numbers
   influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
+  print(length(influential))
   df_out <- df_out[-influential, ]
-  model <- lm(eval(summary(model)$call), data = df_out)
-  
-  }
   return (df_out)
 }
 
 ```
 
-```{r }
-  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
-length(influential)
-dim(df)[1]
-```
 
 # Data
 
@@ -272,12 +259,8 @@ summary(model_2)
 
 model_3 <- lm(tip_amount ~ fare_amount, data = train)
 summary(model_3)
-cooks_distance(train, model_3)
+cooks_distance(df_out, model_3)
 
-df_out <- influential_points(train, model_3)
-dim(df_out)
-
-dim(df_out)
 
 
 model_3 <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
