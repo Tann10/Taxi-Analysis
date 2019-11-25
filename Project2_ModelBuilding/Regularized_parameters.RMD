@@ -459,7 +459,7 @@ cv_5 = trainControl(method = "cv", number = 5)
 
 # We then use train() with method = "glmnet" which is actually fitting the elastic net
 elnet_model = train(
-  tip_fare_ratio ~ ., data = df_sub,
+  tip_amount ~ .-tip_fare_ratio, data = df_sub,
   method = "glmnet",
   trControl = cv_5
 )
@@ -474,7 +474,7 @@ So by default, train() from caret library tried only three α values, 0.10, 0.55
 Now we expand our model search. First we expand the feature space to include all interactions. Also by setting tuneLength = 10, we will search 10 α values and 10 λ values for each.
 ```{r }
 elnet_model_exp = train(
-  tip_fare_ratio ~ .^2, data = df_sub,
+  tip_amount ~ .-tip_fare_ratio^2, data = df_sub,
   method = "glmnet",
   trControl = cv_5,
   tuneLength = 10
@@ -501,26 +501,26 @@ get_best_result(elnet_model_exp)
 ```{r }
 # Find the best lambda using cross-validation
 set.seed(123) 
-elnet_cv <- cv.glmnet(x, y, alpha = 0.4)
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
 # Display the best lambda value
-best_lambda = 0.0006670847
+best_lambda = 0.003474875
 ```
 
 ```{r }
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.4, lambda = best_lambda)
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda)
 # Dsiplay regression coefficients
 coef(elnet_model)
 ```
 
 ```{r }
 # # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- elnet_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
 data.frame(
-  mape = mape(predictions, test$tip_fare_ratio),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+  mape = mape(predictions, test$tip_amount),
+  Rsquare = caret::R2(predictions, test$tip_amount)
 )
 ```
 
