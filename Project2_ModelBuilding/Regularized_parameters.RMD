@@ -260,11 +260,13 @@ X_train <- fastScale(dataSet = splitted_dfs["X_train"]$X_train, scales = scales,
 X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, verbose = TRUE)
 ```
 
+Bind the columns to get one train and test set 
 ```{r }
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 ```
+
 
 ## Linear models
 ```{r }
