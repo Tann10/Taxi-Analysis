@@ -212,19 +212,24 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 ```
 
 ```{r }
-splitted_dfs["y_train"]$y_train
-
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 ```
 
+## Linear models
 ```{r }
-model_1 <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
+model_1 <- lm(tip_fare_ratio ~ fare_amount, data = train)
 summary(model_1)
 
-model_2 <- lm(tip ~ ., data = df_sub)
+model_2 <- lm(tip_fare_ratio ~ fare_amount + trip_distance, data = train)
 summary(model_2)
+
+model_3 <- lm(tip_amount ~ fare_amount, data = train)
+summary(model_3)
+
+model_4 <- lm(tip_amount ~ fare_amount + trip_distance, data = train)
+summary(model_4)
 ```
 
 # Principal component analysis
@@ -282,12 +287,11 @@ Stepwise regression
 
 ```
 
-## Linear models:
-### Ridge
-Ridge model:
+## Ridge
+### Tip Fare Ratio
 ```{r }
 #train <- na.omit(train)
-x=model.matrix(tip_fare_ratio~.,train)[,-1]
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
   unlist() %>%
@@ -304,7 +308,6 @@ cv_lamda$lambda.min
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 # Display regression coefficients
 coef(ridge_model)
-
 plot(cv_lamda)
 
 ```
@@ -312,7 +315,7 @@ plot(cv_lamda)
 
 ```{r }
 # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~., test)[,-1]
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
@@ -321,9 +324,48 @@ data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
 
-
-
 check <- data.frame(predictions, test$tip_fare_ratio)
+
+```
+
+
+### Tip amount
+```{r }
+#train <- na.omit(train)
+x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+#grid = 10^seq(10, -2, length = 100)
+set.seed(123)
+cv_lamda = cv.glmnet(x, y, alpha = 0)
+# Display the best lambda value
+cv_lamda$lambda.min
+
+
+# Fit the final model on the training data
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
+# Display regression coefficients
+coef(ridge_model)
+plot(cv_lamda)
+
+```
+
+
+```{r }
+# Make predictions on the test data
+x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+data.frame(
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+)
+
+# check <- data.frame(predictions, test$tip_amount)
 
 ```
 
