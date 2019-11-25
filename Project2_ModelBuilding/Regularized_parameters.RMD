@@ -30,6 +30,7 @@ loadPkg("dataPreparation")
 loadPkg("factoextra")
 loadPkg("dummies")
 loadPkg("olsrr")
+loadPkg("faraway")
 loadPkg("tree")
 loadPkg("rpart")
 ```
@@ -202,28 +203,6 @@ df_sub %>%
 ```
 
 
-```{r }
-model <- lm(tip_amount ~ fare_amount, data = df_sub)
-
-
-```
-
-```{r }
-model <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
-cooksd <- cooks.distance(model)
-
-# Building boxplot for multiple variables
-ggplot(df_sub, aes(y=tip_amount)) +
-  geom_boxplot(outlier.colour="red", 
-             outlier.shape=16,
-             outlier.size=2, notch=FALSE)
-
-sample_size <- nrow(df_sub)
-plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-abline(h = 15/sample_size, col="red")  # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
-```
-
 # Model building
 
 ## Test train split
@@ -367,31 +346,83 @@ model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
 ```
 
+# Linear Models
+Let build linear models on tip fare ratio: 
+## OLS
+
+### Tip fare ratio
+```{r }
+model <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
+summary(model)
+vif(model)
+plot(model)
+```
+As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
+
+The VIF factor is also 1. 
+
+From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
+```{r cooksdistance removed}
+
+df_out <- influential_points(train, model)
+dim(df_out)
+
+model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+summary(model_rmcook)
+vif(model_rmcook)
+
+# sample_size <- nrow(df_sub)
+# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+# abline(h = 15/sample_size, col="red")  # add cutoff line
+# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio
+
+### Tip amount
+```{r }
+model_tip_amount <- lm(tip_amount ~ fare_amount, data = df_sub)
+summary(model_tip_amount)
+vif(model_tip_amount)
+plot(model_tip_amount)
+```
+As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable
+
+The VIF factor is also 1. 
+
+From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
+```{r cooksdistance_removed_tip_amount}
+df_out <- influential_points(train, model_tip_amount)
+dim(df_out)
+
+model_tip_amountrmcook <- lm(tip_amount ~ fare_amount, data = df_out)
+summary(model_tip_amountrmcook)
+vif(model_tip_amountrmcook)
+
+# sample_size <- nrow(df_sub)
+# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+# abline(h = 15/sample_size, col="red")  # add cutoff line
+# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio but residual error has improved 
+
 ## Stepwise regression
 ```{r }
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
-# k <- ols_step_all_possible(model)
-# plot(k)
-
+# step_lm_tip <- ols_step_all_possible(model)
+# # plot(k)
+# plot(step_lm_tip, scale = "adjr2", main = "Adjusted R^2")
+# plot(step_lm_tip, scale = "r2", main = "R^2")
 # model <- lm(tip_amount ~ .-tip_fare_ratio, data = train)
 # k <- ols_step_all_possible(model)
 # plot(k)
 
 ```
 
-## Tip Fare Ratio
+## Ridge
+### Tip Fare Ratio
 
-Let build linear models on tip fare ratio 
-
-### Stepwise regression
+Lets see if ridge improves results with all variables
 ```{r }
-# model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
-# k <- ols_step_all_possible(model)
-# plot(k)
-### Ridge
-
-```{r }
-
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -412,10 +443,12 @@ x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = tip_fare_ratio,
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
+))
 
 # Display regression coefficients
 coef(ridge_model)
