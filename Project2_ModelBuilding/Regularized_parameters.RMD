@@ -61,7 +61,7 @@ mape <- function(actual,pred){
 }
 
 # Plot cooks distance
-cooks_distance <- function(df){
+cooks_distance <- function(df, model){
   
   cooksd <- cooks.distance(model)
   sample_size <- nrow(df)
@@ -71,6 +71,31 @@ cooks_distance <- function(df){
   
 }
 
+# removing outlies
+influential_points <- function(df_out, model) {
+  # set dummy value in the beginning
+  influential <- dim(df_out)[1]
+  
+  # loop till all points are out from cooks distance
+  while(length(influential) != 0) {
+    
+  cooksd <- cooks.distance(model)
+  sample_size <- nrow(df_out)
+  # influential row numbers
+  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
+  df_out <- df_out[-influential, ]
+  model <- lm(eval(summary(model)$call), data = df_out)
+  
+  }
+  return (df_out)
+}
+
+```
+
+```{r }
+  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
+length(influential)
+dim(df)[1]
 ```
 
 # Data
@@ -231,14 +256,44 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 model_1 <- lm(tip_fare_ratio ~ fare_amount, data = train)
 summary(model_1)
 
+cooks_distance(train, model)
+
+df_out <- influential_points(train, model)
+dim(df_out)
+cooks_distance(df_out, model)
+model_2 <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+summary(model_2)
+```
+
+```{r }
+
 model_2 <- lm(tip_fare_ratio ~ fare_amount + trip_distance, data = train)
 summary(model_2)
 
 model_3 <- lm(tip_amount ~ fare_amount, data = train)
 summary(model_3)
+cooks_distance(train, model_3)
+
+df_out <- influential_points(train, model_3)
+dim(df_out)
+
+dim(df_out)
+
+
+model_3 <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+cooks_distance(df_out, model_3)
+df_out <- influential_points(df_out, model_3)
+
+model_3 <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+cooks_distance(df_out, model_3)
+model_2 <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+summary(model_2)
+
 
 model_4 <- lm(tip_amount ~ fare_amount + trip_distance, data = train)
 summary(model_4)
+plot(model_3)
+
 ```
 
 # Principal component analysis
