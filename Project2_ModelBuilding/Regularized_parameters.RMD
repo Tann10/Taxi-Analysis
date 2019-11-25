@@ -352,10 +352,21 @@ Let build linear models on tip fare ratio:
 
 ### Tip fare ratio
 ```{r }
-model <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
+model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 summary(model)
 vif(model)
-plot(model)
+# plot(model)
+
+# predictions
+predictions <- predict(model, test)
+
+# Model performance metrics
+results_df <- data.frame(
+  technique = "Linear",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
 ```
 As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
 
@@ -365,11 +376,21 @@ From the plot we can see there are some variables outside cooks distance. Lets r
 ```{r cooksdistance removed}
 
 df_out <- influential_points(train, model)
-dim(df_out)
-
 model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
 summary(model_rmcook)
 vif(model_rmcook)
+
+# predictions
+predictions <- predict(model_tip_amountrmcook, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-treated outlier",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+
 
 # sample_size <- nrow(df_sub)
 # plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
@@ -397,6 +418,18 @@ dim(df_out)
 model_tip_amountrmcook <- lm(tip_amount ~ fare_amount, data = df_out)
 summary(model_tip_amountrmcook)
 vif(model_tip_amountrmcook)
+
+# predictions
+predictions <- predict(model_tip_amountrmcook, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-treated outlier",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
 
 # sample_size <- nrow(df_sub)
 # plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
@@ -429,7 +462,6 @@ y = train %>%
   unlist() %>%
   as.numeric()
 
-#grid = 10^seq(10, -2, length = 100)
 set.seed(123)
 cv_lamda = cv.glmnet(x, y, alpha = 0)
 # Display the best lambda value
@@ -445,16 +477,20 @@ predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Ridge",
-  dependent = tip_fare_ratio,
+  dependent = "tip_fare_ratio",
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
+
+
 
 # Display regression coefficients
 coef(ridge_model)
 plot(cv_lamda)
 
 ```
+
+The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
 
 ### Lasso
 
