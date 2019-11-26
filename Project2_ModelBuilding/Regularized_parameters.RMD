@@ -313,6 +313,17 @@ test.data <- as.data.frame(test.data)
 
 model <- lm(tip_fare_ratio ~ ., data = pca_train)
 summary(model)
+
+# predictions
+predictions <- predict(model, test.data)
+
+# Model performance metrics
+results_df <- data.frame(
+  technique = "PCR",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
 ```
 
 Tip amount
@@ -327,6 +338,17 @@ test.data <- as.data.frame(test.data)
 
 model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
+
+# predictions
+predictions <- predict(model, test.data)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "PCR",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
 ```
 
 # Linear Models
@@ -355,12 +377,12 @@ vif(model)
 predictions <- predict(model, test)
 
 # Model performance metrics
-results_df <- data.frame(
+results_df <- rbind(results_df, data.frame(
   technique = "Linear",
   dependent = "tip_fare_ratio",
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
+))
 
 ```
 No significant improvement even factor choosing significant variables. 
