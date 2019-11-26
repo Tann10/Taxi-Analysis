@@ -547,6 +547,12 @@ results_df <- rbind(results_df, data.frame(
 ## Lasso
 ### Tip fare ratio
 ```{r }
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+y = train %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
+
 # Find the best lambda using cross-validation
 set.seed(123) 
 lasso_cv <- cv.glmnet(x, y, alpha = 1)
@@ -576,6 +582,12 @@ results_df <- rbind(results_df, data.frame(
 
 ## Tip amount
 ```{r }
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
 # Find the best lambda using cross-validation
 set.seed(123) 
 lasso_cv <- cv.glmnet(x, y, alpha = 1)
@@ -598,6 +610,7 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
+
 ```
 
 
