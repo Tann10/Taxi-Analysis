@@ -278,12 +278,12 @@ train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 ```
 
-##corplot,pair plot
+##correlation of all the variables with Y lables(Fare_Tip_ratio & Fare_Amount)
 
-```{r }
+```{r corr, include=TRUE}
 #correaltion
 taxipro <- train
-str(taxipro)
+#str(taxipro)
 # head(taxipro)
 # summary(taxipro)
 
@@ -395,35 +395,61 @@ summary(fit2)
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
 fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance, data = taxipro )
 summary(fit3)
-vif(fit3)
-plot(fit3)
+# vif(fit3)
+# plot(fit3)
 
 #perform ANOVA to compare three models built
 anova(fit1,fit2,fit3)
 #We observe that p is > 0.05 for fit3 implies fit1 and fit2 are same.
 
+#Prediction
+model.final.pred <- add_predictions(test,fit3)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear(3 best cor values)",
+  dependent = "tip_fare_ratio",
+  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
+))
+
 ```
 Since the results are not satisfactory we perform step by varification.
 
-```{r step_by_feature_selection}
+```{r step_by_feature_selection, include= TRUE}
 
 mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
-plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+#plot(mod_tip_ratio, scale = "Cp", main = "Cp")
 # plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-# plot(mod_tip_ratio, scale = "r2", main = "R^2")
+ plot(mod_tip_ratio, scale = "r2", main = "R^2")
 # plot(mod_tip_ratio, scale = "bic", main = "BIC")
 
 
 #Let us select first three features selected by feature selection function above.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
 summary(fit_feature)
-vif(fit_feature)
-plot(fit_feature)
+# vif(fit_feature)
+# plot(fit_feature)
+
+#Prediction
+model.final.pred <- add_predictions(test,fit_feature)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-Stepwise",
+  dependent = "tip_fare_ratio",
+  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
+))
 
 ```
 
 Let us build a linear model with fare amount to get significany results
-```{r }
+```{r ABC, include= TRUE}
 
 #Taking best three variables correlated with tip_fare ratio
 
@@ -442,69 +468,74 @@ summary(fit2_ta)
 #linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
 fit3_ta <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance, data = taxipro )
 summary(fit3_ta)
-vif(fit3_ta)
-plot(fit3_ta)
+# vif(fit3_ta)
+# plot(fit3_ta)
 
 
 #perform ANOVA to compare three models built
 anova(fit1_ta,fit2_ta,fit3_ta)
 
-model.final.pred <- add_predictions(test,fit2_ta)
-head(model.final.pred)
+model.final.pred <- add_predictions(test,fit3_ta)
+# head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
 
-actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
-correlation_accuracy <- cor(actuals_preds)  # 91.4%
-head(actuals_preds)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear(3 best cor values)",
+  dependent = "tip_amount",
+  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
+))
 ```
 
 To further improve the model
-```{r step_by_feature_selection}
+```{r step_by_feature_selection1, include= TRUE}
 
-mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
-plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio-fare_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
+# plot(mod_tip_ratio, scale = "Cp", main = "Cp")
 # plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-# plot(mod_tip_ratio, scale = "r2", main = "R^2")
+plot(mod_tip_ratio, scale = "r2", main = "R^2")
 # plot(mod_tip_ratio, scale = "bic", main = "BIC")
 
 
 #Let us select first three features selected by feature selection function above.
 fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
 summary(fit_feature_ta) 
-vif(fit_feature_ta)
-plot(fit_feature_ta)
+# vif(fit_feature_ta)
+# plot(fit_feature_ta)
 
 # #perform ANOVA to compare three models built
 # anova(fit3_ta,fit_feature_ta)
 
 
 model.final.pred <- add_predictions(test,fit_feature_ta)
-head(model.final.pred)
+# head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
 
-actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
-correlation_accuracy <- cor(actuals_preds)  # 91.4%
-head(actuals_preds)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-Stepwise",
+  dependent = "tip_amount",
+  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
+))
 
 ```
-```{r lm-fare_amount}
+```{r lm-fare_amount, include= TRUE}
 #Let us select first three features selected by feature selection function above.
-fit_without_fare_amount <- lm(tip_amount ~ .-fare_amount, data = taxipro )
+fit_without_fare_amount <- lm(tip_amount ~ .-fare_amount-tip_fare_ratio, data = taxipro )
 summary(fit_without_fare_amount) 
-vif(fit_without_fare_amount)
-plot(fit_feature_ta)
+# vif(fit_without_fare_amount)
+# plot(fit_feature_ta)
 
 # #perform ANOVA to compare three models built
 # anova(fit3_ta,fit_without_fare_amount)
 
 
 model.final.pred <- add_predictions(test,fit_without_fare_amount)
-head(model.final.pred)
+# head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
 
-actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
-correlation_accuracy <- cor(actuals_preds)  # 91.4%
-head(actuals_preds)
 
 ```
 
@@ -925,7 +956,8 @@ tip_cv_seq$dev
 optimal_cvtree_tip = which(tip_cv_seq$dev == min(tip_cv_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(tip_cv_seq$size[optimal_cvtree_tip])
+best_leaves_cv_tip = min(tip_cv_seq$size[optimal_cvtree_tip])
+best_leaves_cv_tip
 ```
 
 Here is the pruned tree by 10-fold CV:
@@ -934,7 +966,7 @@ Here is the pruned tree by 10-fold CV:
 # Plot tree
 tree_tip_cv = cv.tree(taxi_tree_tip, best = 5)
 plot(tree_tip_cv, main = "CV Decision Tree for Tip Amount")
-text(tree_tip_prune, cex = 0.75)
+text(tree_tip_prune, cex = 0.5)
 ```
 
 ```{r dt_accuracy_tip}
@@ -1029,7 +1061,8 @@ ratio_prune_seq$dev
 optimal_tree_ratio = which(ratio_prune_seq$dev == min(ratio_prune_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(ratio_prune_seq$size[optimal_tree_ratio])
+best_leaves_ratio_prune = min(ratio_prune_seq$size[optimal_tree_ratio])
+best_leaves_ratio_prune
 ```
 
 Here is the pruned decision tree:
@@ -1057,14 +1090,15 @@ ratio_cv_seq$dev
 optimal_cvtree_ratio = which(ratio_cv_seq$dev == min(ratio_cv_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(ratio_cv_seq$size[optimal_cvtree_ratio])
+best_leaves_cv_ratio = min(ratio_cv_seq$size[optimal_cvtree_ratio])
+best_leaves_cv_ratio
 ```
 
 Here is the pruned tree by 10-fold CV:
 
 ```{r dt_plotcvtree_ratio, include = T, echo = F}
 # Plot tree
-tree_ratio_cv = cv.tree(taxi_tree_ratio, best = 3)
+tree_ratio_cv = cv.tree(taxi_tree_ratio, best = best_leaves_cv_ratio)
 plot(tree_ratio_cv, main = "CV Decision Tree for Tip Ratio")
 text(tree_ratio_prune, cex = 0.75)
 ```
@@ -1129,6 +1163,8 @@ results_df <- rbind(results_df, data.frame(
 # Summary of Model results
 
 ```{r summary, include=TRUE}
+
+results_df <-results_df[order(results_df$dependent),]
 
 formattable(results_df,
             align =c("l","c","c","c","c"),
