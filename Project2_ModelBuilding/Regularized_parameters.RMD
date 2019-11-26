@@ -783,6 +783,7 @@ results_df <- rbind(results_df, data.frame(
 Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune here lambda and alpha. First lets try with alpha = 0.5
 
 ### Tip fare ratio
+
 ```{r elnet_tipfareratio}
 
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -792,7 +793,7 @@ y = train %>%
   as.numeric()
 
 # Find the best lambda using cross-validation
-set.seed(123) 
+set.seed(123)
 elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
 # Display the best lambda value
 elnet_cv$lambda.min
@@ -819,6 +820,7 @@ results_df <- rbind(results_df, data.frame(
 
 
 ## Tip amount
+
 ```{r elnet_tip}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
@@ -827,7 +829,7 @@ y = train %>%
   as.numeric()
 
 # Find the best lambda using cross-validation
-set.seed(123) 
+set.seed(123)
 elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
 # Display the best lambda value
 elnet_cv$lambda.min
@@ -849,92 +851,6 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
-```
-
-###############
-
-
-```{r elnet}
-com1_df_sub <- subset( com_df_sub, select = -tip_amount )
-set.seed(123)
-# We first setup our cross-validation strategy, which will be 5 fold. 
-cv_5 = trainControl(method = "cv", number = 5)
-# We then use train() with method = "glmnet" which is actually fitting the elastic net.
-ratio_elnet = train(
-  tip_fare_ratio ~ ., data = com1_df_sub,
-  method = "glmnet",
-  trControl = cv_5
-)
-
-ratio_elnet
-
-```
-
-
-
-
-```{r elnet}
-com2_df_sub <- subset( com_df_sub, select = -tip_fare_ratio )
-
-set.seed(123)
-# We first setup our cross-validation strategy, which will be 5 fold. 
-cv_5 = trainControl(method = "cv", number = 5)
-# We then use train() with method = "glmnet" which is actually fitting the elastic net.
-tip_elnet = train(
-  tip_amount ~ ., data = com2_df_sub,
-  method = "glmnet",
-  trControl = cv_5
-)
-
-tip_elnet
-
-```
-
-```{r large_grid_elnet}
-
-tip_elnet_large = train(
-  tip_amount ~ ., data = com2_df_sub,
-  method = "glmnet",
-  trControl = cv_5,
-  tuneLength = 10
-)
-
-get_best_result = function(caret_fit) {
-  best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
-  best_result = caret_fit$results[best, ]
-  rownames(best_result) = NULL
-  best_result
-}
-
-get_best_result(tip_elnet_large)
-
-###########
-x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
-y = train %>%
-  select(tip_amount) %>%
-  unlist() %>%
-  as.numeric()
-
-# Find the best lambda using cross-validation
-set.seed(123) 
-
-
-# Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.9, lambda = 0.02313856, standardize = FALSE)
-# Dsiplay regression coefficients
-coef(elnet_model)
-
-# # Make predictions on the test data
-x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
-predictions <- elnet_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Elastic Net",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
 ```
 
 
