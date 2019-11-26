@@ -255,7 +255,6 @@ df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
-
 ```
 
 
@@ -746,11 +745,17 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+
 # Display regression coefficients
 coef(ridge_model)
 coef(ridge_model_2)
 
 plot(cv_lamda)
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
@@ -788,6 +793,10 @@ results_df <- rbind(results_df, data.frame(
 ))
 
 # check <- data.frame(predictions, test$tip_amount)
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -806,6 +815,8 @@ lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
+plot(cv_lamda)
+
 # Fit the final model on the training data
 lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
@@ -822,6 +833,11 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -858,6 +874,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
@@ -899,6 +919,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -935,6 +959,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
