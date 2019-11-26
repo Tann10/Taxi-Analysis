@@ -163,71 +163,71 @@ Below are the scatter plot along with correlation and regression line for numeri
 
 For tip amount
 ```{r scatterplots2}
-
-ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
-  geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +
-  labs(title="Variation in trip distance and tip amount",
-       x="Trip distance", y = "Tip amount") +
-  geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
-                             df_sub$tip_amount), parse = TRUE)
-
-
-ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +
-  labs(title="Variation in trip duration and tip amount",
-       x="Trip duration", y = "Tip amount")+
-  geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
-                             df_sub$tip_amount), parse = TRUE)
-
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +
-  labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")+
-  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
-                             df_sub$tip_amount), parse = TRUE)
-
-```
-
-```{r scatterplots}
-
-ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
-  geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +
-  labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio") +
-  geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
-                             df_sub$tip_fare_ratio), parse = TRUE)
-
-ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio") +
-  geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
-                             df_sub$tip_fare_ratio), parse = TRUE)
-
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio") +
-  geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
-                             df_sub$tip_fare_ratio), parse = TRUE)
-```
-
-
-```{r normality check of processed data, echo=T, include=T}
-#ggplot histogram of tip_fare_ratio for processed df
-df_sub %>%
-  ggplot(aes(x=tip_fare_ratio)) +
-  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
-  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio Data Post-Outlier Removal")
-
-df_sub %>%
-  ggplot(aes(x=tip_amount)) +
-  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
-  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+# 
+# ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
+#   geom_point(color = "blue")+
+#   geom_smooth(method=lm, color = "black") +
+#   labs(title="Variation in trip distance and tip amount",
+#        x="Trip distance", y = "Tip amount") +
+#   geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
+#                              df_sub$tip_amount), parse = TRUE)
+# 
+# 
+# ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
+#   geom_point(color = "red")+
+#   geom_smooth(method=lm) +
+#   labs(title="Variation in trip duration and tip amount",
+#        x="Trip duration", y = "Tip amount")+
+#   geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
+#                              df_sub$tip_amount), parse = TRUE)
+# 
+# ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
+#   geom_point(color = "red")+
+#   geom_smooth(method=lm) +
+#   labs(title="Variation in congestion surcharge and tip amount",
+#        x="Congestion surcharge", y = "Tip amount")+
+#   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
+#                              df_sub$tip_amount), parse = TRUE)
+# 
+# ```
+# 
+# ```{r scatterplots}
+# 
+# ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
+#   geom_point(color = "blue")+
+#   geom_smooth(method=lm, color = "black") +
+#   labs(title="Variation in trip distance and tip fare ratio",
+#        x="Trip distance", y = "Tip fare ratio") +
+#   geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
+#                              df_sub$tip_fare_ratio), parse = TRUE)
+# 
+# ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
+#   geom_point(color = "red")+
+#   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
+#        x="Trip duration", y = "Tip fare ratio") +
+#   geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
+#                              df_sub$tip_fare_ratio), parse = TRUE)
+# 
+# ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
+#   geom_point(color = "red")+
+#   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
+#        x="Congestion surcharge", y = "Tip fare ratio") +
+#   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
+#                              df_sub$tip_fare_ratio), parse = TRUE)
+# ```
+# 
+# 
+# ```{r normality check of processed data, echo=T, include=T}
+# #ggplot histogram of tip_fare_ratio for processed df
+# df_sub %>%
+#   ggplot(aes(x=tip_fare_ratio)) +
+#   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
+#   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio Data Post-Outlier Removal")
+# 
+# df_sub %>%
+#   ggplot(aes(x=tip_amount)) +
+#   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
+#   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 
 ```
 
@@ -695,9 +695,15 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+
 # Display regression coefficients
 coef(ridge_model)
 plot(cv_lamda)
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
@@ -735,6 +741,10 @@ results_df <- rbind(results_df, data.frame(
 ))
 
 # check <- data.frame(predictions, test$tip_amount)
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -772,6 +782,11 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+
 ```
 
 
@@ -807,6 +822,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
@@ -848,6 +867,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -884,6 +907,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
