@@ -55,6 +55,7 @@ loadPkg("ggplot2")
 loadPkg("data.table")
 loadPkg("nortest")
 loadPkg("corrplot")
+loadPkg("faraway")
 ```
 
 ```{r LinReg, include=TRUE}
@@ -151,7 +152,7 @@ anova(fit0,fit1,fit2,fit3,fit4,fit5,fit6)
 Predict
 ```{r Prediction, echo=TRUE}
 loadPkg("stats")
-predict(fit6,data.frame(
-  #midterm=c(25,52,78),hw=c(20,80,45))
-  )
+# predict(fit6,data.frame(
+#   #midterm=c(25,52,78),hw=c(20,80,45))
+#  )
 ```

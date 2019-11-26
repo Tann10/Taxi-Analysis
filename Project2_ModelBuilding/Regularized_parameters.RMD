@@ -32,6 +32,12 @@ loadPkg("dummies")
 loadPkg("olsrr")
 loadPkg("tree")
 loadPkg("rpart")
+loadPkg("plyr")
+loadPkg("ggplot2")
+loadPkg("data.table")
+loadPkg("nortest")
+loadPkg("corrplot")
+loadPkg("faraway")
 ```
 
 ```{r udf}
