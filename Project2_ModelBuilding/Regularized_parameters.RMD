@@ -849,12 +849,6 @@ text(taxi_tree_tip, cex = 0.75) #2.5)
 
 
 ```{r dt_prunetree_tip}
-# Return best pruned tree with 5 leaves, evaluating error on training data 
-tree_tip_prune <- prune.tree(taxi_tree_tip, best = 5)
-
-# Print results
-summary(tree_tip_prune)
-
 # Create sequence of pruned tree sizes/errors
 tip_prune_seq = prune.tree(taxi_tree_tip)
 
@@ -874,12 +868,42 @@ min(tip_prune_seq$size[optimal_tree_tip])
 Here is the pruned tree:
 
 ```{r dt_plotprunetree_tip, include = T, echo = F}
+# Return best pruned tree with 5 leaves, evaluating error on training data 
+tree_tip_prune <- prune.tree(taxi_tree_tip, best = 5)
+
 # Plot tree
 plot(tree_tip_prune, main = "Pruned Decision Tree for Tip Amount") 
 text(tree_tip_prune, cex = 0.75)
 ```
 
+```{r dt_cvtree_tip}
+# Create sequence of CV tree sizes/errors
+tip_cv_seq = cv.tree(taxi_tree_tip)
+
+# Plot error versus plot size
+plot(tip_cv_seq, main = "Error versus Decision Tree Plot Size for Tip Amount")
+
+# Get vector of error
+tip_cv_seq$dev
+
+# Identify optimal tree where vector of error is minimized
+optimal_cvtree_tip = which(tip_cv_seq$dev == min(tip_cv_seq$dev))
+
+# Positions of optimal (with respect to error) trees 
+min(tip_cv_seq$size[optimal_cvtree_tip])
+```
+
+Here is the pruned tree by 10-fold CV:
+
+```{r dt_plotcvtree_tip, include = T, echo = F}
+# Plot tree
+tree_tip_cv = cv.tree(taxi_tree_tip, best = 5)
+plot(tree_tip_cv, main = "CV Decision Tree for Tip Amount")
+text(tree_tip_prune, cex = 0.75)
+```
+
 ```{r dt_accuracy_tip}
+# Original
 # Predict test values using tree
 tree_tip_pred = predict(taxi_tree_tip, newdata = test)
 
@@ -896,9 +920,44 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, tree_tip_pred),
   Rsquare = caret::R2(tree_tip_pred, test$tip_amount)
 ))
+
+# Pruned
+# Predict test values using tree
+tree_tip_pred_prune = predict(tree_tip_prune, newdata = test)
+
+# Obtain MSE
+tree_tip_mse_prune = (sum((tree_tip_pred_prune - test$tip_amount)^2)) / nrow(test)
+
+# Print MSE
+tree_tip_mse_prune
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree (Prune)",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, tree_tip_pred_prune),
+  Rsquare = caret::R2(tree_tip_pred_prune, test$tip_amount)
+))
+
+# CV
+# Predict test values using tree
+tree_tip_pred_cv = predict(tree_tip_cv, newdata = test)
+
+# Obtain MSE
+tree_tip_mse_cv = (sum((tree_tip_pred_cv - test$tip_amount)^2)) / nrow(test)
+
+# Print MSE
+tree_tip_mse_cv
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree (CV)",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, tree_tip_pred_cv),
+  Rsquare = caret::R2(tree_tip_pred_cv, test$tip_amount)
+))
 ```
 
-The mean squared error is `r tree_tip_mse`.
 
 #### Tip Fare Ratio
 
@@ -922,12 +981,6 @@ text(taxi_tree_ratio, cex = 0.75) #2.5)
 
 
 ```{r dt_prunetree_ratio}
-# Return best pruned tree with 5 leaves, evaluating error on training data 
-tree_ratio_prune <- prune.tree(taxi_tree_ratio, best = 5)
-
-# Print results
-summary(tree_ratio_prune)
-
 # Create sequence of pruned tree sizes/errors
 ratio_prune_seq = prune.tree(taxi_tree_ratio)
 
@@ -947,13 +1000,42 @@ min(ratio_prune_seq$size[optimal_tree_ratio])
 Here is the pruned decision tree:
 
 ```{r dt_plotprunetree_ratio, include = T, echo = F}
+# Return best pruned tree with 5 leaves, evaluating error on training data 
+tree_ratio_prune <- prune.tree(taxi_tree_ratio, best = 5)
+
 # Plot pruned tree
 plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio") 
 text(tree_ratio_prune, cex = 0.75)
 ```
 
+```{r dt_cvtree_ratio}
+# Create sequence of CV tree sizes/errors
+ratio_cv_seq = cv.tree(taxi_tree_ratio)
+
+# Plot error versus plot size
+plot(ratio_cv_seq, main = "Error versus Decision Tree Plot Size for Tip Ratio")
+
+# Get vector of error
+ratio_cv_seq$dev
+
+# Identify optimal tree where vector of error is minimized
+optimal_cvtree_ratio = which(ratio_cv_seq$dev == min(ratio_cv_seq$dev))
+
+# Positions of optimal (with respect to error) trees 
+min(ratio_cv_seq$size[optimal_cvtree_ratio])
+```
+
+Here is the pruned tree by 10-fold CV:
+
+```{r dt_plotcvtree_ratio, include = T, echo = F}
+# Plot tree
+tree_ratio_cv = cv.tree(taxi_tree_ratio, best = 3)
+plot(tree_ratio_cv, main = "CV Decision Tree for Tip Ratio")
+text(tree_ratio_prune, cex = 0.75)
+```
 
 ```{r dt_accuracy_ratio}
+# Original
 # Predict test values using tree
 tree_ratio_pred = predict(taxi_tree_ratio, newdata = test)
 
@@ -970,9 +1052,44 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, tree_ratio_pred),
   Rsquare = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
 ))
+
+# Prune
+# Predict test values using tree
+tree_ratio_pred_prune = predict(tree_ratio_prune, newdata = test)
+
+# Obtain MSE
+tree_ratio_mse_prune = (sum((tree_ratio_pred_prune - test$tip_fare_ratio)^2)) / nrow(test)
+
+# Print MSE
+tree_ratio_mse_prune
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree (Prune)",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, tree_ratio_pred_prune),
+  Rsquare = caret::R2(tree_ratio_pred_prune, test$tip_fare_ratio)
+))
+
+# CV
+# Predict test values using tree
+tree_ratio_pred_cv = predict(tree_ratio_cv, newdata = test)
+
+# Obtain MSE
+tree_ratio_mse_cv = (sum((tree_ratio_pred_cv - test$tip_fare_ratio)^2)) / nrow(test)
+
+# Print MSE
+tree_ratio_mse_cv
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree (CV)",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, tree_ratio_pred_cv),
+  Rsquare = caret::R2(tree_ratio_pred_cv, test$tip_fare_ratio)
+))
 ```
 
-The mean squared error is `r tree_ratio_mse`.
 
 # Summary of Model results
 
