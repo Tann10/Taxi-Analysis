@@ -352,10 +352,21 @@ Let build linear models on tip fare ratio:
 
 ### Tip fare ratio
 ```{r }
+
 model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 summary(model)
 vif(model)
 # plot(model)
+```
+As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
+
+The VIF factor is also 1. 
+
+Select only significant coeff:
+```{r}
+model <- lm(tip_fare_ratio ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
+summary(model)
+vif(model)
 
 # predictions
 predictions <- predict(model, test)
@@ -367,21 +378,19 @@ results_df <- data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
-```
-As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
 
-The VIF factor is also 1. 
+```
+No significant improvement even factor choosing significant variables. 
 
 From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
 ```{r cooksdistance removed}
-
 df_out <- influential_points(train, model)
 model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
 summary(model_rmcook)
 vif(model_rmcook)
 
 # predictions
-predictions <- predict(model_tip_amountrmcook, test)
+predictions <- predict(model_rmcook, test)
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -400,11 +409,22 @@ results_df <- rbind(results_df, data.frame(
 After removal of the outliers from the data there is no improvement in the values for tip fare ratio
 
 ### Tip amount
+Similary check a model with tip amount and significant variables decided from the tip ratio
 ```{r }
-model_tip_amount <- lm(tip_amount ~ fare_amount, data = df_sub)
+model_tip_amount <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
 summary(model_tip_amount)
 vif(model_tip_amount)
-plot(model_tip_amount)
+
+# predictions
+predictions <- predict(model_tip_amount, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
 ```
 As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable
 
@@ -415,7 +435,7 @@ From the plot we can see there are some variables outside cooks distance. Lets r
 df_out <- influential_points(train, model_tip_amount)
 dim(df_out)
 
-model_tip_amountrmcook <- lm(tip_amount ~ fare_amount, data = df_out)
+model_tip_amountrmcook <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = df_out)
 summary(model_tip_amountrmcook)
 vif(model_tip_amountrmcook)
 
@@ -453,7 +473,6 @@ After removal of the outliers from the data there is no improvement in the value
 
 ## Ridge
 ### Tip Fare Ratio
-
 Lets see if ridge improves results with all variables
 ```{r }
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -482,56 +501,21 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
-
-
 # Display regression coefficients
 coef(ridge_model)
 plot(cv_lamda)
-
 ```
 
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
 
-### Lasso
-
+### Tip amount
 ```{r }
-# Find the best lambda using cross-validation
-set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1)
-# Display the best lambda value
-lasso_cv$lambda.min
-```
-
-```{r }
-# Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
-# Dsiplay regression coefficients
-coef(lasso_model)
-```
-
-
-```{r }
-# # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
-predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-# Model performance metrics
-data.frame(
-  mape = mape(predictions, test$tip_fare_ratio),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
-```
-
-## Tip amount
-### Ridge
-```{r }
-#train <- na.omit(train)
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
   unlist() %>%
   as.numeric()
 
-#grid = 10^seq(10, -2, length = 100)
 set.seed(123)
 cv_lamda = cv.glmnet(x, y, alpha = 0)
 # Display the best lambda value
@@ -544,42 +528,61 @@ ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 coef(ridge_model)
 plot(cv_lamda)
 
-```
-
-
-```{r }
 # Make predictions on the test data
 x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = "tip_amount",
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
 
 # check <- data.frame(predictions, test$tip_amount)
 
 ```
 
 ## Lasso
+### Tip fare ratio
 ```{r }
 # Find the best lambda using cross-validation
 set.seed(123) 
 lasso_cv <- cv.glmnet(x, y, alpha = 1)
 # Display the best lambda value
 lasso_cv$lambda.min
-```
 
-```{r }
 # Fit the final model on the training data
 lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
 # Dsiplay regression coefficients
 coef(lasso_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+# Model performance metrics
+data.frame(
+  mape = mape(predictions, test$tip_fare_ratio),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
 ```
 
 
+
+## Tip amount
 ```{r }
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1)
+# Display the best lambda value
+lasso_cv$lambda.min
+
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+# Dsiplay regression coefficients
+coef(lasso_model)
+
 # # Make predictions on the test data
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- lasso_model %>% predict(x.test) %>% as.vector()
