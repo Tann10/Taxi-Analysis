@@ -34,6 +34,7 @@ loadPkg("faraway")
 loadPkg("tree")
 loadPkg("rpart")
 loadPkg("data.table")
+loadPkg("corrplot")
 loadPkg("formattable")
 loadPkg("tidyr")
 ```
@@ -132,6 +133,8 @@ tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], meth
 
 tip_fare_ratio_cor
 
+loadPkg("corrplot")
+corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 ```
 
 The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas Passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
@@ -141,6 +144,7 @@ Here is the another correlation. This time we choose tip_amount as our dependent
 ```{r correlation2}
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
 
+df_sub_cor <- cor(df_sub[,condition], method = c("pearson"))
 ```
 
 This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
@@ -263,6 +267,7 @@ Bind the columns to get one train and test set
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
+
 ```
 
 
