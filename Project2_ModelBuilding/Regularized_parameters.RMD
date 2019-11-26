@@ -100,7 +100,7 @@ influential_points <- function(df_out, model) {
 
 First of all, we load data into R and clean (preprocess) it so that it can be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
 
-```{r }
+```{r data}
 #read_file
 df <- read.csv("../Data/taxidata_processed_project2.csv")
 # remove zero passenger count
@@ -156,28 +156,28 @@ Below are the scatter plot along with correlation and regression line for numeri
 For tip amount
 ```{r scatterplots2}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) + 
+ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  
+  geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip amount",
-       x="Trip distance", y = "Tip amount") + 
+       x="Trip distance", y = "Tip amount") +
   geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_amount), parse = TRUE)
 
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) + 
+ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  
+  geom_smooth(method=lm) +
   labs(title="Variation in trip duration and tip amount",
-       x="Trip duration", y = "Tip amount")+ 
+       x="Trip duration", y = "Tip amount")+
   geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_amount), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) + 
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  
+  geom_smooth(method=lm) +
   labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")+ 
+       x="Congestion surcharge", y = "Tip amount")+
   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_amount), parse = TRUE)
 
@@ -185,25 +185,25 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
 
 ```{r scatterplots}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  
+  geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio") + 
+       x="Trip distance", y = "Tip fare ratio") +
   geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio") + 
+       x="Trip duration", y = "Tip fare ratio") +
   geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio") + 
+       x="Congestion surcharge", y = "Tip fare ratio") +
   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_fare_ratio), parse = TRUE)
 ```
@@ -257,13 +257,13 @@ print(scales)
 
 All the variables has different means and std hence we need to scale all the variables present above.
 
-```{r }
+```{r scale_all}
 X_train <- fastScale(dataSet = splitted_dfs["X_train"]$X_train, scales = scales, verbose = TRUE)
 X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, verbose = TRUE)
 ```
 
 Bind the columns to get one train and test set 
-```{r }
+```{r bind}
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
@@ -302,7 +302,7 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
 ```
 
 Tip Fare Ratio
-```{r }
+```{r pca_tipfareratio}
 #add a training set with principal components
 
 pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:21]
@@ -327,7 +327,7 @@ results_df <- data.frame(
 ```
 
 Tip amount
-```{r }
+```{r pca_tip}
 #add a training set with principal components
 
 pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:21]
@@ -356,7 +356,7 @@ Let build linear models on tip fare ratio:
 ## OLS
 
 ### Tip fare ratio
-```{r }
+```{r ols_tipfareratio}
 
 model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 summary(model)
@@ -368,7 +368,7 @@ As you can see from the summary r square `r format( summary(model)$r.squared )` 
 The VIF factor is also 1. 
 
 Select only significant coeff:
-```{r}
+```{r ols_sig}
 model <- lm(tip_fare_ratio ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
 summary(model)
 vif(model)
@@ -415,7 +415,7 @@ After removal of the outliers from the data there is no improvement in the value
 
 ### Tip amount
 Similary check a model with tip amount and significant variables decided from the tip ratio
-```{r }
+```{r ols_sig_tip}
 model_tip_amount <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
 summary(model_tip_amount)
 vif(model_tip_amount)
@@ -464,7 +464,7 @@ results_df <- rbind(results_df, data.frame(
 After removal of the outliers from the data there is no improvement in the values for tip fare ratio but residual error has improved 
 
 ## Stepwise regression
-```{r }
+```{r stepwise}
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 # step_lm_tip <- ols_step_all_possible(model)
 # # plot(k)
@@ -479,7 +479,7 @@ After removal of the outliers from the data there is no improvement in the value
 ## Ridge
 ### Tip Fare Ratio
 Lets see if ridge improves results with all variables
-```{r }
+```{r ridge_tipfareratio}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -514,7 +514,7 @@ plot(cv_lamda)
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
 
 ### Tip amount
-```{r }
+```{r ridge_tip}
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -551,7 +551,7 @@ results_df <- rbind(results_df, data.frame(
 
 ## Lasso
 ### Tip fare ratio
-```{r }
+```{r lasso_tipfareratio}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -586,7 +586,7 @@ results_df <- rbind(results_df, data.frame(
 
 
 ## Tip amount
-```{r }
+```{r lasso_tip}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -619,106 +619,69 @@ results_df <- rbind(results_df, data.frame(
 ```
 
 
-### Elastic net
-
-Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune lambda and alpha. 
-
-```{r }
-# The glmnet package allows to tune λ via cross-validation for a fixed α, but it does not support α-tuning, so we will turn to caret for this job.
-# simply use all of the data as training data
-
-set.seed(123) 
-# setting up 5-fold Cross Validation strategy for resampling
-cv_5 = trainControl(method = "cv", number = 5)
-
-# We then use train() with method = "glmnet" which is actually fitting the elastic net
-elnet_model = train(
-  tip_amount ~ .-tip_fare_ratio, data = df_sub,
-  method = "glmnet",
-  trControl = cv_5
-)
-# note that since we are using caret() directly, it is taking care of dummy variable creation. So unlike before when we used glmnet(), we do not need to manually create a model matrix.
-
-elnet_model
+## Elastic Net
 
 
-```
+Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune here lambda and alpha. First lets try with alpha = 0.5
 
-So by default, train() from caret library tried only three α values, 0.10, 0.55, and 1. Here, the best result uses α=0.55, so this result is somewhere between ridge and lasso (slightly more closer to lasso than ridge).
+### Tip fare ratio
+```{r elnet_tipfareratio}
 
-Now we expand our model search. First we expand the feature space to include all interactions. Also by setting tuneLength = 10, we will search 10 α values and 10 λ values for each.
-```{r }
-elnet_model_exp = train(
-  tip_amount ~ .-tip_fare_ratio^2, data = df_sub,
-  method = "glmnet",
-  trControl = cv_5,
-  tuneLength = 10
-)
-```
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+y = train %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
 
-The results will be very large so to deal with this, a quick helper function is used to extract the row with the best tuning parameters.
-
-```{r }
-# helper function to extract row with the best tuning parameters.
-get_best_result = function(caret_fit) {
-  best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
-  best_result = caret_fit$results[best, ]
-  rownames(best_result) = NULL
-  best_result
-}
-
-# calling helper fn on trained object
-get_best_result(elnet_model_exp)
-
-```
-
-
-```{r }
 # Find the best lambda using cross-validation
 set.seed(123) 
 elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
 # Display the best lambda value
-best_lambda = 0.003474875
-```
+elnet_cv$lambda.min
 
-```{r }
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda)
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min)
 # Dsiplay regression coefficients
 coef(elnet_model)
 
-# printing only the non-zero coefficients
-tmp_coeffs <- coef(elnet_model)
-data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x)
+# # Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+predictions <- elnet_model %>% predict(x.test) %>% as.vector()
 
-# finding significant variables i.e. calculating p-values for all coefficients
-# library(ISLR)
-W <- as.matrix(coef(elnet_model))
-W
-keep_X <- rownames(W)[W!=0]
-keep_X <- keep_X[!keep_X == "(Intercept)"]
-x <- x[,keep_X]
-lm_elnet <- lm(y~x)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Elastic Net",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
 
-# # extracting only the p-values of all variables
-# a <- summary(lm(y~x))$coefficients[,"Pr(>|t|)"]
-# a
-
-library(broom)
-tm = tidy(lm_elnet)
-options(scipen = 999)
-# removing 1st row i.e. intercept 
-tm <- tm[-1, ]
-tm
-# get variables with p value less than 0.05
-sig_var_elnet <- tm$term[tm$p.value < 0.05]
 ```
 
-```{r }
+
+## Tip amount
+```{r elnet_tip}
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
+# Display the best lambda value
+elnet_cv$lambda.min
+
+# Fit the final model on the training data
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min)
+# Dsiplay regression coefficients
+coef(elnet_model)
+
 # # Make predictions on the test data
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- elnet_model %>% predict(x.test) %>% as.vector()
-# Model performance metrics
+
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Elastic Net",
@@ -730,38 +693,155 @@ results_df <- rbind(results_df, data.frame(
 ```
 
 
+
+
+
+
+
+
+<!-- ```{r elnet_tip} -->
+<!-- # The glmnet package allows to tune λ via cross-validation for a fixed α, but it does not support α-tuning, so we will turn to caret for this job. -->
+<!-- # simply use all of the data as training data -->
+
+<!-- set.seed(123)  -->
+<!-- # setting up 5-fold Cross Validation strategy for resampling -->
+<!-- cv_5 = trainControl(method = "cv", number = 5) -->
+
+<!-- # We then use train() with method = "glmnet" which is actually fitting the elastic net -->
+<!-- elnet_model = train( -->
+<!--   tip_amount ~ .-tip_fare_ratio, data = df_sub, -->
+<!--   method = "glmnet", -->
+<!--   trControl = cv_5 -->
+<!-- ) -->
+<!-- # note that since we are using caret() directly, it is taking care of dummy variable creation. So unlike before when we used glmnet(), we do not need to manually create a model matrix. -->
+
+<!-- elnet_model -->
+
+
+<!-- ``` -->
+
+<!-- So by default, train() from caret library tried only three α values, 0.10, 0.55, and 1. Here, the best result uses α=0.55, so this result is somewhere between ridge and lasso (slightly more closer to lasso than ridge). -->
+
+<!-- Now we expand our model search. First we expand the feature space to include all interactions. Also by setting tuneLength = 10, we will search 10 α values and 10 λ values for each. -->
+
+<!-- ```{r elnet_expandedfeatures} -->
+<!-- elnet_model_exp = train( -->
+<!--   tip_amount ~ .-tip_fare_ratio^2, data = df_sub, -->
+<!--   method = "glmnet", -->
+<!--   trControl = cv_5, -->
+<!--   tuneLength = 10 -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- The results will be very large so to deal with this, a quick helper function is used to extract the row with the best tuning parameters. -->
+
+<!-- ```{r elnet_bestparameters} -->
+<!-- # helper function to extract row with the best tuning parameters. -->
+<!-- get_best_result = function(caret_fit) { -->
+<!--   best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune)) -->
+<!--   best_result = caret_fit$results[best, ] -->
+<!--   rownames(best_result) = NULL -->
+<!--   best_result -->
+<!-- } -->
+
+<!-- # calling helper fn on trained object -->
+<!-- get_best_result(elnet_model_exp) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r elnet_bestlambda_cv} -->
+<!-- # Find the best lambda using cross-validation -->
+<!-- set.seed(123)  -->
+<!-- elnet_cv <- cv.glmnet(x, y, alpha = 0.5) -->
+<!-- # Display the best lambda value -->
+<!-- best_lambda = 0.003474875 -->
+<!-- ``` -->
+
+<!-- ```{r elnet_fit} -->
+<!-- # Fit the final model on the training data -->
+<!-- elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda) -->
+<!-- # Dsiplay regression coefficients -->
+<!-- coef(elnet_model) -->
+
+<!-- # printing only the non-zero coefficients -->
+<!-- tmp_coeffs <- coef(elnet_model) -->
+<!-- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x) -->
+
+<!-- # finding significant variables i.e. calculating p-values for all coefficients -->
+<!-- # library(ISLR) -->
+<!-- W <- as.matrix(coef(elnet_model)) -->
+<!-- W -->
+<!-- keep_X <- rownames(W)[W!=0] -->
+<!-- keep_X <- keep_X[!keep_X == "(Intercept)"] -->
+<!-- x <- x[,keep_X] -->
+<!-- lm_elnet <- lm(y~x) -->
+
+<!-- # # extracting only the p-values of all variables -->
+<!-- # a <- summary(lm(y~x))$coefficients[,"Pr(>|t|)"] -->
+<!-- # a -->
+
+<!-- library(broom) -->
+<!-- tm = tidy(lm_elnet) -->
+<!-- options(scipen = 999) -->
+<!-- # removing 1st row i.e. intercept  -->
+<!-- tm <- tm[-1, ] -->
+<!-- tm -->
+<!-- # get variables with p value less than 0.05 -->
+<!-- sig_var_elnet <- tm$term[tm$p.value < 0.05] -->
+<!-- ``` -->
+
+<!-- ```{r elnet_pred} -->
+<!-- # # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1] -->
+<!-- predictions <- elnet_model %>% predict(x.test) %>% as.vector() -->
+<!-- # Model performance metrics -->
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Elastic Net", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+<!-- ``` -->
+
+
 ### Decision Tree
 
 #### Tip Amount
 
-```{r dt_growtree_tip, out.width='100%', out.height='100%', include = T, echo = F}
+```{r dt_growtree_tip}
 # Grow decision tree
 taxi_tree_tip <- tree(tip_amount ~ passenger_count + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Staten_Island + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night, data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree_tip)
-png(file="tree_tipamt.png",width=900,height=900,res=30)
-plot(taxi_tree_tip) 
-text(taxi_tree_tip, cex = 2.5) #0.75) #2.5)
-dev.off()
+```
+
+Here is the decision tree for tip amount:
+
+```{r dt_plottree_tip, out.width='100%', out.height='100%', include = T, echo = F}
+# Plot tree
+#png(file="tree_tipamt.png",width=900,height=900,res=30) # Use if want to export
+plot(taxi_tree_tip, main = "Decision Tree for Tip Amount") 
+text(taxi_tree_tip, cex = 0.75) #2.5)
+#dev.off() # Use if want to export
 ```
 
 
-```{r dt_prunetree_tip, include = T, echo = F}
+```{r dt_prunetree_tip}
 # Return best pruned tree with 5 leaves, evaluating error on training data 
 tree_tip_prune <- prune.tree(taxi_tree_tip, best = 5)
 
 # Print results
 summary(tree_tip_prune)
-plot(tree_tip_prune) 
-text(tree_tip_prune, cex = 0.75)
-
 
 # Create sequence of pruned tree sizes/errors
 tip_prune_seq = prune.tree(taxi_tree_tip)
 
 # Plot error versus plot size
-plot(tip_prune_seq, main = "Error versus Decision Tree Plot Size")
+plot(tip_prune_seq, main = "Error versus Decision Tree Plot Size for Tip Amount")
 
 # Get vector of error
 tip_prune_seq$dev
@@ -773,7 +853,15 @@ optimal_tree_tip = which(tip_prune_seq$dev == min(tip_prune_seq$dev))
 min(tip_prune_seq$size[optimal_tree_tip])
 ```
 
-```{r dt_accuracy_tip, include = T, echo = F}
+Here is the pruned tree:
+
+```{r dt_plotprunetree_tip, include = T, echo = F}
+# Plot tree
+plot(tree_tip_prune, main = "Pruned Decision Tree for Tip Amount") 
+text(tree_tip_prune, cex = 0.75)
+```
+
+```{r dt_accuracy_tip}
 # Predict test values using tree
 tree_tip_pred = predict(taxi_tree_tip, newdata = test)
 
@@ -792,36 +880,41 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
+The mean squared error is `r tree_tip_mse`.
+
 #### Tip Fare Ratio
 
-```{r dt_growtree_ratio, out.width='100%', out.height='100%', include = T, echo = F}
+```{r dt_growtree_ratio}
 # Grow decision tree
 taxi_tree_ratio <- tree(tip_fare_ratio ~ passenger_count + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Staten_Island + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night, data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree_ratio)
-png(file="tree_ratio.png",width=900,height=900,res=30)
-plot(taxi_tree_ratio) 
-text(taxi_tree_ratio, cex = 2.5) #0.75) #2.5)
-dev.off()
+```
+
+Here is the decision tree for tip ratio:
+
+```{r dt_plottree_ratio, out.width='100%', out.height='100%', include = T, echo = F}
+# Plot tree
+#png(file="tree_ratio.png",width=900,height=900,res=30) # Use if want to export
+plot(taxi_tree_ratio, main = "Decision Tree for Tip Ratio") 
+text(taxi_tree_ratio, cex = 0.75) #2.5)
+#dev.off() # Use if want to export
 ```
 
 
-```{r dt_prunetree_ratio, include = T, echo = F}
+```{r dt_prunetree_ratio}
 # Return best pruned tree with 5 leaves, evaluating error on training data 
 tree_ratio_prune <- prune.tree(taxi_tree_ratio, best = 5)
 
 # Print results
 summary(tree_ratio_prune)
-plot(tree_ratio_prune) 
-text(tree_ratio_prune, cex = 0.75)
-
 
 # Create sequence of pruned tree sizes/errors
 ratio_prune_seq = prune.tree(taxi_tree_ratio)
 
 # Plot error versus plot size
-plot(ratio_prune_seq, main = "Error versus Decision Tree Plot Size")
+plot(ratio_prune_seq, main = "Error versus Decision Tree Plot Size for Tip Ratio")
 
 # Get vector of error
 ratio_prune_seq$dev
@@ -833,7 +926,16 @@ optimal_tree_ratio = which(ratio_prune_seq$dev == min(ratio_prune_seq$dev))
 min(ratio_prune_seq$size[optimal_tree_ratio])
 ```
 
-```{r dt_accuracy_ratio, include = T, echo = F}
+Here is the pruned decision tree:
+
+```{r dt_plotprunetree_ratio, include = T, echo = F}
+# Plot pruned tree
+plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio") 
+text(tree_ratio_prune, cex = 0.75)
+```
+
+
+```{r dt_accuracy_ratio}
 # Predict test values using tree
 tree_ratio_pred = predict(taxi_tree_ratio, newdata = test)
 
@@ -852,22 +954,11 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
+The mean squared error is `r tree_ratio_mse`.
+
 # Summary of Model results
 
 ```{r summary, include=TRUE}
-
-# Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
-# Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
-# MAPE <- c(1,2,3, df_elnet$mape, 5)
-# Significant_Variables <- c(1,2,3, 20, 5)
-# 
-# result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
-# formattable(result_tbl, 
-#             align =c("l","c","c","c","c"), 
-#             list(`Model` = formatter(
-#               "span", style = ~ style(color = "grey",font.weight = "bold"))
-#               # `Rsquared` = color_bar("pink")
-# ))
 
 formattable(results_df,
             align =c("l","c","c","c","c"),
