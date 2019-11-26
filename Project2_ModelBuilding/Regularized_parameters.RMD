@@ -1007,7 +1007,8 @@ tip_cv_seq$dev
 optimal_cvtree_tip = which(tip_cv_seq$dev == min(tip_cv_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(tip_cv_seq$size[optimal_cvtree_tip])
+best_leaves_cv_tip = min(tip_cv_seq$size[optimal_cvtree_tip])
+best_leaves_cv_tip
 ```
 
 Here is the pruned tree by 10-fold CV:
@@ -1016,7 +1017,7 @@ Here is the pruned tree by 10-fold CV:
 # Plot tree
 tree_tip_cv = cv.tree(taxi_tree_tip, best = 5)
 plot(tree_tip_cv, main = "CV Decision Tree for Tip Amount")
-text(tree_tip_prune, cex = 0.75)
+text(tree_tip_prune, cex = 0.5)
 ```
 
 ```{r dt_accuracy_tip}
@@ -1111,7 +1112,8 @@ ratio_prune_seq$dev
 optimal_tree_ratio = which(ratio_prune_seq$dev == min(ratio_prune_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(ratio_prune_seq$size[optimal_tree_ratio])
+best_leaves_ratio_prune = min(ratio_prune_seq$size[optimal_tree_ratio])
+best_leaves_ratio_prune
 ```
 
 Here is the pruned decision tree:
@@ -1139,14 +1141,15 @@ ratio_cv_seq$dev
 optimal_cvtree_ratio = which(ratio_cv_seq$dev == min(ratio_cv_seq$dev))
 
 # Positions of optimal (with respect to error) trees 
-min(ratio_cv_seq$size[optimal_cvtree_ratio])
+best_leaves_cv_ratio = min(ratio_cv_seq$size[optimal_cvtree_ratio])
+best_leaves_cv_ratio
 ```
 
 Here is the pruned tree by 10-fold CV:
 
 ```{r dt_plotcvtree_ratio, include = T, echo = F}
 # Plot tree
-tree_ratio_cv = cv.tree(taxi_tree_ratio, best = 3)
+tree_ratio_cv = cv.tree(taxi_tree_ratio, best = best_leaves_cv_ratio)
 plot(tree_ratio_cv, main = "CV Decision Tree for Tip Ratio")
 text(tree_ratio_prune, cex = 0.75)
 ```
