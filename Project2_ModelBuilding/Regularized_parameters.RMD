@@ -37,6 +37,10 @@ loadPkg("data.table")
 loadPkg("corrplot")
 loadPkg("formattable")
 loadPkg("tidyr")
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github("kassambara/ggpubr")
+
+library(ggpubr)
 ```
 
 ```{r udf}
@@ -133,7 +137,6 @@ tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], meth
 
 tip_fare_ratio_cor
 
-loadPkg("corrplot")
 corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 ```
 
@@ -143,8 +146,6 @@ Here is the another correlation. This time we choose tip_amount as our dependent
 
 ```{r correlation2}
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
-
-df_sub_cor <- cor(df_sub[,condition], method = c("pearson"))
 ```
 
 This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
@@ -156,7 +157,7 @@ Below are the scatter plot along with correlation and regression line for numeri
 For tip amount
 ```{r scatterplots2}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
+Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip amount",
@@ -165,7 +166,7 @@ ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
                              df_sub$tip_amount), parse = TRUE)
 
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
+Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +
   labs(title="Variation in trip duration and tip amount",
@@ -173,7 +174,8 @@ ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_amount), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
+
+Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +
   labs(title="Variation in congestion surcharge and tip amount",
@@ -181,6 +183,19 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_amount), parse = TRUE)
 
+Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in congestion surcharge and tip amount",
+       x="Congestion surcharge", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
+                             df_sub$tip_amount), parse = TRUE)
+
+``` 
+
+```{r }
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
 ```
 
 ```{r scatterplots}
@@ -206,6 +221,8 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
        x="Congestion surcharge", y = "Tip fare ratio") +
   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_fare_ratio), parse = TRUE)
+
+plot(as.factor(df_sub$congestion_surcharge), df_sub$tip_fare_ratio) 
 ```
 
 
@@ -465,6 +482,7 @@ After removal of the outliers from the data there is no improvement in the value
 
 ## Stepwise regression
 ```{r stepwise}
+
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 # step_lm_tip <- ols_step_all_possible(model)
 # # plot(k)
