@@ -1004,7 +1004,7 @@ min(ratio_cv_seq$size[optimal_cvtree_ratio])
 
 Here is the pruned tree by 10-fold CV:
 
-```{r dt_plotcvtree_tip, include = T, echo = F}
+```{r dt_plotcvtree_ratio, include = T, echo = F}
 # Plot tree
 tree_ratio_cv = cv.tree(taxi_tree_ratio, best = 3)
 plot(tree_ratio_cv, main = "CV Decision Tree for Tip Ratio")
