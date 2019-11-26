@@ -722,6 +722,8 @@ lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
+plot(cv_lamda)
+
 # Fit the final model on the training data
 lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
