@@ -55,11 +55,12 @@ loadPkg("ggplot2")
 loadPkg("data.table")
 loadPkg("nortest")
 loadPkg("corrplot")
+loadPkg("faraway")
 ```
 
 ```{r LinReg, include=TRUE}
 taxipro1 <- read.csv("../Data/taxidata_processed_project2.csv")
-cnames<- c("fare_amount",	"pickup_hrs", "dropoff_hrs",	"trip_duration",	"trip_distance",	"DOLocationID",	"PULocationID",	"tip_fare_ratio")
+cnames<- c("tip_amount","fare_amount",	"pickup_hrs", "dropoff_hrs",	"trip_duration",	"trip_distance",	"DOLocationID",	"PULocationID",	"tip_fare_ratio")
 taxipro <- taxipro1[cnames]
 str(taxipro)
 head(taxipro)
@@ -71,12 +72,12 @@ taxiprocor
 #correlation plot
 corrplot.mixed(taxiprocor,lower.col="black", number.cex = 0.7)
 
-fit0 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
+fit0 <- lm(tip_amount ~ fare_amount, data = taxipro )
 summary(fit0)
 vif(fit0)
 plot(fit0)
 
-fit1 <- lm(tip_fare_ratio ~ fare_amount+trip_duration, data = taxipro )
+fit1 <- lm(tip_amount ~ fare_amount+trip_duration, data = taxipro )
 summary(fit1)
 vif(fit1)
 plot(fit1)
@@ -86,17 +87,17 @@ summary(fit2)
 vif(fit2)
 plot(fit2)
 
-fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs, data = taxipro )
+fit3 <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance+pickup_hrs, data = taxipro )
 summary(fit3)
 vif(fit3)
 plot(fit3)
 
-fit4 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID, data = taxipro )
+fit4 <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID, data = taxipro )
 summary(fit4)
 vif(fit4)
 plot(fit4)
 
-fit5 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs, data = taxipro )
+fit5 <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs, data = taxipro )
 summary(fit5)
 vif(fit5)
 plot(fit5)
@@ -104,7 +105,7 @@ plot(fit5)
 
 ```{r include=TRUE}
 
-fit6 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs+DOLocationID, data = taxipro )
+fit6 <- lm(tip_amount ~ trip_duration+trip_distance+pickup_hrs+PULocationID+dropoff_hrs+DOLocationID, data = taxipro )
 summary(fit6)
 vif(fit6)
 plot(fit6)
@@ -151,7 +152,7 @@ anova(fit0,fit1,fit2,fit3,fit4,fit5,fit6)
 Predict
 ```{r Prediction, echo=TRUE}
 loadPkg("stats")
-predict(fit6,data.frame(
-  #midterm=c(25,52,78),hw=c(20,80,45))
-  )
+# predict(fit6,data.frame(
+#   #midterm=c(25,52,78),hw=c(20,80,45))
+#  )
 ```
