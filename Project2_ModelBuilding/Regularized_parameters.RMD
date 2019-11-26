@@ -735,10 +735,10 @@ taxi_tree_tip <- tree(tip_amount ~ passenger_count + trip_distance + fare_amount
 
 # Print results
 summary(taxi_tree_tip)
-png(file="tree_tipamt.png",width=900,height=900,res=30)
-plot(taxi_tree_tip) 
-text(taxi_tree_tip, cex = 2.5) #0.75) #2.5)
-dev.off()
+#png(file="tree_tipamt.png",width=900,height=900,res=30) # Use if want to export
+plot(taxi_tree_tip, main = "Decision Tree for Tip Amount") 
+text(taxi_tree_tip, cex = 0.75) #2.5)
+#dev.off() # Use if want to export
 ```
 
 
@@ -748,15 +748,14 @@ tree_tip_prune <- prune.tree(taxi_tree_tip, best = 5)
 
 # Print results
 summary(tree_tip_prune)
-plot(tree_tip_prune) 
+plot(tree_tip_prune, main = "Pruned Decision Tree for Tip Amount") 
 text(tree_tip_prune, cex = 0.75)
-
 
 # Create sequence of pruned tree sizes/errors
 tip_prune_seq = prune.tree(taxi_tree_tip)
 
 # Plot error versus plot size
-plot(tip_prune_seq, main = "Error versus Decision Tree Plot Size")
+plot(tip_prune_seq, main = "Error versus Decision Tree Plot Size for Tip Amount")
 
 # Get vector of error
 tip_prune_seq$dev
@@ -795,10 +794,10 @@ taxi_tree_ratio <- tree(tip_fare_ratio ~ passenger_count + trip_distance + fare_
 
 # Print results
 summary(taxi_tree_ratio)
-png(file="tree_ratio.png",width=900,height=900,res=30)
-plot(taxi_tree_ratio) 
-text(taxi_tree_ratio, cex = 2.5) #0.75) #2.5)
-dev.off()
+#png(file="tree_ratio.png",width=900,height=900,res=30) # Use if want to export
+plot(taxi_tree_ratio, main = "Decision Tree for Tip Ratio") 
+text(taxi_tree_ratio, cex = 0.75) #2.5)
+#dev.off() # Use if want to export
 ```
 
 
@@ -808,15 +807,14 @@ tree_ratio_prune <- prune.tree(taxi_tree_ratio, best = 5)
 
 # Print results
 summary(tree_ratio_prune)
-plot(tree_ratio_prune) 
+plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio") 
 text(tree_ratio_prune, cex = 0.75)
-
 
 # Create sequence of pruned tree sizes/errors
 ratio_prune_seq = prune.tree(taxi_tree_ratio)
 
 # Plot error versus plot size
-plot(ratio_prune_seq, main = "Error versus Decision Tree Plot Size")
+plot(ratio_prune_seq, main = "Error versus Decision Tree Plot Size for Tip Ratio")
 
 # Get vector of error
 ratio_prune_seq$dev
