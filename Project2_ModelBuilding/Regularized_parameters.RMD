@@ -806,12 +806,18 @@ results_df <- rbind(results_df, data.frame(
 
 #### Tip Amount
 
-```{r dt_growtree_tip, out.width='100%', out.height='100%', include = T, echo = F}
+```{r dt_growtree_tip}
 # Grow decision tree
 taxi_tree_tip <- tree(tip_amount ~ passenger_count + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Staten_Island + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night, data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree_tip)
+```
+
+Here is the decision tree for tip amount:
+
+```{r dt_plottree_tip, out.width='100%', out.height='100%', include = T, echo = F}
+# Plot tree
 #png(file="tree_tipamt.png",width=900,height=900,res=30) # Use if want to export
 plot(taxi_tree_tip, main = "Decision Tree for Tip Amount") 
 text(taxi_tree_tip, cex = 0.75) #2.5)
@@ -819,14 +825,12 @@ text(taxi_tree_tip, cex = 0.75) #2.5)
 ```
 
 
-```{r dt_prunetree_tip, include = T, echo = F}
+```{r dt_prunetree_tip}
 # Return best pruned tree with 5 leaves, evaluating error on training data 
 tree_tip_prune <- prune.tree(taxi_tree_tip, best = 5)
 
 # Print results
 summary(tree_tip_prune)
-plot(tree_tip_prune, main = "Pruned Decision Tree for Tip Amount") 
-text(tree_tip_prune, cex = 0.75)
 
 # Create sequence of pruned tree sizes/errors
 tip_prune_seq = prune.tree(taxi_tree_tip)
@@ -844,7 +848,15 @@ optimal_tree_tip = which(tip_prune_seq$dev == min(tip_prune_seq$dev))
 min(tip_prune_seq$size[optimal_tree_tip])
 ```
 
-```{r dt_accuracy_tip, include = T, echo = F}
+Here is the pruned tree:
+
+```{r dt_plotprunetree_tip, include = T, echo = F}
+# Plot tree
+plot(tree_tip_prune, main = "Pruned Decision Tree for Tip Amount") 
+text(tree_tip_prune, cex = 0.75)
+```
+
+```{r dt_accuracy_tip}
 # Predict test values using tree
 tree_tip_pred = predict(taxi_tree_tip, newdata = test)
 
@@ -863,14 +875,22 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
+The mean squared error is `r tree_tip_mse`.
+
 #### Tip Fare Ratio
 
-```{r dt_growtree_ratio, out.width='100%', out.height='100%', include = T, echo = F}
+```{r dt_growtree_ratio}
 # Grow decision tree
 taxi_tree_ratio <- tree(tip_fare_ratio ~ passenger_count + trip_distance + fare_amount + congestion_surcharge + trip_duration + VendorID_1 + VendorID_2 + Borough_pu_Bronx + Borough_pu_Brooklyn + Borough_pu_Manhattan + Borough_pu_Queens + Borough_pu_Unknown + Borough_do_Bronx + Borough_do_Brooklyn + Borough_do_EWR + Borough_do_Manhattan + Borough_do_Queens + Borough_do_Staten_Island + Borough_do_Unknown + pickup_period_Afternoon + pickup_period_Evening + pickup_period_Morning + pickup_period_Night + drop_period_Afternoon + drop_period_Evening + drop_period_Morning + drop_period_Night, data = train, mindev=0.001)
 
 # Print results
 summary(taxi_tree_ratio)
+```
+
+Here is the decision tree for tip ratio:
+
+```{r dt_plottree_ratio, out.width='100%', out.height='100%', include = T, echo = F}
+# Plot tree
 #png(file="tree_ratio.png",width=900,height=900,res=30) # Use if want to export
 plot(taxi_tree_ratio, main = "Decision Tree for Tip Ratio") 
 text(taxi_tree_ratio, cex = 0.75) #2.5)
@@ -878,14 +898,12 @@ text(taxi_tree_ratio, cex = 0.75) #2.5)
 ```
 
 
-```{r dt_prunetree_ratio, include = T, echo = F}
+```{r dt_prunetree_ratio}
 # Return best pruned tree with 5 leaves, evaluating error on training data 
 tree_ratio_prune <- prune.tree(taxi_tree_ratio, best = 5)
 
 # Print results
 summary(tree_ratio_prune)
-plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio") 
-text(tree_ratio_prune, cex = 0.75)
 
 # Create sequence of pruned tree sizes/errors
 ratio_prune_seq = prune.tree(taxi_tree_ratio)
@@ -903,7 +921,16 @@ optimal_tree_ratio = which(ratio_prune_seq$dev == min(ratio_prune_seq$dev))
 min(ratio_prune_seq$size[optimal_tree_ratio])
 ```
 
-```{r dt_accuracy_ratio, include = T, echo = F}
+Here is the pruned decision tree:
+
+```{r dt_plotprunetree_ratio, include = T, echo = F}
+# Plot pruned tree
+plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio") 
+text(tree_ratio_prune, cex = 0.75)
+```
+
+
+```{r dt_accuracy_ratio}
 # Predict test values using tree
 tree_ratio_pred = predict(taxi_tree_ratio, newdata = test)
 
@@ -921,6 +948,8 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
 ))
 ```
+
+The mean squared error is `r tree_ratio_mse`.
 
 # Summary of Model results
 
