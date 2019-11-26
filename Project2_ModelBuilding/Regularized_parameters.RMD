@@ -325,9 +325,9 @@ taxiprocor[c("tip_fare_ratio","tip_amount"),]
 
 We have to use one hot encoding to convert factor variables into numerical variables
 ```{r pca}
-pr.out =prcomp(X_train)
+pr.out =prcomp(X_train, scale = F)
 summary(pr.out)
-pr.out$rotation[1:5,1:4]
+pr.out$rotation[1:5,1:7]
 
 dim(pr.out$x)
 
@@ -355,7 +355,7 @@ Tip Fare Ratio
 ```{r pca_tipfareratio}
 #add a training set with principal components
 
-pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:21]
+pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:7]
 
 #transform test into PCA
 test.data <- predict(pr.out, newdata = X_test)
@@ -374,13 +374,25 @@ results_df <- data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
+
+ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
+  geom_point() +
+  geom_point(aes(y = predictions), shape = 1, color = "blue") +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip fare ratio")
+
+ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Actual Tip amount", y = "Predicted Tip amount")
+
 ```
 
 Tip amount
 ```{r pca_tip}
 #add a training set with principal components
 
-pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:21]
+pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:7]
 
 #transform test into PCA
 test.data <- predict(pr.out, newdata = X_test)
@@ -399,6 +411,12 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
+
+ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Actual Tip amount", y = "Predicted Tip amount")
+
 ```
 
 # Linear Models
