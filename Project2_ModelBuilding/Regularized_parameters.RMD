@@ -851,119 +851,7 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-
-
-
-
-
-
-
-<!-- ```{r elnet_tip} -->
-<!-- # The glmnet package allows to tune λ via cross-validation for a fixed α, but it does not support α-tuning, so we will turn to caret for this job. -->
-<!-- # simply use all of the data as training data -->
-
-<!-- set.seed(123)  -->
-<!-- # setting up 5-fold Cross Validation strategy for resampling -->
-<!-- cv_5 = trainControl(method = "cv", number = 5) -->
-
-<!-- # We then use train() with method = "glmnet" which is actually fitting the elastic net -->
-<!-- elnet_model = train( -->
-<!--   tip_amount ~ .-tip_fare_ratio, data = df_sub, -->
-<!--   method = "glmnet", -->
-<!--   trControl = cv_5 -->
-<!-- ) -->
-<!-- # note that since we are using caret() directly, it is taking care of dummy variable creation. So unlike before when we used glmnet(), we do not need to manually create a model matrix. -->
-
-<!-- elnet_model -->
-
-
-<!-- ``` -->
-
-<!-- So by default, train() from caret library tried only three α values, 0.10, 0.55, and 1. Here, the best result uses α=0.55, so this result is somewhere between ridge and lasso (slightly more closer to lasso than ridge). -->
-
-<!-- Now we expand our model search. First we expand the feature space to include all interactions. Also by setting tuneLength = 10, we will search 10 α values and 10 λ values for each. -->
-
-<!-- ```{r elnet_expandedfeatures} -->
-<!-- elnet_model_exp = train( -->
-<!--   tip_amount ~ .-tip_fare_ratio^2, data = df_sub, -->
-<!--   method = "glmnet", -->
-<!--   trControl = cv_5, -->
-<!--   tuneLength = 10 -->
-<!-- ) -->
-<!-- ``` -->
-
-<!-- The results will be very large so to deal with this, a quick helper function is used to extract the row with the best tuning parameters. -->
-
-<!-- ```{r elnet_bestparameters} -->
-<!-- # helper function to extract row with the best tuning parameters. -->
-<!-- get_best_result = function(caret_fit) { -->
-<!--   best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune)) -->
-<!--   best_result = caret_fit$results[best, ] -->
-<!--   rownames(best_result) = NULL -->
-<!--   best_result -->
-<!-- } -->
-
-<!-- # calling helper fn on trained object -->
-<!-- get_best_result(elnet_model_exp) -->
-
-<!-- ``` -->
-
-
-<!-- ```{r elnet_bestlambda_cv} -->
-<!-- # Find the best lambda using cross-validation -->
-<!-- set.seed(123)  -->
-<!-- elnet_cv <- cv.glmnet(x, y, alpha = 0.5) -->
-<!-- # Display the best lambda value -->
-<!-- best_lambda = 0.003474875 -->
-<!-- ``` -->
-
-<!-- ```{r elnet_fit} -->
-<!-- # Fit the final model on the training data -->
-<!-- elnet_model <- glmnet(x, y, alpha = 0.5, lambda = best_lambda) -->
-<!-- # Dsiplay regression coefficients -->
-<!-- coef(elnet_model) -->
-
-<!-- # printing only the non-zero coefficients -->
-<!-- tmp_coeffs <- coef(elnet_model) -->
-<!-- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x) -->
-
-<!-- # finding significant variables i.e. calculating p-values for all coefficients -->
-<!-- # library(ISLR) -->
-<!-- W <- as.matrix(coef(elnet_model)) -->
-<!-- W -->
-<!-- keep_X <- rownames(W)[W!=0] -->
-<!-- keep_X <- keep_X[!keep_X == "(Intercept)"] -->
-<!-- x <- x[,keep_X] -->
-<!-- lm_elnet <- lm(y~x) -->
-
-<!-- # # extracting only the p-values of all variables -->
-<!-- # a <- summary(lm(y~x))$coefficients[,"Pr(>|t|)"] -->
-<!-- # a -->
-
-<!-- library(broom) -->
-<!-- tm = tidy(lm_elnet) -->
-<!-- options(scipen = 999) -->
-<!-- # removing 1st row i.e. intercept  -->
-<!-- tm <- tm[-1, ] -->
-<!-- tm -->
-<!-- # get variables with p value less than 0.05 -->
-<!-- sig_var_elnet <- tm$term[tm$p.value < 0.05] -->
-<!-- ``` -->
-
-<!-- ```{r elnet_pred} -->
-<!-- # # Make predictions on the test data -->
-<!-- x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1] -->
-<!-- predictions <- elnet_model %>% predict(x.test) %>% as.vector() -->
-<!-- # Model performance metrics -->
-<!-- # Model performance metrics -->
-<!-- results_df <- rbind(results_df, data.frame( -->
-<!--   technique = "Elastic Net", -->
-<!--   dependent = "tip_amount", -->
-<!--   mape = mape(test$tip_amount, predictions), -->
-<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
-<!-- )) -->
-
-<!-- ``` -->
+###############
 
 
 ```{r elnet}
@@ -1032,7 +920,7 @@ set.seed(123)
 
 
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.9, lambda = 0.02313856)
+elnet_model <- glmnet(x, y, alpha = 0.9, lambda = 0.02313856, standardize = FALSE)
 # Dsiplay regression coefficients
 coef(elnet_model)
 
