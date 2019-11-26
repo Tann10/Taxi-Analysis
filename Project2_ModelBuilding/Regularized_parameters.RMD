@@ -41,6 +41,11 @@ loadPkg("faraway")
 loadPkg("data.table")
 loadPkg("formattable")
 loadPkg("tidyr")
+loadPkg("ggcorrplot")
+loadPkg("Hmisc")
+loadPkg("leaps")
+loadPkg("ISLR")
+loadPkg("modelr")
 ```
 
 ```{r udf}
@@ -137,6 +142,8 @@ tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], meth
 
 tip_fare_ratio_cor
 
+
+
 ```
 
 The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas Passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
@@ -157,28 +164,28 @@ Below are the scatter plot along with correlation and regression line for numeri
 For tip amount
 ```{r scatterplots2}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) + 
+ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  
+  geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip amount",
-       x="Trip distance", y = "Tip amount") + 
+       x="Trip distance", y = "Tip amount") +
   geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_amount), parse = TRUE)
 
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) + 
+ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  
+  geom_smooth(method=lm) +
   labs(title="Variation in trip duration and tip amount",
-       x="Trip duration", y = "Tip amount")+ 
+       x="Trip duration", y = "Tip amount")+
   geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_amount), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) + 
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  
+  geom_smooth(method=lm) +
   labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")+ 
+       x="Congestion surcharge", y = "Tip amount")+
   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_amount), parse = TRUE)
 
@@ -186,25 +193,25 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
 
 ```{r scatterplots}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  
+  geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio") + 
+       x="Trip distance", y = "Tip fare ratio") +
   geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio") + 
+       x="Trip duration", y = "Tip fare ratio") +
   geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
+ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio") + 
+       x="Congestion surcharge", y = "Tip fare ratio") +
   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_fare_ratio), parse = TRUE)
 ```
@@ -223,6 +230,7 @@ df_sub %>%
   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
 
 ```
+
 
 
 # Model building
@@ -270,6 +278,20 @@ train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 ```
 
+##corplot,pair plot
+
+```{r }
+#correaltion
+taxipro <- train
+str(taxipro)
+# head(taxipro)
+# summary(taxipro)
+
+taxiprocor =  cor(taxipro) # get the correlation matrix between all numerical variables.
+taxiprocor[c("tip_fare_ratio","tip_amount"),]
+#we observe that fare_amount, trip_distance, trip_duration has best correlation with tip fare ratio and tip amount
+
+```
 
 # Principal component analysis
 
@@ -352,12 +374,146 @@ results_df <- rbind(results_df, data.frame(
 ```
 
 # Linear Models
+
+Let us build a linear model
+```{r }
+
+#Taking best three variables correlated with tip_fare ratio
+
+#linear model of tip_fare_ratio ~ trip_duration
+fit1 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
+summary(fit1)
+# vif(fit1)
+# plot(fit1)
+
+#linear model of tip_fare_ratio ~ trip_duration+fare_amount
+fit2 <- lm(tip_fare_ratio ~ fare_amount+trip_duration, data = taxipro )
+summary(fit2)
+# vif(fit2)
+# plot(fit2)
+
+#linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
+fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance, data = taxipro )
+summary(fit3)
+vif(fit3)
+plot(fit3)
+
+#perform ANOVA to compare three models built
+anova(fit1,fit2,fit3)
+#We observe that p is > 0.05 for fit3 implies fit1 and fit2 are same.
+
+```
+Since the results are not satisfactory we perform step by varification.
+
+```{r step_by_feature_selection}
+
+mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
+plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+# plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+# plot(mod_tip_ratio, scale = "r2", main = "R^2")
+# plot(mod_tip_ratio, scale = "bic", main = "BIC")
+
+
+#Let us select first three features selected by feature selection function above.
+fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
+summary(fit_feature)
+vif(fit_feature)
+plot(fit_feature)
+
+```
+
+Let us build a linear model with fare amount to get significany results
+```{r }
+
+#Taking best three variables correlated with tip_fare ratio
+
+#linear model of tip_amount ~ trip_duration
+fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
+summary(fit1_ta)
+# vif(fit1_ta)
+# plot(fit1_ta)
+
+#linear model of tip_amount ~ trip_duration+fare_amount
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_duration, data = taxipro )
+summary(fit2_ta)
+# vif(fit2_ta)
+# plot(fit2_ta)
+
+#linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
+fit3_ta <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance, data = taxipro )
+summary(fit3_ta)
+vif(fit3_ta)
+plot(fit3_ta)
+
+
+#perform ANOVA to compare three models built
+anova(fit1_ta,fit2_ta,fit3_ta)
+
+model.final.pred <- add_predictions(test,fit2_ta)
+head(model.final.pred)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+
+actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
+correlation_accuracy <- cor(actuals_preds)  # 91.4%
+head(actuals_preds)
+```
+
+To further improve the model
+```{r step_by_feature_selection}
+
+mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
+plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+# plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+# plot(mod_tip_ratio, scale = "r2", main = "R^2")
+# plot(mod_tip_ratio, scale = "bic", main = "BIC")
+
+
+#Let us select first three features selected by feature selection function above.
+fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
+summary(fit_feature_ta) 
+vif(fit_feature_ta)
+plot(fit_feature_ta)
+
+# #perform ANOVA to compare three models built
+# anova(fit3_ta,fit_feature_ta)
+
+
+model.final.pred <- add_predictions(test,fit_feature_ta)
+head(model.final.pred)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+
+actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
+correlation_accuracy <- cor(actuals_preds)  # 91.4%
+head(actuals_preds)
+
+```
+```{r lm-fare_amount}
+#Let us select first three features selected by feature selection function above.
+fit_without_fare_amount <- lm(tip_amount ~ .-fare_amount, data = taxipro )
+summary(fit_without_fare_amount) 
+vif(fit_without_fare_amount)
+plot(fit_feature_ta)
+
+# #perform ANOVA to compare three models built
+# anova(fit3_ta,fit_without_fare_amount)
+
+
+model.final.pred <- add_predictions(test,fit_without_fare_amount)
+head(model.final.pred)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+
+actuals_preds <- data.frame(cbind(actuals=model.final.pred$tip_amount, predicteds=model.final.pred$pred))  # make actuals_predicteds dataframe.
+correlation_accuracy <- cor(actuals_preds)  # 91.4%
+head(actuals_preds)
+
+```
+
+
 Let build linear models on tip fare ratio: 
 ## OLS
 
 ### Tip fare ratio
 ```{r }
-
 model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 summary(model)
 vif(model)
