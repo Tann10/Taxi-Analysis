@@ -186,21 +186,20 @@ Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
 Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +
-  labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")+
+  labs(title="Variation in passenger count and tip amount",
+       x="Passenger count", y = "Tip amount")+
   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
                              df_sub$tip_amount), parse = TRUE)
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
 
 ``` 
 
-```{r }
-ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
-          ncol = 2, nrow = 2)
-```
+
 
 ```{r scatterplots}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
+Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip fare ratio",
@@ -208,21 +207,30 @@ ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
+Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
        x="Trip duration", y = "Tip fare ratio") +
   geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
+Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
        x="Congestion surcharge", y = "Tip fare ratio") +
   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-plot(as.factor(df_sub$congestion_surcharge), df_sub$tip_fare_ratio) 
+Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_fare_ratio)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in passenger count and fip fare ratio",
+       x="Passenger count", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
+                             df_sub$tip_fare_ratio), parse = TRUE)
+
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
 ```
 
 
@@ -512,6 +520,8 @@ cv_lamda$lambda.min
 # Fit the final model on the training data
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 
+ridge_model_2 <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min,standardize = F)
+
 # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
@@ -526,6 +536,8 @@ results_df <- rbind(results_df, data.frame(
 
 # Display regression coefficients
 coef(ridge_model)
+coef(ridge_model_2)
+
 plot(cv_lamda)
 ```
 
