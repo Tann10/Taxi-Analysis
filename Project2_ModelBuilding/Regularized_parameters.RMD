@@ -38,11 +38,15 @@ loadPkg("data.table")
 loadPkg("nortest")
 loadPkg("corrplot")
 loadPkg("faraway")
+loadPkg("data.table")
+loadPkg("formattable")
+loadPkg("tidyr")
 ```
 
 ```{r udf}
+# Split the data into training and test set
+
 train_test_split = function(df_sub) {
-  # Split the data into training and test set
   set.seed(123)
   training.samples <- df_sub$tip_fare_ratio %>%
     createDataPartition(p = 0.8, list = FALSE)
@@ -65,7 +69,36 @@ mape <- function(actual,pred){
            return (mape)
 }
 
+
+corr_eqn <- function(x,y, digits = 2) {
+  corr_coef <- round(cor(x, y), digits = digits)
+  paste("italic(r) == ", corr_coef)
+}
+
+# Plot cooks distance
+cooks_distance <- function(df, model){
+  
+  cooksd <- cooks.distance(model)
+  sample_size <- nrow(df)
+  plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+  abline(h = 4/sample_size, col="red")  # add cutoff line
+  text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+  
+}
+
+# removing outlies
+influential_points <- function(df_out, model) {
+  cooksd <- cooks.distance(model)
+  sample_size <- nrow(df_out)
+  # influential row numbers
+  influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
+  print(length(influential))
+  df_out <- df_out[-influential, ]
+  return (df_out)
+}
+
 ```
+
 
 # Data
 
@@ -79,6 +112,8 @@ df <- df %>% filter(passenger_count>0)
 
 # select the required columns
 df_sub <- df[,c("tip_fare_ratio", "tip_amount", "VendorID",  "passenger_count", "trip_distance", "fare_amount", "congestion_surcharge", "Borough_pu", "Borough_do", "pickup_period", "drop_period", "trip_duration")]
+
+print(dim(df_sub))
 
 # checking for NAs
 # any(is.na(df_sub))    # false
@@ -117,43 +152,63 @@ This time we get stronger and positive correlation coefficients between tip amou
 
 The same relationship can be visually confirmed through scatter plots below:
 
+Below are the scatter plot along with correlation and regression line for numerical variables
+
+For tip amount
 ```{r scatterplots2}
 
 ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) + 
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip amount",
-       x="Trip distance", y = "Tip amount")
+  geom_smooth(method=lm, color = "black") +  
+  labs(title="Variation in trip distance and tip amount",
+       x="Trip distance", y = "Tip amount") + 
+  geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
+                             df_sub$tip_amount), parse = TRUE)
 
 
 ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) + 
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip amount",
-       x="Trip duration", y = "Tip amount")
+  geom_smooth(method=lm) +  
+  labs(title="Variation in trip duration and tip amount",
+       x="Trip duration", y = "Tip amount")+ 
+  geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
+                             df_sub$tip_amount), parse = TRUE)
 
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) + 
   geom_point(color = "red")+
-  geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")
+  geom_smooth(method=lm) +  
+  labs(title="Variation in congestion surcharge and tip amount",
+       x="Congestion surcharge", y = "Tip amount")+ 
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
+                             df_sub$tip_amount), parse = TRUE)
+
 ```
 
 ```{r scatterplots}
 
 ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) + 
   geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +  labs(title="Variation in trip distance and tip fare ratio",
-       x="Trip distance", y = "Tip fare ratio")
-
+  geom_smooth(method=lm, color = "black") +  
+  labs(title="Variation in trip distance and tip fare ratio",
+       x="Trip distance", y = "Tip fare ratio") + 
+  geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 
 ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
-       x="Trip duration", y = "Tip fare ratio")
+       x="Trip duration", y = "Tip fare ratio") + 
+  geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 
 ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) + 
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
-       x="Congestion surcharge", y = "Tip fare ratio")
+       x="Congestion surcharge", y = "Tip fare ratio") + 
+  geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
+                             df_sub$tip_fare_ratio), parse = TRUE)
 ```
+
 
 ```{r normality check of processed data, echo=T, include=T}
 #ggplot histogram of tip_fare_ratio for processed df
@@ -169,32 +224,6 @@ df_sub %>%
 
 ```
 
-
-```{r }
-model <- lm(tip_amount ~ fare_amount, data = df_sub)
-cooksd <- cooks.distance(model)
-
-sample_size <- nrow(df_sub)
-plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-abline(h = 4/sample_size, col="red")  # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
-```
-
-```{r }
-model <- lm(tip_fare_ratio ~ fare_amount, data = df_sub)
-cooksd <- cooks.distance(model)
-
-# Building boxplot for multiple variables
-ggplot(df_sub, aes(y=tip_amount)) +
-  geom_boxplot(outlier.colour="red", 
-             outlier.shape=16,
-             outlier.size=2, notch=FALSE)
-
-sample_size <- nrow(df_sub)
-plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-abline(h = 15/sample_size, col="red")  # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
-```
 
 # Model building
 
@@ -234,26 +263,13 @@ X_train <- fastScale(dataSet = splitted_dfs["X_train"]$X_train, scales = scales,
 X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, verbose = TRUE)
 ```
 
+Bind the columns to get one train and test set 
 ```{r }
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 ```
 
-## Linear models
-```{r }
-model_1 <- lm(tip_fare_ratio ~ fare_amount, data = train)
-summary(model_1)
-
-model_2 <- lm(tip_fare_ratio ~ fare_amount + trip_distance, data = train)
-summary(model_2)
-
-model_3 <- lm(tip_amount ~ fare_amount, data = train)
-summary(model_3)
-
-model_4 <- lm(tip_amount ~ fare_amount + trip_distance, data = train)
-summary(model_4)
-```
 
 # Principal component analysis
 
@@ -313,101 +329,176 @@ model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
 ```
 
-## Variable selection
+# Linear Models
+Let build linear models on tip fare ratio: 
+## OLS
 
-Stepwise regression
+### Tip fare ratio
+```{r }
+
+model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
+summary(model)
+vif(model)
+# plot(model)
+```
+As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
+
+The VIF factor is also 1. 
+
+Select only significant coeff:
+```{r}
+model <- lm(tip_fare_ratio ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
+summary(model)
+vif(model)
+
+# predictions
+predictions <- predict(model, test)
+
+# Model performance metrics
+results_df <- data.frame(
+  technique = "Linear",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
+
+```
+No significant improvement even factor choosing significant variables. 
+
+From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
+```{r cooksdistance removed}
+df_out <- influential_points(train, model)
+model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
+summary(model_rmcook)
+vif(model_rmcook)
+
+# predictions
+predictions <- predict(model_rmcook, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-treated outlier",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+
+
+# sample_size <- nrow(df_sub)
+# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+# abline(h = 15/sample_size, col="red")  # add cutoff line
+# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio
+
+### Tip amount
+Similary check a model with tip amount and significant variables decided from the tip ratio
+```{r }
+model_tip_amount <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
+summary(model_tip_amount)
+vif(model_tip_amount)
+
+# predictions
+predictions <- predict(model_tip_amount, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+```
+As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable
+
+The VIF factor is also 1. 
+
+From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
+```{r cooksdistance_removed_tip_amount}
+df_out <- influential_points(train, model_tip_amount)
+dim(df_out)
+
+model_tip_amountrmcook <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = df_out)
+summary(model_tip_amountrmcook)
+vif(model_tip_amountrmcook)
+
+# predictions
+predictions <- predict(model_tip_amountrmcook, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-treated outlier",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
+
+# sample_size <- nrow(df_sub)
+# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+# abline(h = 15/sample_size, col="red")  # add cutoff line
+# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
+```
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio but residual error has improved 
+
+## Stepwise regression
 ```{r }
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
-# k <- ols_step_all_possible(model)
-# plot(k)
-
+# step_lm_tip <- ols_step_all_possible(model)
+# # plot(k)
+# plot(step_lm_tip, scale = "adjr2", main = "Adjusted R^2")
+# plot(step_lm_tip, scale = "r2", main = "R^2")
 # model <- lm(tip_amount ~ .-tip_fare_ratio, data = train)
 # k <- ols_step_all_possible(model)
 # plot(k)
 
 ```
 
-## Tip Fare Ratio
-### Ridge
-
+## Ridge
+### Tip Fare Ratio
+Lets see if ridge improves results with all variables
 ```{r }
-#train <- na.omit(train)
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
   unlist() %>%
   as.numeric()
 
-#grid = 10^seq(10, -2, length = 100)
 set.seed(123)
 cv_lamda = cv.glmnet(x, y, alpha = 0)
 # Display the best lambda value
 cv_lamda$lambda.min
 
-
 # Fit the final model on the training data
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
-# Display regression coefficients
-coef(ridge_model)
-plot(cv_lamda)
 
-```
-
-
-```{r }
 # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = "tip_fare_ratio",
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
+))
 
-check <- data.frame(predictions, test$tip_fare_ratio)
-
-```
-### Lasso
-
-```{r }
-# Find the best lambda using cross-validation
-set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1)
-# Display the best lambda value
-lasso_cv$lambda.min
+# Display regression coefficients
+coef(ridge_model)
+plot(cv_lamda)
 ```
 
-```{r }
-# Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
-# Dsiplay regression coefficients
-coef(lasso_model)
-```
+The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
 
-
+### Tip amount
 ```{r }
-# # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
-predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-# Model performance metrics
-data.frame(
-  mape = mape(predictions, test$tip_fare_ratio),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
-```
-
-## Tip amount
-### Ridge
-```{r }
-#train <- na.omit(train)
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
   unlist() %>%
   as.numeric()
 
-#grid = 10^seq(10, -2, length = 100)
 set.seed(123)
 cv_lamda = cv.glmnet(x, y, alpha = 0)
 # Display the best lambda value
@@ -420,50 +511,89 @@ ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
 coef(ridge_model)
 plot(cv_lamda)
 
-```
-
-
-```{r }
 # Make predictions on the test data
 x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = "tip_amount",
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
 
 # check <- data.frame(predictions, test$tip_amount)
 
 ```
 
 ## Lasso
+### Tip fare ratio
 ```{r }
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+y = train %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
+
 # Find the best lambda using cross-validation
 set.seed(123) 
 lasso_cv <- cv.glmnet(x, y, alpha = 1)
 # Display the best lambda value
 lasso_cv$lambda.min
-```
 
-```{r }
 # Fit the final model on the training data
 lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
 # Dsiplay regression coefficients
 coef(lasso_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+
 ```
 
 
+
+## Tip amount
 ```{r }
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1)
+# Display the best lambda value
+lasso_cv$lambda.min
+
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+# Dsiplay regression coefficients
+coef(lasso_model)
+
 # # Make predictions on the test data
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_amount",
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
+
 ```
 
 
@@ -567,12 +697,14 @@ sig_var_elnet <- tm$term[tm$p.value < 0.05]
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- elnet_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
-df_elnet <- data.frame(
-  mape = mape(predictions, test$tip_amount),
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Elastic Net",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
 
-df_elnet
 ```
 
 
@@ -629,8 +761,13 @@ tree_tip_mse = (sum((tree_tip_pred - test$tip_amount)^2)) / nrow(test)
 # Print MSE
 tree_tip_mse
 
-# Get MAPE
-mape(test$tip_amount, tree_tip_pred)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, tree_tip_pred),
+  Rsquare = caret::R2(tree_tip_pred, test$tip_amount)
+))
 ```
 
 #### Tip Fare Ratio
@@ -684,27 +821,34 @@ tree_ratio_mse = (sum((tree_ratio_pred - test$tip_fare_ratio)^2)) / nrow(test)
 # Print MSE
 tree_ratio_mse
 
-# Get MAPE
-mape(test$tip_fare_ratio, tree_ratio_pred)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, tree_ratio_pred),
+  Rsquare = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
+))
 ```
 
 # Summary of Model results
 
 ```{r summary, include=TRUE}
 
-loadPkg("data.table")
-loadPkg("formattable")
-loadPkg("tidyr")
+# Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
+# Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
+# MAPE <- c(1,2,3, df_elnet$mape, 5)
+# Significant_Variables <- c(1,2,3, 20, 5)
+# 
+# result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
+# formattable(result_tbl, 
+#             align =c("l","c","c","c","c"), 
+#             list(`Model` = formatter(
+#               "span", style = ~ style(color = "grey",font.weight = "bold"))
+#               # `Rsquared` = color_bar("pink")
+# ))
 
-
-Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
-Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
-MAPE <- c(1,2,3, df_elnet$mape, 5)
-Significant_Variables <- c(1,2,3, 20, 5)
-
-result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
-formattable(result_tbl, 
-            align =c("l","c","c","c","c"), 
+formattable(results_df,
+            align =c("l","c","c","c","c"),
             list(`Model` = formatter(
               "span", style = ~ style(color = "grey",font.weight = "bold"))
               # `Rsquared` = color_bar("pink")
