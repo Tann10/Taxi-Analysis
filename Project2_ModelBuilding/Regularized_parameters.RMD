@@ -561,11 +561,15 @@ coef(lasso_model)
 # # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
 # Model performance metrics
-data.frame(
-  mape = mape(predictions, test$tip_fare_ratio),
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
+))
+
 ```
 
 
@@ -586,11 +590,14 @@ coef(lasso_model)
 # # Make predictions on the test data
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
 # Model performance metrics
-data.frame(
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_amount",
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
 ```
 
 
@@ -694,12 +701,14 @@ sig_var_elnet <- tm$term[tm$p.value < 0.05]
 x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
 predictions <- elnet_model %>% predict(x.test) %>% as.vector()
 # Model performance metrics
-df_elnet <- data.frame(
-  mape = mape(predictions, test$tip_amount),
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Elastic Net",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
-)
+))
 
-df_elnet
 ```
 
 
@@ -756,8 +765,13 @@ tree_tip_mse = (sum((tree_tip_pred - test$tip_amount)^2)) / nrow(test)
 # Print MSE
 tree_tip_mse
 
-# Get MAPE
-mape(test$tip_amount, tree_tip_pred)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, tree_tip_pred),
+  Rsquare = caret::R2(tree_tip_pred, test$tip_amount)
+))
 ```
 
 #### Tip Fare Ratio
@@ -811,8 +825,13 @@ tree_ratio_mse = (sum((tree_ratio_pred - test$tip_fare_ratio)^2)) / nrow(test)
 # Print MSE
 tree_ratio_mse
 
-# Get MAPE
-mape(test$tip_fare_ratio, tree_ratio_pred)
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Decision Tree",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, tree_ratio_pred),
+  Rsquare = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
+))
 ```
 
 # Summary of Model results
@@ -824,14 +843,21 @@ loadPkg("formattable")
 loadPkg("tidyr")
 
 
-Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
-Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
-MAPE <- c(1,2,3, df_elnet$mape, 5)
-Significant_Variables <- c(1,2,3, 20, 5)
+# Model <- c("Linear", "Ridge", "Lasso", "Elastic Net", "Decision Tree")
+# Rsquared <- c(1,2,3, df_elnet$Rsquare, 5)
+# MAPE <- c(1,2,3, df_elnet$mape, 5)
+# Significant_Variables <- c(1,2,3, 20, 5)
+# 
+# result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
+# formattable(result_tbl, 
+#             align =c("l","c","c","c","c"), 
+#             list(`Model` = formatter(
+#               "span", style = ~ style(color = "grey",font.weight = "bold"))
+#               # `Rsquared` = color_bar("pink")
+# ))
 
-result_tbl <- data.frame(Model, Rsquared, MAPE, Significant_Variables)
-formattable(result_tbl, 
-            align =c("l","c","c","c","c"), 
+formattable(results_df,
+            align =c("l","c","c","c","c"),
             list(`Model` = formatter(
               "span", style = ~ style(color = "grey",font.weight = "bold"))
               # `Rsquared` = color_bar("pink")
