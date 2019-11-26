@@ -645,12 +645,12 @@ y = train %>%
   as.numeric()
 
 set.seed(123)
-cv_lamda = cv.glmnet(x, y, alpha = 0)
+cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
 # Display the best lambda value
 cv_lamda$lambda.min
 
 # Fit the final model on the training data
-ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
 
 # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
@@ -680,13 +680,13 @@ y = train %>%
   as.numeric()
 
 set.seed(123)
-cv_lamda = cv.glmnet(x, y, alpha = 0)
+cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
 # Display the best lambda value
 cv_lamda$lambda.min
 
 
 # Fit the final model on the training data
-ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min)
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
 # Display regression coefficients
 coef(ridge_model)
 plot(cv_lamda)
@@ -718,12 +718,12 @@ y = train %>%
 
 # Find the best lambda using cross-validation
 set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1)
+lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
 # Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
 coef(lasso_model)
 
@@ -753,12 +753,12 @@ y = train %>%
 
 # Find the best lambda using cross-validation
 set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1)
+lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
 # Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min)
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
 coef(lasso_model)
 
@@ -793,12 +793,12 @@ y = train %>%
 
 # Find the best lambda using cross-validation
 set.seed(123) 
-elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
 # Display the best lambda value
 elnet_cv$lambda.min
 
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min)
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
 coef(elnet_model)
 
@@ -814,6 +814,7 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+
 ```
 
 
@@ -827,12 +828,12 @@ y = train %>%
 
 # Find the best lambda using cross-validation
 set.seed(123) 
-elnet_cv <- cv.glmnet(x, y, alpha = 0.5)
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
 # Display the best lambda value
 elnet_cv$lambda.min
 
 # Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min)
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
 coef(elnet_model)
 
@@ -963,6 +964,94 @@ results_df <- rbind(results_df, data.frame(
 <!-- )) -->
 
 <!-- ``` -->
+
+
+```{r elnet}
+com1_df_sub <- subset( com_df_sub, select = -tip_amount )
+set.seed(123)
+# We first setup our cross-validation strategy, which will be 5 fold. 
+cv_5 = trainControl(method = "cv", number = 5)
+# We then use train() with method = "glmnet" which is actually fitting the elastic net.
+ratio_elnet = train(
+  tip_fare_ratio ~ ., data = com1_df_sub,
+  method = "glmnet",
+  trControl = cv_5
+)
+
+ratio_elnet
+
+```
+
+
+
+
+```{r elnet}
+com2_df_sub <- subset( com_df_sub, select = -tip_fare_ratio )
+
+set.seed(123)
+# We first setup our cross-validation strategy, which will be 5 fold. 
+cv_5 = trainControl(method = "cv", number = 5)
+# We then use train() with method = "glmnet" which is actually fitting the elastic net.
+tip_elnet = train(
+  tip_amount ~ ., data = com2_df_sub,
+  method = "glmnet",
+  trControl = cv_5
+)
+
+tip_elnet
+
+```
+
+```{r large_grid_elnet}
+
+tip_elnet_large = train(
+  tip_amount ~ ., data = com2_df_sub,
+  method = "glmnet",
+  trControl = cv_5,
+  tuneLength = 10
+)
+
+get_best_result = function(caret_fit) {
+  best = which(rownames(caret_fit$results) == rownames(caret_fit$bestTune))
+  best_result = caret_fit$results[best, ]
+  rownames(best_result) = NULL
+  best_result
+}
+
+get_best_result(tip_elnet_large)
+
+###########
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+
+
+# Fit the final model on the training data
+elnet_model <- glmnet(x, y, alpha = 0.9, lambda = 0.02313856)
+# Dsiplay regression coefficients
+coef(elnet_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
+predictions <- elnet_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Elastic Net",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+```
+
+
+
+
 
 
 ### Decision Tree
