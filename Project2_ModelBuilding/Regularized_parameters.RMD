@@ -39,8 +39,12 @@ loadPkg("nortest")
 loadPkg("corrplot")
 loadPkg("faraway")
 loadPkg("data.table")
+loadPkg("corrplot")
 loadPkg("formattable")
 loadPkg("tidyr")
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github("kassambara/ggpubr")
+loadPkg("ggpubr")
 loadPkg("ggcorrplot")
 loadPkg("Hmisc")
 loadPkg("leaps")
@@ -142,7 +146,7 @@ tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], meth
 
 tip_fare_ratio_cor
 
-
+corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 
 ```
 
@@ -152,7 +156,6 @@ Here is the another correlation. This time we choose tip_amount as our dependent
 
 ```{r correlation2}
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
-
 ```
 
 This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
@@ -164,7 +167,7 @@ Below are the scatter plot along with correlation and regression line for numeri
 For tip amount
 ```{r scatterplots2}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
+Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip amount",
@@ -173,7 +176,7 @@ ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
                              df_sub$tip_amount), parse = TRUE)
 
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
+Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +
   labs(title="Variation in trip duration and tip amount",
@@ -181,7 +184,8 @@ ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_amount), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
+
+Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +
   labs(title="Variation in congestion surcharge and tip amount",
@@ -189,11 +193,23 @@ ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
   geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_amount), parse = TRUE)
 
-```
+Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in passenger count and tip amount",
+       x="Passenger count", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
+                             df_sub$tip_amount), parse = TRUE)
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
+
+``` 
+
+
 
 ```{r scatterplots}
 
-ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
+Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
   labs(title="Variation in trip distance and tip fare ratio",
@@ -201,19 +217,30 @@ ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_text(x = 23, y = 0.4, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
+Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in trip duration and tip fare ratio",
        x="Trip duration", y = "Tip fare ratio") +
   geom_text(x = 30, y = 0.4, label = corr_eqn(df_sub$trip_duration,
                              df_sub$tip_fare_ratio), parse = TRUE)
 
-ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
+Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_fare_ratio)) +
   geom_point(color = "red")+
   geom_smooth(method=lm) +  labs(title="Variation in congestion surcharge and tip fare ratio",
        x="Congestion surcharge", y = "Tip fare ratio") +
   geom_text(x = 2, y = 0.4, label = corr_eqn(df_sub$congestion_surcharge,
                              df_sub$tip_fare_ratio), parse = TRUE)
+
+Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_fare_ratio)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in passenger count and fip fare ratio",
+       x="Passenger count", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
+                             df_sub$tip_fare_ratio), parse = TRUE)
+
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
 ```
 
 
@@ -228,7 +255,6 @@ df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
-
 ```
 
 
@@ -276,6 +302,7 @@ Bind the columns to get one train and test set
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
+
 ```
 
 ##correlation of all the variables with Y lables(Fare_Tip_ratio & Fare_Amount)
@@ -297,9 +324,9 @@ taxiprocor[c("tip_fare_ratio","tip_amount"),]
 
 We have to use one hot encoding to convert factor variables into numerical variables
 ```{r pca}
-pr.out =prcomp(X_train)
+pr.out =prcomp(X_train, scale = F)
 summary(pr.out)
-pr.out$rotation[1:5,1:4]
+pr.out$rotation[1:5,1:7]
 
 dim(pr.out$x)
 
@@ -327,7 +354,7 @@ Tip Fare Ratio
 ```{r pca_tipfareratio}
 #add a training set with principal components
 
-pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:21]
+pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:8]
 
 #transform test into PCA
 test.data <- predict(pr.out, newdata = X_test)
@@ -346,13 +373,25 @@ results_df <- data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 )
+
+# ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
+#   geom_point() +
+#   geom_point(aes(y = predictions), shape = 1, color = "blue") +
+#   labs(title="Actual & Predicted Values",
+#        x="Fare amount ", y = "Tip fare ratio")
+
+# ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
+#   geom_point() +
+#   labs(title="Actual & Predicted Values",
+#        x="Actual Tip amount", y = "Predicted Tip amount")
+
 ```
 
 Tip amount
 ```{r pca_tip}
 #add a training set with principal components
 
-pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:21]
+pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:8]
 
 #transform test into PCA
 test.data <- predict(pr.out, newdata = X_test)
@@ -371,6 +410,12 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
+
+ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Actual Tip amount", y = "Predicted Tip amount")
+
 ```
 
 # Linear Models
@@ -619,6 +664,8 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, predictions),
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
+
+# plot(model_tip_amount)
 ```
 As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable
 
@@ -654,6 +701,7 @@ After removal of the outliers from the data there is no improvement in the value
 
 ## Stepwise regression
 ```{r stepwise}
+
 # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
 # step_lm_tip <- ols_step_all_possible(model)
 # # plot(k)
@@ -695,9 +743,16 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+
 # Display regression coefficients
 coef(ridge_model)
 plot(cv_lamda)
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+
 ```
 
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
@@ -735,6 +790,10 @@ results_df <- rbind(results_df, data.frame(
 ))
 
 # check <- data.frame(predictions, test$tip_amount)
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -753,6 +812,8 @@ lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
+plot(cv_lamda)
+
 # Fit the final model on the training data
 lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
 # Dsiplay regression coefficients
@@ -769,6 +830,11 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -805,6 +871,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
@@ -846,6 +916,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 
 ```
 
@@ -882,6 +956,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
 ```
 
 
