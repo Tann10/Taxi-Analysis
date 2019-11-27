@@ -491,7 +491,7 @@ results_df <- rbind(results_df, data.frame(
 To further improve the model
 ```{r step_by_feature_selection1, include= TRUE}
 
-mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio-fare_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
+mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
 # plot(mod_tip_ratio, scale = "Cp", main = "Cp")
 # plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 plot(mod_tip_ratio, scale = "r2", main = "R^2")
