@@ -300,25 +300,12 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 Bind the columns to get one train and test set 
 ```{r bind}
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
+taxipro <- train
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 
 ```
 
-##correlation of all the variables with Y lables(Fare_Tip_ratio & Fare_Amount)
-
-```{r corr, include=TRUE}
-#correaltion
-taxipro <- train
-#str(taxipro)
-# head(taxipro)
-# summary(taxipro)
-
-taxiprocor =  cor(taxipro) # get the correlation matrix between all numerical variables.
-taxiprocor[c("tip_fare_ratio","tip_amount"),]
-#we observe that fare_amount, trip_distance, trip_duration has best correlation with tip fare ratio and tip amount
-
-```
 
 # Principal component analysis
 
@@ -346,8 +333,6 @@ plot(prop_varex, xlab = "Principal Component",
 plot(cumsum(prop_varex), xlab = "Principal Component",
               ylab = "Cumulative Proportion of Variance Explained",
               type = "b")
-
-
 ```
 
 Tip Fare Ratio
@@ -418,12 +403,17 @@ ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
 
 ```
 
-# Linear Models
+# Modeling
 
-Let us build a linear model
+## Linear Models
+
+### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Fare_Ratio'
+
+Let us Start building our linear model with first 3 high Pearson Correlation values for 'Tip_Fare_Ratio'
+
 ```{r }
 
-#Taking best three variables correlated with tip_fare ratio
+#Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
 
 #linear model of tip_fare_ratio ~ trip_duration
 fit1 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
@@ -440,13 +430,22 @@ summary(fit2)
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
 fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance, data = taxipro )
 summary(fit3)
-# vif(fit3)
-# plot(fit3)
+vif(fit3)
+plot(fit3)
+```
 
+The model graphs look good. So let us perform ANOVA test on all the three models.
+
+```{r, include=TRUE}
 #perform ANOVA to compare three models built
 anova(fit1,fit2,fit3)
-#We observe that p is > 0.05 for fit3 implies fit1 and fit2 are same.
+```
 
+We observe that p is > 0.05 for fit3 implies fit2 and fit3 are same.
+
+Below is the graph for predicted vs Actual values of tip_fare_ratio
+
+```{r, include=TRUE}
 #Prediction
 model.final.pred <- add_predictions(test,fit3)
 # head(model.final.pred)
@@ -461,22 +460,31 @@ results_df <- rbind(results_df, data.frame(
 ))
 
 ```
-Since the results are not satisfactory we perform step by varification.
+
+Since the results are not satisfactory we perform step by feature selection.
+Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
 
 ```{r step_by_feature_selection, include= TRUE}
 
 mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
 #plot(mod_tip_ratio, scale = "Cp", main = "Cp")
-# plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
- plot(mod_tip_ratio, scale = "r2", main = "R^2")
+plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+#plot(mod_tip_ratio, scale = "r2", main = "R^2")
 # plot(mod_tip_ratio, scale = "bic", main = "BIC")
+```
 
+Below is the Summary from Lm with First 3 features selected with Linear model.
+```{r, Include= TRUE}
 
 #Let us select first three features selected by feature selection function above.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
 summary(fit_feature)
 # vif(fit_feature)
-# plot(fit_feature)
+plot(fit_feature)
+```
+
+Below is the graph for predicted vs Actual values of tip_fare_ratio
+```{r, include=TRUE}
 
 #Prediction
 model.final.pred <- add_predictions(test,fit_feature)
@@ -493,8 +501,13 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-Let us build a linear model with fare amount to get significany results
-```{r ABC, include= TRUE}
+To further improve the model now we use tip_amount instead of Tip_Fare_Ratio since we did not get any significant improvement in adj R^2 value.
+
+### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Amount'
+
+Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'
+
+```{r, include= TRUE}
 
 #Taking best three variables correlated with tip_fare ratio
 
@@ -514,12 +527,22 @@ summary(fit2_ta)
 fit3_ta <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance, data = taxipro )
 summary(fit3_ta)
 # vif(fit3_ta)
-# plot(fit3_ta)
+plot(fit3_ta)
 
+```
 
+The model graphs look good. So let us perform ANOVA test on all the three models.
+
+```{r, include=TRUE}
 #perform ANOVA to compare three models built
 anova(fit1_ta,fit2_ta,fit3_ta)
+```
 
+We observe that p is > 0.05 for fit2 implies fit1 and fit2 are same.
+
+Below is the graph for predicted vs Actual values of tip_fare_ratio
+
+```{r, include=TRUE}
 model.final.pred <- add_predictions(test,fit3_ta)
 # head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
@@ -533,16 +556,23 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
-To further improve the model
+Since the results are not satisfactory we perform step by feature selection.
+Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
+
 ```{r step_by_feature_selection1, include= TRUE}
 
 mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
 # plot(mod_tip_ratio, scale = "Cp", main = "Cp")
-# plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-plot(mod_tip_ratio, scale = "r2", main = "R^2")
+plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+# plot(mod_tip_ratio, scale = "r2", main = "R^2")
 # plot(mod_tip_ratio, scale = "bic", main = "BIC")
 
+```
 
+
+Below is the Summary from Lm with First 3 features selected with Linear model.
+
+```{r, include=TRUE}
 #Let us select first three features selected by feature selection function above.
 fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
 summary(fit_feature_ta) 
@@ -551,7 +581,10 @@ summary(fit_feature_ta)
 
 # #perform ANOVA to compare three models built
 # anova(fit3_ta,fit_feature_ta)
+```
 
+Below is the graph for predicted vs Actual values of tip_amount
+```{r, include=TRUE}
 
 model.final.pred <- add_predictions(test,fit_feature_ta)
 # head(model.final.pred)
@@ -566,6 +599,8 @@ results_df <- rbind(results_df, data.frame(
 ))
 
 ```
+
+Below are the results of lm(tip_amount ~ .-fare_amount)
 ```{r lm-fare_amount, include= TRUE}
 #Let us select first three features selected by feature selection function above.
 fit_without_fare_amount <- lm(tip_amount ~ .-fare_amount-tip_fare_ratio, data = taxipro )
@@ -580,7 +615,6 @@ summary(fit_without_fare_amount)
 model.final.pred <- add_predictions(test,fit_without_fare_amount)
 # head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
-
 
 ```
 
