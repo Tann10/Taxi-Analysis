@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
@@ -314,10 +314,10 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 ```{r corr, include=TRUE}
 # #correaltion
-# taxipro <- train
-# #str(taxipro)
-# # head(taxipro)
-# # summary(taxipro)
+taxipro <- train
+#str(taxipro)
+# head(taxipro)
+# summary(taxipro)
 # 
 # taxiprocor =  cor(taxipro) # get the correlation matrix between all numerical variables.
 # taxiprocor[c("tip_fare_ratio","tip_amount"),]
@@ -1245,7 +1245,7 @@ results_df <- rbind(results_df, data.frame(
 
 ```{r summary, include=TRUE}
 
-results_df <-results_df[order(results_df$dependent),]
+results_df <-results_df[order(results_df$dependent, results_df$dependent),]
 
 formattable(results_df,
             align =c("l","c","c","c","c"),
