@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
@@ -206,7 +206,9 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 ``` 
 
 
+Below are the scatter plot along with correlation and regression line for numerical variables
 
+For tip fare ratio
 ```{r scatterplots}
 
 Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
@@ -243,14 +245,17 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
           ncol = 2, nrow = 2)
 ```
 
-
+Normality check for tip fare ratio
 ```{r normality check of processed data, echo=T, include=T}
 #ggplot histogram of tip_fare_ratio for processed df
 df_sub %>%
   ggplot(aes(x=tip_fare_ratio)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio Data Post-Outlier Removal")
+```
 
+Normality check for tip amount
+```{r }
 df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
@@ -306,8 +311,7 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 ```
 
-
-# Principal component analysis
+## Principal component analysis
 
 We have to use one hot encoding to convert factor variables into numerical variables
 ```{r pca}
@@ -335,7 +339,7 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
               type = "b")
 ```
 
-Tip Fare Ratio
+### Tip Fare Ratio
 ```{r pca_tipfareratio}
 #add a training set with principal components
 
@@ -372,7 +376,7 @@ results_df <- data.frame(
 
 ```
 
-Tip amount
+### Tip amount
 ```{r pca_tip}
 #add a training set with principal components
 
@@ -402,6 +406,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
        x="Actual Tip amount", y = "Predicted Tip amount")
 
 ```
+
 
 # Modeling
 
@@ -1274,7 +1279,7 @@ results_df <- rbind(results_df, data.frame(
 
 ```{r summary, include=TRUE}
 
-results_df <-results_df[order(results_df$dependent),]
+results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
 
 formattable(results_df,
             align =c("l","c","c","c","c"),
