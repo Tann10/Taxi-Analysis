@@ -44,7 +44,7 @@ loadPkg("formattable")
 loadPkg("tidyr")
 if(!require(devtools)) install.packages("devtools")
 devtools::install_github("kassambara/ggpubr")
-loadPkg(ggpubr)
+loadPkg("ggpubr")
 loadPkg("ggcorrplot")
 loadPkg("Hmisc")
 loadPkg("leaps")
@@ -731,8 +731,6 @@ cv_lamda$lambda.min
 # Fit the final model on the training data
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
 
-ridge_model_2 <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min,standardize = F)
-
 # Make predictions on the test data
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
@@ -748,14 +746,13 @@ results_df <- rbind(results_df, data.frame(
 
 # Display regression coefficients
 coef(ridge_model)
-coef(ridge_model_2)
-
 plot(cv_lamda)
 
 ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
   geom_point() +
   labs(title="Actual & Predicted Values",
        x="Fare amount ", y = "Tip amount")
+
 ```
 
 The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
