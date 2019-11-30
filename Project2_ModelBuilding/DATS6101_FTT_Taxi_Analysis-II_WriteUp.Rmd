@@ -718,6 +718,9 @@ out-of-sample R2 | `r Rsquare_tip` | `r Rsquare_tip_prune` | `r Rsquare_tip_cv` 
 MAPE | `r mape_tip` | `r mape_tip_prune` | `r mape_tip_cv` | 
 
 
+### Tip Fare Model Building Summary and Analysis
+
+
 # Conclusion
 
 CONCLUDING THOUGHTS HERE
