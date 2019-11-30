@@ -340,13 +340,22 @@ p2 <- ggplot() +
 require(gridExtra)    # plotting for 2 graphs side by side
 grid.arrange(p1, p2)
 
+
+
+# Run ANOVA
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = processed_df)
+# Run ANOVA
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = processed_df)
+#Run T-test
+trip_duration_ttest <- t.test(processed_df$tip_fare_ratio, processed_df$trip_duration)
+
 ```
 
 # Feature Analysis
 
 In this section, we analyze various factors shortlisted from our data set that may affect the tipping amount paid to the cab drivers.
 
->>>>>>> a4df036051f197df59c6076a8c7698976871766a
+
 ## Trip location
 
 ```{r anova_tipratio_location}
@@ -466,7 +475,7 @@ Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H
 pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
 distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
-pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
+pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
 dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
 passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | fail to reject H0 |
 vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equal | reject H0 | 
