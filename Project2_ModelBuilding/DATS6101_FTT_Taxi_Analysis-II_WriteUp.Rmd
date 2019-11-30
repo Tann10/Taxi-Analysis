@@ -171,7 +171,7 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 ```
 
-# EDA
+# Exploratory Data Analysis
 
 Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables.
 
