@@ -428,25 +428,9 @@ text(taxi_tree_ratio, cex = 0.75) #2.5)
 ```
 
 
-```{r dt_prunetree_ratio}
-# Create sequence of pruned tree sizes/errors
-ratio_prune_seq = prune.tree(taxi_tree_ratio)
+One disadvantage of decision trees is its potential to overfit the training data. While the fit may be strong for the training data, overfitting results in the model not fitting the test set particularly well. As such, it is important to prune back the tree by reducing the number of leaves (or terminal nodes).
 
-# Plot error versus plot size
-plot(ratio_prune_seq, main = "Error versus Decision Tree Plot Size for Tip Ratio")
-
-# Get vector of error
-ratio_prune_seq$dev
-
-# Identify optimal tree where vector of error is minimized
-optimal_tree_ratio = which(ratio_prune_seq$dev == min(ratio_prune_seq$dev))
-
-# Positions of optimal (with respect to error) trees 
-best_leaves_ratio_prune = min(ratio_prune_seq$size[optimal_tree_ratio])
-best_leaves_ratio_prune
-```
-
-Here is the pruned decision tree:
+Here is the best pruned decision tree with only 5 leaves, down from our original of 14 leaves.
 
 ```{r dt_plotprunetree_ratio, include = T, echo = F}
 # Return best pruned tree with 5 leaves, evaluating error on training data 
@@ -457,29 +441,13 @@ plot(tree_ratio_prune, main = "Pruned Decision Tree for Tip Ratio")
 text(tree_ratio_prune, cex = 0.75)
 ```
 
-```{r dt_cvtree_ratio}
-# Create sequence of CV tree sizes/errors
-ratio_cv_seq = cv.tree(taxi_tree_ratio)
-
-# Plot error versus plot size
-plot(ratio_cv_seq, main = "Error versus Decision Tree Plot Size for Tip Ratio")
-
-# Get vector of error
-ratio_cv_seq$dev
-
-# Identify optimal tree where vector of error is minimized
-optimal_cvtree_ratio = which(ratio_cv_seq$dev == min(ratio_cv_seq$dev))
-
-# Positions of optimal (with respect to error) trees 
-best_leaves_cv_ratio = min(ratio_cv_seq$size[optimal_cvtree_ratio])
-best_leaves_cv_ratio
-```
+Another way to prune back the leaves is to use cross-validation. Cross-validation is where the data is broken into multiple sets (or folds). Generally, the folds are divided to train and test the model, with the goal of generalizing the results.
 
 Here is the pruned tree by 10-fold CV:
 
 ```{r dt_plotcvtree_ratio, include = T, echo = F}
 # Plot tree
-tree_ratio_cv = cv.tree(taxi_tree_ratio, best = best_leaves_cv_ratio)
+tree_ratio_cv = cv.tree(taxi_tree_ratio, best = 4)
 plot(tree_ratio_cv, main = "CV Decision Tree for Tip Ratio")
 text(tree_ratio_prune, cex = 0.75)
 ```
@@ -569,8 +537,17 @@ out-of-sample MSE | `r tree_ratio_mse` | `r tree_ratio_mse_prune` | `r tree_rati
 out-of-sample R2 | `r Rsquare_ratio` | `r Rsquare_ratio_prune` | `r Rsquare_ratio_cv` |
 MAPE | `r mape_ratio` | `r mape_ratio_prune` | `r mape_ratio_cv` | 
 
+As expected, the original decision tree is the best of the tree, given that it has the lowest MAPE and highest r-squared. This is because the tree was not pruned back to prevent overfitting, so it fits the data the best (out of the three). The pruned tree has a higher MAPE than the cross-validated tree, but the pruned tree has a higher r-squared. All three models, however, do not differ by much when looking at MAPE and r-squared. This indicates that there may not be much differences in the models.
+
+Fare amount appears to be the main predictor of tip ratio. In the three models, the first node split was fare amount, suggesting that there is a difference in tip ratio according to whether a passenger's fare amount is high or low. This notion is further solidified by the fact that the tip ratio terminal node values descend from left to right. This means that the lower the fare amount, the higher proportion of tip is paid to the driver. In this context, passengers with higher fare amounts tend to tip less proportional to their fare amount.
+
+Although the models roughly have 79% accuracy, the model only explains roughly 13-15% of the variation in tip ratio. This suggests that the model is not comprehensive.
 
 ### Tip Ratio Model Building Summary and Analysis
+
+Looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
+
+This also suggests that a null model may be the "best fit" for tip ratio. In this case, tip ratio remains constant despite changes in the independent variables. This may make sense because based on our literature review, tips in the service industry generally hover around 15%; the tips for taxis may also be hovering around a certain percentage.
 
 
 
@@ -589,8 +566,6 @@ WHY DID WE LOOK AT TIP AMOUNT TOO????
 ### PCR
 
 ### Decision Tree
-
-
 
 ```{r dt_growtree_tip}
 # Grow decision tree
@@ -726,7 +701,7 @@ MAPE | `r mape_tip` | `r mape_tip_prune` | `r mape_tip_cv` |
 CONCLUDING THOUGHTS HERE
 
 ```{r summary, include=TRUE}
-
+if(FALSE) {
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
 
 formattable(results_df,
@@ -735,6 +710,7 @@ formattable(results_df,
               "span", style = ~ style(color = "grey",font.weight = "bold"))
               # `Rsquared` = color_bar("pink")
 ))
+}
 ```
 
 
