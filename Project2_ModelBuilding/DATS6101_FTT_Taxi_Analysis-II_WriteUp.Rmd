@@ -175,11 +175,13 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables.
 
-## TRIP DISTANCE
+## TRIP DISTANCE EDA
 
-## TRIP DURATION
+## TRIP DURATION EDA
 
-## VENDOR ID/ NUMBER OF PASSENGERS
+## VENDOR ID/ NUMBER OF PASSENGERS EDA
+
+## Location
 
 ```{r anova_tipratio_location}
 # Run ANOVA
@@ -211,6 +213,7 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day. In this context, we can incorporate these variables into our future analysis.
 
+## Correlation
 
 For this step, we also use Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
@@ -545,7 +548,7 @@ Although the models roughly have 79% accuracy, the model only explains roughly 1
 
 ### Tip Ratio Model Building Summary and Analysis
 
-Looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
+The best model, when looking at for a low MAPE and high r-squared, is the unpruned decision tree. It is important to note that looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
 
 This also suggests that a null model may be the "best fit" for tip ratio. In this case, tip ratio remains constant despite changes in the independent variables. This may make sense because based on our literature review, tips in the service industry generally hover around 15%; the tips for taxis may also be hovering around a certain percentage.
 
@@ -692,13 +695,29 @@ out-of-sample MSE | `r tree_tip_mse` | `r tree_tip_mse_prune` | `r tree_tip_mse_
 out-of-sample R2 | `r Rsquare_tip` | `r Rsquare_tip_prune` | `r Rsquare_tip_cv` |
 MAPE | `r mape_tip` | `r mape_tip_prune` | `r mape_tip_cv` | 
 
+As with tip ratio, the unpruned, original decision tree is the best model of the three, with the lowest MAPE and the highest r-squared. The other two (pruned and cross-validated) are worse than the original decision tree but are pretty much similar when compared with each other. Regardless, the r-squared values of these three models indicates that the decision tree models can explain anywhere from 75% to 83% of the variation in tip fare. These numbers are pretty high, which indicates that the models are pretty reliable.
+
+In addition, fare amount appears to be the main predictor of tip ratio. In the three models, the first node split was fare amount, suggesting that there is a difference in tipped amount  according to whether a passenger's fare amount is high or low. The terminal leaves ascend from left to right, which means that the higher the fare amount, the higher tipped paid to the driver.
 
 ### Tip Fare Model Building Summary and Analysis
+
+The best model in our analysis for tip amount is the elastic net regularized regression model. It had the lowest MAPE value and highest r-squared, explaining roughly 84% of the variation in the dependent variable. Comparing all models, however, the MAPE and r-squared values are roughly the same, with the exception of the pruned and cross-validated decision tree: The MAPE values are around 21 and 22, indicating an accuracy of 78-79%, and the r-squared values range from 0.79 to 0.84. The high r-squared values suggest that the models are good and reliable.
+
+In short, most of the models are producing the same results, and the improvement is very minimal. Thus, it can be argued that the relationship with tip amount is pretty stable.
 
 
 # Conclusion
 
 CONCLUDING THOUGHTS HERE
+
+Tip fare ratio
+From the variables (distance, duration, congestion surcharge, location) we could not explain any relationship. That means tip fare ratio is roughly a constant value
+There were no significant predictors in the data to explain the relationship
+
+Tip amount
+Tip amount has very strong relationship with fare amount, distance and duration
+Duration and distance are significant variables   (R square & adj R square 71%)
+Best models for tip amount: Elastic net
 
 ```{r summary, include=TRUE}
 if(FALSE) {
@@ -716,6 +735,11 @@ formattable(results_df,
 
 ## Limitations and Future Work
 
+Non-Normality of Tipping data
+Missing values?????
+Human errors
+Hardware
+Limited time and resources
 
 
 
@@ -731,7 +755,8 @@ formattable(results_df,
 
 
 
-~~~~~~~~~~~~THIS IS FROM THE RMD FILE~~~~~~~~~~~~~
+
+~~~~~~~~~~~~BELOW IS FROM THE RMD FILE WE SUBMITTED LAST WEEK~~~~~~~~~~~~~
 COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE
 
 
