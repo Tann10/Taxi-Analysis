@@ -1,5 +1,5 @@
 ---
-title: "Regularized_models"
+title: "DATS6101_FTT_Taxi_Analysis-II_WriteUp"
 author: "Steven Chao, Tanaya Kavathekar, Madhuri Yadav, Amna Gul"
 date: "`r Sys.Date()`"
 output:
