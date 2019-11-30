@@ -173,7 +173,46 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 # EDA
 
-Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables. For this step, we use Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
+Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables.
+
+## TRIP DISTANCE
+
+## TRIP DURATION
+
+## VENDOR ID/ NUMBER OF PASSENGERS
+
+```{r anova_tipratio_location}
+# Run ANOVA
+anova_tiprat_pu <- aov(tip_fare_ratio ~ Borough_pu, data = df_sub)
+
+# Print ANOVA results
+anova_tiprat_pu
+
+# Run ANOVA
+anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = df_sub)
+
+# Print ANOVA results
+anova_tiprat_do
+```
+
+From the previous research, we ran various tests to gain a basic understanding of the data:
+
+Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
+-----|-----|-----|--------|--------|  
+pickup location | ANOVA | `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
+dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |  
+distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
+pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
+dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
+passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | fail to reject H0 |
+vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equal | reject H0 | 
+
+*based on a significance level of 0.05
+
+Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day. In this context, we can incorporate these variables into our future analysis.
+
+
+For this step, we also use Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
 ```{r correlation1}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
