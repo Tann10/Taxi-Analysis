@@ -179,7 +179,28 @@ Once we have cleaned our data, we start exploratory data analysis by seeking if 
 
 ## TRIP DURATION EDA
 
-## VENDOR ID/ NUMBER OF PASSENGERS EDA
+## NUMBER OF PASSENGERS
+We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio.  The passenger count varies from 1 to 6.
+```{r anova test for passenger_count}
+
+# ANOVA test
+anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
+summary(anova_tip_amount)
+
+```
+The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
+## VENDOR ID
+
+```{r t test for vendor ID}
+# Create factor
+processed_df$VendorID <- as.factor(processed_df$VendorID)
+
+# t test for vendor
+ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
+ttest_vendor
+```
+
+Similarly, we check the distribution for the vendor ID and run a t-test to check the results. The p-value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
 
 ## Location
 
