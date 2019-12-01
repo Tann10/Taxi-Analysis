@@ -368,13 +368,11 @@ TALK ABOUT WHY WE CHOSE THE MODELS WE USED
 
 ## Model Building Preparation
 
-### Test train split
+## One hot encoding 
 
-To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps for instance scaling.
+In order to convert factor columns to numerical columns we have used one hot encoding. One hot encoding converts all factors as a separate boolean column. 
 
-To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
-
-```{r split the data}
+```{r }
 # one hot encoding for factor columns
 sub_factor_col <- (!(names(df_sub) %in% c("tip_fare_ratio", "tip_amount"))) & (sapply(df_sub, class) == "factor")
 new_df_sub <- dummy.data.frame(df_sub[,c(sub_factor_col)],  sep="_")
@@ -383,7 +381,13 @@ new_df_sub <- dummy.data.frame(df_sub[,c(sub_factor_col)],  sep="_")
 names(new_df_sub) <- gsub(" ", "_", names(new_df_sub))
 
 com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
+```
 
+### Test train split
+
+To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps for instance scaling.To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
+
+```{r split the data}
 #train and test split (into 4 modules (i.e. X_train, y_train (80%) & X_test, y_test (20%))
 splitted_dfs <- train_test_split(com_df_sub)
 ```
