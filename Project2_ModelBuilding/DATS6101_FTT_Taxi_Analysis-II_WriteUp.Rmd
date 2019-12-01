@@ -184,7 +184,7 @@ We hyothesize that there is a relationship between the number of passenger in th
 ```{r anova test for passenger_count}
 
 # ANOVA test
-anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = processed_df)
+anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = df_sub)
 summary(anova_tip_amount)
 
 ```
@@ -192,11 +192,9 @@ The mean of all the groups of passenger count does not vary much. Also, the outp
 ## VENDOR ID
 
 ```{r t test for vendor ID}
-# Create factor
-processed_df$VendorID <- as.factor(processed_df$VendorID)
 
 # t test for vendor
-ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = processed_df)
+ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = df_sub)
 ttest_vendor
 ```
 
@@ -1483,7 +1481,7 @@ ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
 
 # Summary of Model results
 
-```{r summary, include=TRUE}
+```{r summary2, include=TRUE}
 
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
 
