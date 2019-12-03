@@ -897,7 +897,7 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 
 ### Linear regression
 
-Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'. fare_amount, trip_distance, trip_duration eere highly correlated variables to tip fare ratio with 0.91, 0.83, 0.71 as pearson coefficients respectively.
+We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount (0.91), trip_distance (0.83), and trip_duration(0.71).
 
 ```{r, include= TRUE}
 
