@@ -22,6 +22,7 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r loadlibraries, include=F}
+loadPkg("plotmo")
 loadPkg("tidyverse")
 loadPkg("glmnet")
 loadPkg("dplyr")
@@ -418,9 +419,7 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. Six differencet models that we are going to apply are:
 
-### 1. LM Model
-
-### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Fare_Ratio'
+### Linear Regression
 
 Let us Start building our linear model with first 3 high Pearson Correlation values for 'Tip_Fare_Ratio'. trip_duration fare_amount trip_distance were highly correlated variables to tip fare ratio with -0.31, -0.27, -0.23 as pearson coefficients respectively.
 
@@ -519,7 +518,7 @@ results_df <- rbind(results_df, data.frame(
 
 To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
-### 2. Ridge
+### Ridge Regression
 
 ```{r ridge_tipfareratio2}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -585,7 +584,7 @@ fit = glmnet(x, y, alpha = 0)
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### 3. Lasso
+### Lasso Regression
 
 ```{r lasso_tipfareratio1}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -632,7 +631,6 @@ Again, we iterated through a range of lambda values. The plot below shows how la
 
 
 ```{r plot_coef_lasso1, include = T, echo = F}
-library(plotmo)
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
 plot_glmnet(fit.lasso, label=5)
 ```
@@ -651,11 +649,11 @@ fit = glmnet(x, y, alpha = 1)
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### 4. Elastic Net
+### Elastic Net
 
 The last penalized regression model that we used for our problem is elastic net that linearly combines the L1 and L2 penalties of the lasso and ridge methods. But unfortunately it also did not help in improving R-square value.
 
-### 5. PCR
+### Principal Component Analysis
 
 As most of our variables where correlated with each other and there were around 27 number of features we decided to use principal component analysis as a variable reduction technique.
 ```{r pca}
@@ -678,7 +676,6 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
 
 We decided to run a simple linear regression model on those components to check if this increase the variablitiy explained by the r2.
 
-### Tip Fare Ratio
 ```{r pca_tipfareratio}
 #add a training set with principal components
 pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:8]
@@ -721,7 +718,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
 
 The above graph represents predicted tip amount verses actual tip amount. It is evident that predicted tip amount varies signifcantly from the actual tip amount.
 
-### 6. Decision Tree
+### Decision Tree
 
 Finally, we decided to grow a decision tree for our dataset. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
 
@@ -855,7 +852,7 @@ Fare amount appears to be the main predictor of tip ratio. In the three models, 
 
 Although the models roughly have 79% accuracy, the model only explains roughly 13-15% of the variation in tip ratio. This suggests that the model is not comprehensive.
 
-### Tip Ratio Model Building Summary and Analysis
+### Summary and Analysis
 
 The best model, when looking at for a low MAPE and high r-squared, is the unpruned decision tree. It is important to note that looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
 
@@ -925,9 +922,7 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 
 ```
 
-### LM Model
-
-### Uni and Multivariate modeling
+### Linear regression
 
 Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'. fare_amount, trip_distance, trip_duration eere highly correlated variables to tip fare ratio with 0.91, 0.83, 0.71 as pearson coefficients respectively.
 
@@ -980,8 +975,11 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
-The results are good. To further improve them we perform step by feature selection.
-Below is the tip_amount ~ . step by feature selection with Adjusted R^2 scaling
+The results are good. In order to check if any combination of features set give us better results than this we performed Stepwise Regression.
+
+### Stepwise regression
+
+We performed backward stepwise regression and variables were selected based on adjusted R2
 
 ```{r step_by_feature_selection1, include= TRUE}
 
@@ -993,7 +991,7 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 ```
 
-From the graph above we see that Adj R^2 remians constant throughout. Hence we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
+From the graph above we see that Adj R^2 remains constant throughout. Hence we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
 
 Below is the Summary from Lm with First 3 features selected with Linear model.
 
@@ -1025,7 +1023,6 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
 ### Ridge
 
@@ -1197,7 +1194,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and we are getting extremely good results now (R^2 of `r elnet_model$dev`as compared to only 12% above) for Elastic Net model.
 
-### PCR
+### Principal Component Analysis
 
 The components which we created earlier are now used against tip amount. We built a linear regression model using 7 principal components. 
 
@@ -1363,7 +1360,7 @@ As with tip ratio, the unpruned, original decision tree is the best model of the
 
 In addition, fare amount appears to be the main predictor of tip ratio. In the three models, the first node split was fare amount, suggesting that there is a difference in tipped amount  according to whether a passenger's fare amount is high or low. The terminal leaves ascend from left to right, which means that the higher the fare amount, the higher tipped paid to the driver.
 
-### Tip Fare Model Building Summary and Analysis
+### Summary and Analysis
 
 The best model in our analysis for tip amount is the elastic net regularized regression model. It had the lowest MAPE value and highest r-squared, explaining roughly 84% of the variation in the dependent variable. Comparing all models, however, the MAPE and r-squared values are roughly the same, with the exception of the pruned and cross-validated decision tree: The MAPE values are around 21 and 22, indicating an accuracy of 78-79%, and the r-squared values range from 0.79 to 0.84. The high r-squared values suggest that the models are good and reliable.
 
@@ -1371,8 +1368,6 @@ In short, most of the models are producing the same results, and the improvement
 
 
 # Conclusion
-
-CONCLUDING THOUGHTS HERE
 
 Tip fare ratio
 From the variables (distance, duration, congestion surcharge, location) we could not explain any relationship. That means tip fare ratio is roughly a constant value
@@ -1384,7 +1379,6 @@ Duration and distance are significant variables   (R square & adj R square 71%)
 Best models for tip amount: Elastic net
 
 ```{r summary, include=TRUE}
-if(FALSE) {
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
 
 formattable(results_df,
@@ -1393,7 +1387,6 @@ formattable(results_df,
               "span", style = ~ style(color = "grey",font.weight = "bold"))
               # `Rsquared` = color_bar("pink")
 ))
-}
 ```
 
 
