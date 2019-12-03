@@ -180,8 +180,30 @@ Once we have cleaned our data, we start exploratory data analysis by seeking if 
 
 ## TRIP DISTANCE EDA
 
+```{r subset_2cols, include = T, echo = F}
+
+# Subset data and glimpse data
+df_dist <- subset(df_sub, select=c(tip_fare_ratio, trip_distance))
+factor_dist <- cut(df_dist$trip_distance, breaks=c(0, mean(df_dist$trip_distance), Inf), labels= c("Shorter Distances","Longer Distances"), 1:2, sep="")
+df_dist$trip_distance <- factor_dist 
+short_dist <- subset(df_dist, df_dist$trip_distance == "Shorter Distances")
+long_dist <- subset(df_dist, df_dist$trip_distance == "Longer Distances")
+
+# Applying 2 Sample t-test below
+result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
+
+```
+
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay larger share of tips relative to their overall fare than those who travel longer distances within NYC radius. 
-![Tip Fare ratio vs Distance Travelled](Ratio_Distance.png)
+```{r box_plot, include = T, echo = F}
+
+# box-plot to see who pays more tips 
+e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip_distance)) + 
+  geom_boxplot()+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
+  labs(x="Distance Travelled", y = "Tip %") + ggtitle("Box Plot for Tip Percentages vs Distance Travelled")
+e
+
+```
 
 Apart from just plotting box-plots we also performed independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
 
@@ -191,7 +213,7 @@ As always, First Step in every Significance testing:
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
 </ul>
 
-With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alternate Hypothesis meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
 
 ## TRIP DURATION EDA
@@ -493,17 +515,22 @@ fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
 
-To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
+To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
 ```{r ridge2plt, include = T, echo = F}
 plot(cv_lamda)
 ```
 
+But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
 
+```{r plot_r2_ridge_ratio, include=TRUE, echo= FALSE}
+fit = glmnet(x, y, alpha = 0)
+plot(fit, xvar = "dev", label = TRUE)
+```
 
 ### 3. Lasso
 
-```{r lasso_tipfareratio}
+```{r lasso_tipfareratio1}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -546,6 +573,8 @@ This is another type of regularization (L1) technique that can lead to zero coef
 
 Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
 
+
+
 ```{r plot_coef_lasso1, include = T, echo = F}
 library(plotmo)
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
@@ -553,10 +582,17 @@ plot_glmnet(fit.lasso, label=5)
 ```
 
 
-To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
+To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
 ```{r lasso2plt, include = T, echo = F}
 plot(cv_lamda)
+```
+
+But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% (as shown in graph below) which means there is room for a lot improvement.
+
+```{r plot_r2_lasso_ratio, include=TRUE, echo= FALSE}
+fit = glmnet(x, y, alpha = 1)
+plot(fit, xvar = "dev", label = TRUE)
 ```
 
 ### 4. Elastic Net
@@ -780,15 +816,172 @@ From analysis shown above it is clear that either there is no relation (the null
 
 ### Ridge
 
-We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Ridge model.
+```{r ridge_tip1}
+x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+set.seed(123)
+cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
+# Display the best lambda value
+cv_lamda$lambda.min
+
+
+# Fit the final model on the training data
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
+# Display regression coefficients
+coef(ridge_model)
+
+
+# Make predictions on the test data
+x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
+# check <- data.frame(predictions, test$tip_amount)
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+
+```
+
+So replacing our dependent variabe to tip amount is giving us good R-square.  Lets see if we get the the same results from Ridge Model too. We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
+
+```{r plot_coeff_ridge_tip, include=TRUE, echo= FALSE}
+fit = glmnet(x, y, alpha=0)
+plot(fit, label = TRUE)
+```
+
+Then we plot the cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
+
+```{r plot_MSE_ridge_tip, include=TRUE, echo= FALSE}
+plot(cv_lamda)
+```
+
+Finally after traing and testing, we are getting extremenly good results now (R^2 of `r ridge_model$%Dev` as compared to only 12% for tip fare ratio) for our model now.
+
+```{r plot_r2_ridge_tip, include=TRUE, echo= FALSE}
+plot(fit, xvar = "dev", label = TRUE)
+```
 
 ### Lasso
 
-We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Lasso model.
+```{r lasso_tip}
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
+# Display the best lambda value
+lasso_cv$lambda.min
+
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
+# Dsiplay regression coefficients
+coef(lasso_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+```
+
+The second penalized regression model that we are going to use is Lasso. Again first we plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. We can clearly see coefficients going down to zero (instead of just shrinking) here. 
+
+```{r plot_coeff_lasso_tip, include=TRUE, echo= FALSE}
+fit = glmnet(x, y, alpha=1)
+plot(fit, label = TRUE)
+```
+
+Then we plot the Mean Square Error cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
+
+```{r plot_MSE_lasso_tip, include=TRUE, echo= FALSE}
+plot(cv_lamda)
+```
+
+Finally after traing and testing, we see that we are getting extremenly good results now (R^2 of `r lasso_model$%Dev` as compared to only 12% for tip fare ratio) for our model now.
+
+```{r plot_r2_lasso_tip, include=TRUE, echo= FALSE}
+plot(fit, xvar = "dev", label = TRUE)
+```
 
 ### Elastic Net
 
-We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Elastic Net model.
+```{r elnet_tip1}
+x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
+y = train %>%
+  select(tip_amount) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123)
+elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
+# Display the best lambda value
+elnet_cv$lambda.min
+
+# Fit the final model on the training data
+elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE)
+# Dsiplay regression coefficients
+coef(elnet_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
+predictions <- elnet_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Elastic Net",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
+ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+```
+
+The elastic-net penalty is controlled by α, and bridges the gap between lasso (α=1, the default) and ridge (α=0). The elastic-net penalty mixes these two; if predictors are correlated in groups, an α=0.5 tends to select the groups in or out together. Let’s plot the coefficients against the log-lambda value for each feature in our set.
+
+```{r plot_coef_elnet_tip, include=TRUE, echo= FALSE}
+plot(fit, xvar = "lambda", label = TRUE)
+```
+
+Now when we plot against %deviance we get a very different picture. This is percent deviance explained on the training data. What we see here is that toward the end of the path this value are not changing much, but the coefficients are “blowing up” a bit. This lets us focus attention on the parts of the fit that matter.
+
+```{r plot_r2_elnet_tip, include=TRUE, echo= FALSE}
+plot(fit, xvar = "dev", label = TRUE)
+```
+
+We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and we are getting extremely good results now (R^2 of `r elnet_model$%Dev`as compared to only 12% above) for Elastic Net model.
 
 ### PCR
 
@@ -1536,7 +1729,7 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 
 
 ## Tip amount
-```{r lasso_tip}
+```{r lasso_tip1}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
