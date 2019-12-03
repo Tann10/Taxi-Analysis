@@ -177,6 +177,20 @@ Once we have cleaned our data, we start exploratory data analysis by seeking if 
 
 ## TRIP DISTANCE EDA
 
+While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay larger share of tips relative to their overall fare than those who travel longer distances within NYC radius. 
+![Tip Fare ratio vs Distance Travelled](Ratio_Distance.png)
+
+Apart from just plotting box-plots we also performed independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
+
+As always, First Step in every Significance testing: 
+<ul>
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
+</ul>
+
+With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
+
+
 ## TRIP DURATION EDA
 
 ## NUMBER OF PASSENGERS
@@ -419,17 +433,136 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 ## Tip Ratio
 
-### LM Model
+Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. Six differencet models that we are going to apply are:
 
-### Ridge
+### 1. LM Model
 
-### Lasso
+### 2. Ridge
 
-### Elastic Net
+```{r ridge_tipfareratio}
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+y = train %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
 
-### PCR
+set.seed(123)
+cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
+# Display the best lambda value
+cv_lamda$lambda.min
 
-### Decision Tree
+# Fit the final model on the training data
+ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
+
+# Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+predictions <- ridge_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Ridge",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+
+
+# Display regression coefficients
+coef(ridge_model)
+plot(cv_lamda)
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+
+plot(fit.ridge, xvar="lambda", label = 5)
+```
+
+OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
+
+Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
+
+
+```{r plot_coef_lambda, include = T, echo = F}
+library(plotmo)
+fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
+plot_glmnet(fit.ridge, label=5)
+```
+
+To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
+
+```{r ridge2plt, include = T, echo = F}
+plot(cv_lamda)
+```
+
+
+
+### 3. Lasso
+
+```{r lasso_tipfareratio}
+x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+y = train %>%
+  select(tip_fare_ratio) %>%
+  unlist() %>%
+  as.numeric()
+
+# Find the best lambda using cross-validation
+set.seed(123) 
+lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
+# Display the best lambda value
+lasso_cv$lambda.min
+
+plot(cv_lamda)
+
+# Fit the final model on the training data
+lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
+# Dsiplay regression coefficients
+coef(lasso_model)
+
+# # Make predictions on the test data
+x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+predictions <- lasso_model %>% predict(x.test) %>% as.vector()
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Lasso",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+
+ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Fare amount ", y = "Tip amount")
+
+```
+
+This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
+
+Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
+
+```{r plot_coef_lasso1, include = T, echo = F}
+library(plotmo)
+fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
+plot_glmnet(fit.lasso, label=5)
+```
+
+
+To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
+
+```{r lasso2plt, include = T, echo = F}
+plot(cv_lamda)
+```
+
+### 4. Elastic Net
+
+The last penalized regression model that we used for our problem is elastic net that linearly combines the L1 and L2 penalties of the lasso and ridge methods. But unfortunately it also did not help in improving R-square value.
+
+### 5. PCR
+
+### 6. Decision Tree
 
 Finally, we decided to grow a decision tree for our dataset. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
 
@@ -580,14 +713,21 @@ This also suggests that a null model may be the "best fit" for tip ratio. In thi
 ## Tip Amount
 
 WHY DID WE LOOK AT TIP AMOUNT TOO????
+From analysis shown above it is clear that either there is no relation (the null model will work just fine). Tip-to-fare is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by tip amount as our dependent variable in models and see if it makes any difference on our results. 
 
 ### LM Model
 
 ### Ridge
 
+We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Ridge model.
+
 ### Lasso
 
+We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Lasso model.
+
 ### Elastic Net
+
+We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Elastic Net model.
 
 ### PCR
 
