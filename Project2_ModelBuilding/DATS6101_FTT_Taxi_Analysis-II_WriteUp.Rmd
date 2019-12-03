@@ -22,6 +22,7 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r loadlibraries, include=F}
+# Load packages
 loadPkg("plotmo")
 loadPkg("tidyverse")
 loadPkg("glmnet")
@@ -143,11 +144,9 @@ In this context, given the lack of research in taxicab tipping, this project see
 
 # Data
 
-The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
-
-The New York City Taxi and Limousine Commission (TLC) was created in 1971. The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
+The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The dataset was collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
   
-The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, 2019 June from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
+The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, June 2019, from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
 
 We loaded data into R and clean (preprocess) it so that it could be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
 
@@ -187,6 +186,7 @@ Once we have cleaned our data, we start exploratory data analysis by seeking if 
 ## Distribution
 
 The data is approximately normally distributed ready to use for analysis. There are lesser points on the left side of the mean.
+
 ```{r normality check of processed data, echo=T, include=T}
 #ggplot histogram of tip_fare_ratio for processed df
 df_sub %>%
@@ -213,6 +213,7 @@ result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 ```
 
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay larger share of tips relative to their overall fare than those who travel longer distances within NYC radius. 
+
 ```{r box_plot, include = T, echo = F}
 
 # box-plot to see who pays more tips 
@@ -231,6 +232,7 @@ As always, first step in every significance testing is to design hypothesis. Bel
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same for both short and long distance passenger(s)
 </ul>
 ```{r }
+# Print result
 result_t
 ```
 
@@ -252,6 +254,15 @@ For this test our hypothesis were as below:
 trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 td_ttest <- t.test(x = df_sub$trip_duration)
 td_ttest$p.value
+
+# Run ANOVA
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = df_sub)
+
+# Run ANOVA
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
+
+#Run T-test
+trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 ```
 
 From the results we observe that p-value `r format(td_ttest$p.value, digits = 3) is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
@@ -274,9 +285,10 @@ anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = df_sub)
 summary(anova_tip_amount)
 
 ```
+
 The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is < 0.05, hence we reject null hypothesis. This means that the number of passenger in the car does affect ratio of the tip amount.
 
-### Vendor Id
+### Vendor ID
 
 Similarly, we checked the distribution for the vendor ID and run a t-test to verify the hypoethsis.
 
@@ -304,18 +316,13 @@ anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = df_sub)
 # Print ANOVA results
 anova_tiprat_do
 
-# Run ANOVA
-anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = df_sub)
 
-# Run ANOVA
-anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
-
-#Run T-test
-trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 
 ```
 
-From the previous research, we ran various tests to gain a basic understanding of the data:
+For tip ratio and location, ANOVA tests give p-values of `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)`. We reject the null hypothesis that the means are the same at a significance level of 0.05. The Tukey HSD test show the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant.
+
+From the previous research, we ran various tests to gain a basic understanding of the data, which can be summarized in this table:
 
 Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
 -----|-----|-----|--------|--------|  
@@ -329,11 +336,11 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 *based on a significance level of 0.05
 
-Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variable we will try to predict tip fare ratio. 
+Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables may affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variables, we will try to predict tip fare ratio. 
 
 ## Correlation
-
 For this step, we have used Pearson correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
+
 
 ```{r correlation1, include=F, echo=F}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
