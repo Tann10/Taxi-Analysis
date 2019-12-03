@@ -42,8 +42,8 @@ loadPkg("data.table")
 loadPkg("corrplot")
 loadPkg("formattable")
 loadPkg("tidyr")
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github("kassambara/ggpubr")
+# if(!require(devtools)) install.packages("devtools")
+# devtools::install_github("kassambara/ggpubr")
 loadPkg("ggpubr")
 loadPkg("ggcorrplot")
 loadPkg("Hmisc")
@@ -253,6 +253,16 @@ anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = df_sub)
 
 # Print ANOVA results
 anova_tiprat_do
+
+# Run ANOVA
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = df_sub)
+
+# Run ANOVA
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
+
+#Run T-test
+trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
+
 ```
 
 From the previous research, we ran various tests to gain a basic understanding of the data:
@@ -403,7 +413,7 @@ df_sub %>%
 
 # Model Building
 
-TALK ABOUT WHY WE CHOSE THE MODELS WE USED
+Since our data problem falls under regression we chose decision trees and Linear(uni,multivariate) regression models and find the best one that suits our data. We also applied step by feature selection, Lasso, Ridge and Elastic Net and PCA to improve our linear model. Let us look into them in details below.
 
 ## Model Building Preparation
 
@@ -461,6 +471,105 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. Six differencet models that we are going to apply are:
 
 ### 1. LM Model
+
+### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Fare_Ratio'
+
+Let us Start building our linear model with first 3 high Pearson Correlation values for 'Tip_Fare_Ratio'. trip_duration fare_amount trip_distance were highly correlated variables to tip fare ratio with -0.31, -0.27, -0.23 as pearson coefficients respectively.
+
+```{r }
+
+#Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
+
+#linear model of tip_fare_ratio ~ trip_duration
+fit1 <- lm(tip_fare_ratio ~ trip_duration, data = taxipro )
+summary(fit1)
+# vif(fit1)
+# plot(fit1)
+
+#linear model of tip_fare_ratio ~ trip_duration+fare_amount
+fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = taxipro )
+summary(fit2)
+# vif(fit2)
+# plot(fit2)
+
+#linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
+fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = taxipro )
+summary(fit3)
+vif(fit3)
+plot(fit3)
+```
+
+The model graphs look good except some outliers which we remove in later steps. Let us perform ANOVA test on all the three models. 
+
+```{r, include=TRUE}
+#perform ANOVA to compare three models built
+anova(fit1,fit2,fit3)
+```
+
+We observe that p is > 0.05 for fit3 implies fit2 and fit3 are same.
+
+Below is the graph for predicted vs Actual values of tip_fare_ratio
+
+```{r, include=TRUE}
+#Prediction
+model.final.pred <- add_predictions(test,fit3)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- data.frame(
+  technique = "Linear(3 vars with best cor-coeffs)",
+  dependent = "tip_fare_ratio",
+  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
+)
+
+```
+
+Since the results are not satisfactory we perform step by feature selection.
+Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
+
+```{r step_by_feature_selection, include= TRUE}
+
+mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
+#plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+#plot(mod_tip_ratio, scale = "r2", main = "R^2")
+# plot(mod_tip_ratio, scale = "bic", main = "BIC")
+```
+
+From the graph above we see that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum Adj R^2 = 0.11 after which Adj R^2 remians constant.
+
+Below is the Summary from Lm with First 3 features selected with Linear model.
+```{r, Include= TRUE}
+
+#Let us select first three features selected by feature selection function above.
+fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
+summary(fit_feature)
+# vif(fit_feature)
+plot(fit_feature)
+```
+
+Below is the graph for predicted vs Actual values of tip_fare_ratio
+
+```{r, include=TRUE}
+
+#Prediction
+model.final.pred <- add_predictions(test,fit_feature)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-Stepwise",
+  dependent = "tip_fare_ratio",
+  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
+))
+
+```
+
+To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
 ### 2. Ridge
 
@@ -574,7 +683,6 @@ This is another type of regularization (L1) technique that can lead to zero coef
 Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
 
 
-
 ```{r plot_coef_lasso1, include = T, echo = F}
 library(plotmo)
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
@@ -643,12 +751,12 @@ We evaluated the metric using mape which is around 22%. No significant improveme
 predictions <- predict(model, test.data)
 
 # Model performance metrics
-results_df <- data.frame(
+results_df <- rbind(results_df, data.frame(
   technique = "PCR",
   dependent = "tip_fare_ratio",
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
+))
 
 # ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
 #   geom_point() +
@@ -813,6 +921,106 @@ WHY DID WE LOOK AT TIP AMOUNT TOO?
 From analysis shown above it is clear that either there is no relation (the null model will work just fine). Tip-to-fare is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by tip amount as our dependent variable in models and see if it makes any difference on our results. 
 
 ### LM Model
+
+### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Amount'
+
+Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'. fare_amount, trip_distance, trip_duration eere highly correlated variables to tip fare ratio with 0.91, 0.83, 0.71 as pearson coefficients respectively.
+
+```{r, include= TRUE}
+
+#Taking best three variables correlated with tip_fare ratio
+
+#linear model of tip_amount ~ trip_duration
+fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
+summary(fit1_ta)
+# vif(fit1_ta)
+# plot(fit1_ta)
+
+#linear model of tip_amount ~ trip_duration+fare_amount
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
+summary(fit2_ta)
+# vif(fit2_ta)
+# plot(fit2_ta)
+
+#linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
+fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = taxipro )
+summary(fit3_ta)
+# vif(fit3_ta)
+plot(fit3_ta)
+
+```
+
+The model graphs look good except some outliers which we remove in later steps. Let us perform ANOVA test on all the three models.
+
+```{r, include=TRUE}
+#perform ANOVA to compare three models built
+anova(fit1_ta,fit2_ta,fit3_ta)
+```
+
+We observe that p is > 0.05 for fit2 implies fit1 and fit2 are same.
+
+Below is the graph for predicted vs Actual values of tip_amount
+
+```{r, include=TRUE}
+model.final.pred <- add_predictions(test,fit3_ta)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear(3 vars with best cor-coeffs)",
+  dependent = "tip_amount",
+  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
+))
+```
+
+The results are good. To further improve them we perform step by feature selection.
+Below is the tip_amount ~ . step by feature selection with Adjusted R^2 scaling
+
+```{r step_by_feature_selection1, include= TRUE}
+
+mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
+# plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
+# plot(mod_tip_ratio, scale = "r2", main = "R^2")
+# plot(mod_tip_ratio, scale = "bic", main = "BIC")
+
+```
+
+From the graph above we see that Adj R^2 remians constant throughout. Hence we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
+
+Below is the Summary from Lm with First 3 features selected with Linear model.
+
+```{r, include=TRUE}
+#Let us select first three features selected by feature selection function above.
+fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
+summary(fit_feature_ta) 
+# vif(fit_feature_ta)
+# plot(fit_feature_ta)
+
+# #perform ANOVA to compare three models built
+# anova(fit3_ta,fit_feature_ta)
+```
+
+Below is the graph for predicted vs Actual values of tip_amount
+```{r, include=TRUE}
+
+model.final.pred <- add_predictions(test,fit_feature_ta)
+# head(model.final.pred)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-Stepwise",
+  dependent = "tip_amount",
+  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
+  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
+))
+
+```
+
+To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
 ### Ridge
 
@@ -1241,635 +1449,410 @@ Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time es
 
 
 
-
-
-
-
-
-
-
-
-
-
-# Model building
-
-~~~~~~~~~~~~BELOW IS FROM THE RMD FILE WE SUBMITTED LAST WEEK~~~~~~~~~~~~~
-COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE
-
-
-# Modeling
-
-## Linear Models
-
-### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Fare_Ratio'
-
-Let us Start building our linear model with first 3 high Pearson Correlation values for 'Tip_Fare_Ratio'
-
-```{r }
-
-#Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
-
-#linear model of tip_fare_ratio ~ trip_duration
-fit1 <- lm(tip_fare_ratio ~ fare_amount, data = taxipro )
-summary(fit1)
-# vif(fit1)
-# plot(fit1)
-
-#linear model of tip_fare_ratio ~ trip_duration+fare_amount
-fit2 <- lm(tip_fare_ratio ~ fare_amount+trip_duration, data = taxipro )
-summary(fit2)
-# vif(fit2)
-# plot(fit2)
-
-#linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
-fit3 <- lm(tip_fare_ratio ~ fare_amount+trip_duration+trip_distance, data = taxipro )
-summary(fit3)
-vif(fit3)
-plot(fit3)
-```
-
-The model graphs look good. So let us perform ANOVA test on all the three models.
-
-```{r, include=TRUE}
-#perform ANOVA to compare three models built
-anova(fit1,fit2,fit3)
-```
-
-We observe that p is > 0.05 for fit3 implies fit2 and fit3 are same.
-
-Below is the graph for predicted vs Actual values of tip_fare_ratio
-
-```{r, include=TRUE}
-#Prediction
-model.final.pred <- add_predictions(test,fit3)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear(3 best cor values)",
-  dependent = "tip_fare_ratio",
-  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
-  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
-))
-
-```
-
-Since the results are not satisfactory we perform step by feature selection.
-Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
-
-```{r step_by_feature_selection, include= TRUE}
-
-mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
-#plot(mod_tip_ratio, scale = "Cp", main = "Cp")
-plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-#plot(mod_tip_ratio, scale = "r2", main = "R^2")
-# plot(mod_tip_ratio, scale = "bic", main = "BIC")
-```
-
-Below is the Summary from Lm with First 3 features selected with Linear model.
-```{r, Include= TRUE}
-
-#Let us select first three features selected by feature selection function above.
-fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
-summary(fit_feature)
-# vif(fit_feature)
-plot(fit_feature)
-```
-
-Below is the graph for predicted vs Actual values of tip_fare_ratio
-```{r, include=TRUE}
-
-#Prediction
-model.final.pred <- add_predictions(test,fit_feature)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear-Stepwise",
-  dependent = "tip_fare_ratio",
-  mape = mape(model.final.pred$tip_fare_ratio, model.final.pred$pred),
-  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_fare_ratio)
-))
-
-```
-
-To further improve the model now we use tip_amount instead of Tip_Fare_Ratio since we did not get any significant improvement in adj R^2 value.
-
-### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Amount'
-
-Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'
-
-```{r, include= TRUE}
-
-#Taking best three variables correlated with tip_fare ratio
-
-#linear model of tip_amount ~ trip_duration
-fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
-summary(fit1_ta)
-# vif(fit1_ta)
-# plot(fit1_ta)
-
-#linear model of tip_amount ~ trip_duration+fare_amount
-fit2_ta <- lm(tip_amount ~ fare_amount+trip_duration, data = taxipro )
-summary(fit2_ta)
-# vif(fit2_ta)
-# plot(fit2_ta)
-
-#linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
-fit3_ta <- lm(tip_amount ~ fare_amount+trip_duration+trip_distance, data = taxipro )
-summary(fit3_ta)
-# vif(fit3_ta)
-plot(fit3_ta)
-
-```
-
-The model graphs look good. So let us perform ANOVA test on all the three models.
-
-```{r, include=TRUE}
-#perform ANOVA to compare three models built
-anova(fit1_ta,fit2_ta,fit3_ta)
-```
-
-We observe that p is > 0.05 for fit2 implies fit1 and fit2 are same.
-
-Below is the graph for predicted vs Actual values of tip_fare_ratio
-
-```{r, include=TRUE}
-model.final.pred <- add_predictions(test,fit3_ta)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear(3 best cor values)",
-  dependent = "tip_amount",
-  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
-  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
-))
-```
-
-Since the results are not satisfactory we perform step by feature selection.
-Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
-
-```{r step_by_feature_selection1, include= TRUE}
-
-mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
-# plot(mod_tip_ratio, scale = "Cp", main = "Cp")
-plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-# plot(mod_tip_ratio, scale = "r2", main = "R^2")
-# plot(mod_tip_ratio, scale = "bic", main = "BIC")
-
-```
-
-
-Below is the Summary from Lm with First 3 features selected with Linear model.
-
-```{r, include=TRUE}
-#Let us select first three features selected by feature selection function above.
-fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
-summary(fit_feature_ta) 
-# vif(fit_feature_ta)
-# plot(fit_feature_ta)
-
-# #perform ANOVA to compare three models built
-# anova(fit3_ta,fit_feature_ta)
-```
-
-Below is the graph for predicted vs Actual values of tip_amount
-```{r, include=TRUE}
-
-model.final.pred <- add_predictions(test,fit_feature_ta)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear-Stepwise",
-  dependent = "tip_amount",
-  mape = mape(model.final.pred$tip_amount, model.final.pred$pred),
-  Rsquare = caret::R2(model.final.pred$pred, model.final.pred$tip_amount)
-))
-
-```
-
-Below are the results of lm(tip_amount ~ .-fare_amount)
-```{r lm-fare_amount, include= TRUE}
-#Let us select first three features selected by feature selection function above.
-fit_without_fare_amount <- lm(tip_amount ~ .-fare_amount-tip_fare_ratio, data = taxipro )
-summary(fit_without_fare_amount) 
-# vif(fit_without_fare_amount)
-# plot(fit_feature_ta)
-
-# #perform ANOVA to compare three models built
-# anova(fit3_ta,fit_without_fare_amount)
-
-
-model.final.pred <- add_predictions(test,fit_without_fare_amount)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
-
-```
-
-
-Let build linear models on tip fare ratio: 
-## OLS
-
-### Tip fare ratio
-
-```{r ols_tipfareratio}
-
-model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
-summary(model)
-vif(model)
-# plot(model)
-```
-As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)`
-
-The VIF factor is also 1. 
-
-Select only significant coeff:
-```{r ols_sig}
-model <- lm(tip_fare_ratio ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
-summary(model)
-vif(model)
-
-# predictions
-predictions <- predict(model, test)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-))
-
-```
-No significant improvement even factor choosing significant variables. 
-
-From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
-```{r cooksdistance removed}
-df_out <- influential_points(train, model)
-model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out)
-summary(model_rmcook)
-vif(model_rmcook)
-
-# predictions
-predictions <- predict(model_rmcook, test)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear-treated outlier",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-))
-
-
-# sample_size <- nrow(df_sub)
-# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-# abline(h = 15/sample_size, col="red")  # add cutoff line
-# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
-```
-After removal of the outliers from the data there is no improvement in the values for tip fare ratio
-
-### Tip amount
-Similary check a model with tip amount and significant variables decided from the tip ratio
-```{r ols_sig_tip}
-model_tip_amount <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train)
-summary(model_tip_amount)
-vif(model_tip_amount)
-
-# predictions
-predictions <- predict(model_tip_amount, test)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-# plot(model_tip_amount)
-```
-As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable
-
-The VIF factor is also 1. 
-
-From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs. 
-```{r cooksdistance_removed_tip_amount}
-df_out <- influential_points(train, model_tip_amount)
-dim(df_out)
-
-model_tip_amountrmcook <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = df_out)
-summary(model_tip_amountrmcook)
-vif(model_tip_amountrmcook)
-
-# predictions
-predictions <- predict(model_tip_amountrmcook, test)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Linear-treated outlier",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-
-# sample_size <- nrow(df_sub)
-# plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
-# abline(h = 15/sample_size, col="red")  # add cutoff line
-# text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
-```
-After removal of the outliers from the data there is no improvement in the values for tip fare ratio but residual error has improved 
-
-## Stepwise regression
-```{r stepwise}
-
-# model <- lm(tip_fare_ratio ~ .-tip_amount, data = train)
-# step_lm_tip <- ols_step_all_possible(model)
-# # plot(k)
-# plot(step_lm_tip, scale = "adjr2", main = "Adjusted R^2")
-# plot(step_lm_tip, scale = "r2", main = "R^2")
-# model <- lm(tip_amount ~ .-tip_fare_ratio, data = train)
-# k <- ols_step_all_possible(model)
-# plot(k)
-
-```
-
-## Ridge
-### Tip Fare Ratio
-Lets see if ridge improves results with all variables
-```{r ridge_tipfareratio}
-x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
-y = train %>%
-  select(tip_fare_ratio) %>%
-  unlist() %>%
-  as.numeric()
-
-set.seed(123)
-cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
-# Display the best lambda value
-cv_lamda$lambda.min
-
-# Fit the final model on the training data
-ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
-
-# Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
-predictions <- ridge_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Ridge",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-))
-
-
-# Display regression coefficients
-coef(ridge_model)
-plot(cv_lamda)
-
-ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-
-```
-
-The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation.
-
-### Tip amount
-```{r ridge_tip}
-x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
-y = train %>%
-  select(tip_amount) %>%
-  unlist() %>%
-  as.numeric()
-
-set.seed(123)
-cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
-# Display the best lambda value
-cv_lamda$lambda.min
-
-
-# Fit the final model on the training data
-ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
-# Display regression coefficients
-coef(ridge_model)
-plot(cv_lamda)
-
-# Make predictions on the test data
-x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
-predictions <- ridge_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Ridge",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-# check <- data.frame(predictions, test$tip_amount)
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-
-```
-
-## Lasso
-### Tip fare ratio
-```{r lasso_tipfareratio}
-x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
-y = train %>%
-  select(tip_fare_ratio) %>%
-  unlist() %>%
-  as.numeric()
-
-# Find the best lambda using cross-validation
-set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
-# Display the best lambda value
-lasso_cv$lambda.min
-
-plot(cv_lamda)
-
-# Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
-# Dsiplay regression coefficients
-coef(lasso_model)
-
-# # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
-predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Lasso",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-))
-
-ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-
-```
-
-
-
-## Tip amount
-```{r lasso_tip1}
-x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
-y = train %>%
-  select(tip_amount) %>%
-  unlist() %>%
-  as.numeric()
-
-# Find the best lambda using cross-validation
-set.seed(123) 
-lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
-# Display the best lambda value
-lasso_cv$lambda.min
-
-# Fit the final model on the training data
-lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE)
-# Dsiplay regression coefficients
-coef(lasso_model)
-
-# # Make predictions on the test data
-x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
-predictions <- lasso_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Lasso",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-```
-
-
-## Elastic Net
-
-
-Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune here lambda and alpha. First lets try with alpha = 0.5
-
-### Tip fare ratio
-
-```{r elnet_tipfareratio}
-
-x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
-y = train %>%
-  select(tip_fare_ratio) %>%
-  unlist() %>%
-  as.numeric()
-
-# Find the best lambda using cross-validation
-set.seed(123)
-elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
-# Display the best lambda value
-elnet_cv$lambda.min
-
-# Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE)
-# Dsiplay regression coefficients
-coef(elnet_model)
-
-# # Make predictions on the test data
-x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
-predictions <- elnet_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Elastic Net",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-))
-
-ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-
-```
-
-
-## Tip amount
-
-```{r elnet_tip}
-x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
-y = train %>%
-  select(tip_amount) %>%
-  unlist() %>%
-  as.numeric()
-
-# Find the best lambda using cross-validation
-set.seed(123)
-elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE)
-# Display the best lambda value
-elnet_cv$lambda.min
-
-# Fit the final model on the training data
-elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE)
-# Dsiplay regression coefficients
-coef(elnet_model)
-
-# # Make predictions on the test data
-x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1]
-predictions <- elnet_model %>% predict(x.test) %>% as.vector()
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "Elastic Net",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-```
-
-
-
-
-
-
-
-
-# Summary of Model results
-
-```{r summary2, include=TRUE}
-
-results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
-
-formattable(results_df,
-            align =c("l","c","c","c","c"),
-            list(`Model` = formatter(
-              "span", style = ~ style(color = "grey",font.weight = "bold"))
-              # `Rsquared` = color_bar("pink")
-))
-```
+<!-- # Model building -->
+
+<!-- ~~~~~~~~~~~~BELOW IS FROM THE RMD FILE WE SUBMITTED LAST WEEK~~~~~~~~~~~~~ -->
+<!-- COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE -->
+
+
+<!-- # Modeling -->
+
+<!-- ## OLS -->
+
+<!-- ### Tip fare ratio -->
+
+<!-- ```{r ols_tipfareratio} -->
+
+<!-- model <- lm(tip_fare_ratio ~ .-tip_amount, data = train) -->
+<!-- summary(model) -->
+<!-- vif(model) -->
+<!-- # plot(model) -->
+<!-- ``` -->
+<!-- As you can see from the summary r square `r format( summary(model)$r.squared )` and adj r square is really low `r format( summary(model)$adj.r.squared)` -->
+
+<!-- The VIF factor is also 1.  -->
+
+<!-- Select only significant coeff: -->
+<!-- ```{r ols_sig} -->
+<!-- model <- lm(tip_fare_ratio ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train) -->
+<!-- summary(model) -->
+<!-- vif(model) -->
+
+<!-- # predictions -->
+<!-- predictions <- predict(model, test) -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Linear", -->
+<!--   dependent = "tip_fare_ratio", -->
+<!--   mape = mape(test$tip_fare_ratio, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_fare_ratio) -->
+<!-- )) -->
+
+<!-- ``` -->
+<!-- No significant improvement even factor choosing significant variables.  -->
+
+<!-- From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs.  -->
+<!-- ```{r cooksdistance removed} -->
+<!-- df_out <- influential_points(train, model) -->
+<!-- model_rmcook <- lm(tip_fare_ratio ~ fare_amount, data = df_out) -->
+<!-- summary(model_rmcook) -->
+<!-- vif(model_rmcook) -->
+
+<!-- # predictions -->
+<!-- predictions <- predict(model_rmcook, test) -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Linear-treated outlier", -->
+<!--   dependent = "tip_fare_ratio", -->
+<!--   mape = mape(test$tip_fare_ratio, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_fare_ratio) -->
+<!-- )) -->
+
+
+<!-- # sample_size <- nrow(df_sub) -->
+<!-- # plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance -->
+<!-- # abline(h = 15/sample_size, col="red")  # add cutoff line -->
+<!-- # text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label -->
+<!-- ``` -->
+<!-- After removal of the outliers from the data there is no improvement in the values for tip fare ratio -->
+
+<!-- ### Tip amount -->
+<!-- Similary check a model with tip amount and significant variables decided from the tip ratio -->
+<!-- ```{r ols_sig_tip} -->
+<!-- model_tip_amount <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = train) -->
+<!-- summary(model_tip_amount) -->
+<!-- vif(model_tip_amount) -->
+
+<!-- # predictions -->
+<!-- predictions <- predict(model_tip_amount, test) -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Linear", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+<!-- # plot(model_tip_amount) -->
+<!-- ``` -->
+<!-- As you can see from the summary r square `r format( summary(model_tip_amount)$r.squared )` and adj r square `r format( summary(model_tip_amount)$adj.r.squared)` are really good. Also fare amount is the significant variable -->
+
+<!-- The VIF factor is also 1.  -->
+
+<!-- From the plot we can see there are some variables outside cooks distance. Lets remove those points and see how the model performs.  -->
+<!-- ```{r cooksdistance_removed_tip_amount} -->
+<!-- df_out <- influential_points(train, model_tip_amount) -->
+<!-- dim(df_out) -->
+
+<!-- model_tip_amountrmcook <- lm(tip_amount ~ fare_amount + congestion_surcharge + trip_duration +Borough_pu_Queens + Borough_do_EWR + drop_period_Evening, data = df_out) -->
+<!-- summary(model_tip_amountrmcook) -->
+<!-- vif(model_tip_amountrmcook) -->
+
+<!-- # predictions -->
+<!-- predictions <- predict(model_tip_amountrmcook, test) -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Linear-treated outlier", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+
+<!-- # sample_size <- nrow(df_sub) -->
+<!-- # plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance -->
+<!-- # abline(h = 15/sample_size, col="red")  # add cutoff line -->
+<!-- # text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label -->
+<!-- ``` -->
+<!-- After removal of the outliers from the data there is no improvement in the values for tip fare ratio but residual error has improved  -->
+
+<!-- ## Stepwise regression -->
+<!-- ```{r stepwise} -->
+
+<!-- # model <- lm(tip_fare_ratio ~ .-tip_amount, data = train) -->
+<!-- # step_lm_tip <- ols_step_all_possible(model) -->
+<!-- # # plot(k) -->
+<!-- # plot(step_lm_tip, scale = "adjr2", main = "Adjusted R^2") -->
+<!-- # plot(step_lm_tip, scale = "r2", main = "R^2") -->
+<!-- # model <- lm(tip_amount ~ .-tip_fare_ratio, data = train) -->
+<!-- # k <- ols_step_all_possible(model) -->
+<!-- # plot(k) -->
+
+<!-- ``` -->
+
+<!-- ## Ridge -->
+<!-- ### Tip Fare Ratio -->
+<!-- Lets see if ridge improves results with all variables -->
+<!-- ```{r ridge_tipfareratio} -->
+<!-- x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_fare_ratio) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- set.seed(123) -->
+<!-- cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- cv_lamda$lambda.min -->
+
+<!-- # Fit the final model on the training data -->
+<!-- ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE) -->
+
+<!-- # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1] -->
+<!-- predictions <- ridge_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Ridge", -->
+<!--   dependent = "tip_fare_ratio", -->
+<!--   mape = mape(test$tip_fare_ratio, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_fare_ratio) -->
+<!-- )) -->
+
+
+<!-- # Display regression coefficients -->
+<!-- coef(ridge_model) -->
+<!-- plot(cv_lamda) -->
+
+<!-- ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+
+<!-- ``` -->
+
+<!-- The lowest point in the curve indicates the optimal lambda: the log value of lambda that best minimised the error in cross-validation. -->
+
+<!-- ### Tip amount -->
+<!-- ```{r ridge_tip} -->
+<!-- x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_amount) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- set.seed(123) -->
+<!-- cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- cv_lamda$lambda.min -->
+
+
+<!-- # Fit the final model on the training data -->
+<!-- ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE) -->
+<!-- # Display regression coefficients -->
+<!-- coef(ridge_model) -->
+<!-- plot(cv_lamda) -->
+
+<!-- # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1] -->
+<!-- predictions <- ridge_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Ridge", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+<!-- # check <- data.frame(predictions, test$tip_amount) -->
+<!-- ggplot(test, aes(x =test$tip_amount ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+
+<!-- ``` -->
+
+<!-- ## Lasso -->
+<!-- ### Tip fare ratio -->
+<!-- ```{r lasso_tipfareratio} -->
+<!-- x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_fare_ratio) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- # Find the best lambda using cross-validation -->
+<!-- set.seed(123)  -->
+<!-- lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- lasso_cv$lambda.min -->
+
+<!-- plot(cv_lamda) -->
+
+<!-- # Fit the final model on the training data -->
+<!-- lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE) -->
+<!-- # Dsiplay regression coefficients -->
+<!-- coef(lasso_model) -->
+
+<!-- # # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1] -->
+<!-- predictions <- lasso_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Lasso", -->
+<!--   dependent = "tip_fare_ratio", -->
+<!--   mape = mape(test$tip_fare_ratio, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_fare_ratio) -->
+<!-- )) -->
+
+<!-- ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+
+<!-- ``` -->
+
+
+
+<!-- ## Tip amount -->
+<!-- ```{r lasso_tip1} -->
+<!-- x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_amount) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- # Find the best lambda using cross-validation -->
+<!-- set.seed(123)  -->
+<!-- lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- lasso_cv$lambda.min -->
+
+<!-- # Fit the final model on the training data -->
+<!-- lasso_model <- glmnet(x, y, alpha = 1, lambda = lasso_cv$lambda.min, standardize = FALSE) -->
+<!-- # Dsiplay regression coefficients -->
+<!-- coef(lasso_model) -->
+
+<!-- # # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1] -->
+<!-- predictions <- lasso_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Lasso", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+<!-- ggplot(test, aes(x =test$tip_amount ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+<!-- ``` -->
+
+
+<!-- ## Elastic Net -->
+
+
+<!-- Elastic net can be thought of as a mixture of Lasso & Ridge models. It combines the penalties of ridge regression and lasso to get the best of both. There are two parameters to tune here lambda and alpha. First lets try with alpha = 0.5 -->
+
+<!-- ### Tip fare ratio -->
+
+<!-- ```{r elnet_tipfareratio} -->
+
+<!-- x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_fare_ratio) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- # Find the best lambda using cross-validation -->
+<!-- set.seed(123) -->
+<!-- elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- elnet_cv$lambda.min -->
+
+<!-- # Fit the final model on the training data -->
+<!-- elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE) -->
+<!-- # Dsiplay regression coefficients -->
+<!-- coef(elnet_model) -->
+
+<!-- # # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1] -->
+<!-- predictions <- elnet_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Elastic Net", -->
+<!--   dependent = "tip_fare_ratio", -->
+<!--   mape = mape(test$tip_fare_ratio, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_fare_ratio) -->
+<!-- )) -->
+
+<!-- ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+
+<!-- ``` -->
+
+
+<!-- ## Tip amount -->
+
+<!-- ```{r elnet_tip} -->
+<!-- x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1] -->
+<!-- y = train %>% -->
+<!--   select(tip_amount) %>% -->
+<!--   unlist() %>% -->
+<!--   as.numeric() -->
+
+<!-- # Find the best lambda using cross-validation -->
+<!-- set.seed(123) -->
+<!-- elnet_cv <- cv.glmnet(x, y, alpha = 0.5, standardize = FALSE) -->
+<!-- # Display the best lambda value -->
+<!-- elnet_cv$lambda.min -->
+
+<!-- # Fit the final model on the training data -->
+<!-- elnet_model <- glmnet(x, y, alpha = 0.5, lambda = elnet_cv$lambda.min, standardize = FALSE) -->
+<!-- # Dsiplay regression coefficients -->
+<!-- coef(elnet_model) -->
+
+<!-- # # Make predictions on the test data -->
+<!-- x.test <- model.matrix(tip_amount ~.-tip_fare_ratio, test)[,-1] -->
+<!-- predictions <- elnet_model %>% predict(x.test) %>% as.vector() -->
+
+<!-- # Model performance metrics -->
+<!-- results_df <- rbind(results_df, data.frame( -->
+<!--   technique = "Elastic Net", -->
+<!--   dependent = "tip_amount", -->
+<!--   mape = mape(test$tip_amount, predictions), -->
+<!--   Rsquare = caret::R2(predictions, test$tip_amount) -->
+<!-- )) -->
+
+<!-- ggplot(test, aes(x =test$tip_amount ,y = predictions)) + -->
+<!--   geom_point() + -->
+<!--   labs(title="Actual & Predicted Values", -->
+<!--        x="Fare amount ", y = "Tip amount") -->
+<!-- ``` -->
+
+
+
+
+
+
+
+
+<!-- # Summary of Model results -->
+
+<!-- ```{r summary2, include=TRUE} -->
+
+<!-- results_df <-results_df[order(results_df$dependent, results_df$Rsquare),] -->
+
+<!-- formattable(results_df, -->
+<!--             align =c("l","c","c","c","c"), -->
+<!--             list(`Model` = formatter( -->
+<!--               "span", style = ~ style(color = "grey",font.weight = "bold")) -->
+<!--               # `Rsquared` = color_bar("pink") -->
+<!-- )) -->
+<!-- ``` -->
 
 
 
