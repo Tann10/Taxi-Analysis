@@ -331,7 +331,7 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variable we will try to predict tip fare ratio. 
 
-### Correlation
+## Correlation
 
 For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
