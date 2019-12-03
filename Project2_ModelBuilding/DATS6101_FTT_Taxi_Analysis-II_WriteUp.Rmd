@@ -175,15 +175,28 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 ```
 
-Below is the data statistics:
+Below is the statistics for the selected columns for analysis:
 ```{r }
 summary(df_sub)
 ```
+
 # Exploratory Data Analysis
 
 Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and independent variables.
 
-## Trip Distance
+## Distribution
+
+The data is approximately normally distributed ready to use for analysis. There are lesser points on the left side of the mean.
+```{r normality check of processed data, echo=T, include=T}
+#ggplot histogram of tip_fare_ratio for processed df
+df_sub %>%
+  ggplot(aes(x=tip_fare_ratio)) +
+  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
+  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio")
+```
+
+## Hypothesis testing
+### Trip Distance
 
 ```{r subset_2cols, include = T, echo = F}
 
@@ -205,26 +218,36 @@ While trying to find the the variation in tip-fare ratio between short distance 
 # box-plot to see who pays more tips 
 e <- ggplot(data = df_dist, aes(x = trip_distance, y = tip_fare_ratio, fill=trip_distance)) + 
   geom_boxplot()+ stat_summary(fun.y=mean, geom="point", shape=23, size=4) + 
-  labs(x="Distance Travelled", y = "Tip %") + ggtitle("Box Plot for Tip Percentages vs Distance Travelled")
+  labs(x="Distance Travelled", y = "Tip Fare Ratio") + ggtitle("Box Plot for Tip Fare Ratio vs Distance Travelled")
 e
 
 ```
 
 Apart from just plotting box-plots we also performed independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
 
-As always, First Step in every Significance testing: 
+As always, first step in every significance testing is to design hypothesis. Below are the hypothesis for tip duration: 
 <ul>
-  <li>Null Hypothesis: H<sub>o</sub>  Average tip amount is same for both short and long distance passenger(s)
-  <li>Alternate Hypothesis: H<sub>a</sub> Average tip amount is NOT same for both short and long distance passenger(s)
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same for both short and long distance passenger(s)
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same for both short and long distance passenger(s)
+</ul>
+```{r }
+result_t
+```
+
+With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null Hypothesis in favor of Alternate Hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
+
+
+### Trip duration 
+
+### Number of passengers
+We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio. We are considering passenger count as a cateogrical variables. There are 6 factors of passenger count varing from 1 to 6.
+
+For this test our hypothesis were as below:
+<ul>
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same across all classes of passenger count
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same across all classes of passenger count
 </ul>
 
-With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alternate Hypothesis meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
-
-
-## Trip duration 
-
-## Number of passengers
-We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio.  The passenger count varies from 1 to 6.
 ```{r anova test for passenger_count}
 
 # ANOVA test
@@ -232,9 +255,11 @@ anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = df_sub)
 summary(anova_tip_amount)
 
 ```
-The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
+The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is < 0.05, hence we reject null hypothesis. This means that the number of passenger in the car does affect ratio of the tip amount.
 
-## Vendor Id
+### Vendor Id
+
+Similarly, we checked the distribution for the vendor ID and run a t-test to verify the hypoethsis.
 
 ```{r t test for vendor ID}
 
@@ -243,9 +268,9 @@ ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = df_sub)
 ttest_vendor
 ```
 
-Similarly, we check the distribution for the vendor ID and run a t-test to check the results. The p-value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
+The p-value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
 
-## Location
+### Location
 
 ```{r anova_tipratio_location}
 # Run ANOVA
@@ -280,36 +305,30 @@ dropoff location | ANOVA | `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[
 distance | T-Test | `r format(result_t$p.value, digits=3)` | means are equal | reject H0 |  
 pickup time | ANOVA | `r format(summary(anova_pickup_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
 dropoff time | ANOVA | `r format(summary(anova_drop_period)[[1]][["Pr(>F)"]][[1]], digits=3)` | means are equal | reject H0 |
-passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | fail to reject H0 |
+passenger count | ANOVA | `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` | means are equal | reject H0 |
 vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equal | reject H0 | 
 
 *based on a significance level of 0.05
 
-Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day. In this context, we can incorporate these variables into our future analysis.
+Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variable we will try to predict tip fare ratio. 
 
-## Correlation
+### Correlation
 
 For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
 ```{r correlation1, include=F, echo=F}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
-
-tip_fare_ratio_cor
 ```
 
 ```{r }
 corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 ```
 
-The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas Passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
-
- 
-
+The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
 
 Below are the scatter plot along with correlation and regression line for numerical variables
 
-For tip fare ratio
-```{r scatterplots}
+```{r scatterplots, include=F, echo=F}
 if(FALSE) {
 Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_fare_ratio)) +
   geom_point(color = "blue")+
@@ -346,14 +365,7 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 }
 ```
 
-Normality check for tip fare ratio
-```{r normality check of processed data, echo=T, include=T}
-#ggplot histogram of tip_fare_ratio for processed df
-df_sub %>%
-  ggplot(aes(x=tip_fare_ratio)) +
-  geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.01) + 
-  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio Data Post-Outlier Removal")
-```
+
 
 Normality check for tip amount
 ```{r }
