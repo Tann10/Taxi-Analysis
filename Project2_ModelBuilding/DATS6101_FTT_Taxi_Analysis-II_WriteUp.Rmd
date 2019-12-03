@@ -178,7 +178,7 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables.
 
-## TRIP DISTANCE EDA
+## Trip Distance
 
 ```{r subset_2cols, include = T, echo = F}
 
@@ -216,9 +216,9 @@ As always, First Step in every Significance testing:
 With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null hypothesis in favor of Alternate Hypothesis meaning that people travelling through Yellow cabs in NYC tip differently based on distance travelled.
 
 
-## TRIP DURATION EDA
+## Trip duration 
 
-## NUMBER OF PASSENGERS
+## Number of passengers
 We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio.  The passenger count varies from 1 to 6.
 ```{r anova test for passenger_count}
 
@@ -228,7 +228,8 @@ summary(anova_tip_amount)
 
 ```
 The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is > 0.05, hence we fail to reject null hypothesis. This means that the number of passenger in the car does not affect ratio of the tip amount.
-## VENDOR ID
+
+## Vendor Id
 
 ```{r t test for vendor ID}
 
@@ -285,72 +286,19 @@ Based on our EDA, we can begin to sketch out an answer to our question: It appea
 
 For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
-```{r correlation1}
+```{r correlation1, include=F, echo=F}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
 
 tip_fare_ratio_cor
+```
 
-if(FALSE) {
+```{r }
 corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
-}
 ```
 
 The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas Passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
 
-Here is the another correlation. This time we choose tip_amount as our dependent variable.
-
-```{r correlation2}
-if(FALSE) {
-cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
-}
-```
-
-This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
-
-The same relationship can be visually confirmed through scatter plots below:
-
-Below are the scatter plot along with correlation and regression line for numerical variables
-
-For tip amount
-```{r scatterplots2}
-if(FALSE) {
-Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
-  geom_point(color = "blue")+
-  geom_smooth(method=lm, color = "black") +
-  labs(title="Variation in trip distance and tip amount",
-       x="Trip distance", y = "Tip amount") +
-  geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
-                             df_sub$tip_amount), parse = TRUE)
-
-
-Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +
-  labs(title="Variation in trip duration and tip amount",
-       x="Trip duration", y = "Tip amount")+
-  geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
-                             df_sub$tip_amount), parse = TRUE)
-
-
-Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +
-  labs(title="Variation in congestion surcharge and tip amount",
-       x="Congestion surcharge", y = "Tip amount")+
-  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
-                             df_sub$tip_amount), parse = TRUE)
-
-Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
-  geom_point(color = "red")+
-  geom_smooth(method=lm) +
-  labs(title="Variation in passenger count and tip amount",
-       x="Passenger count", y = "Tip amount")+
-  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
-                             df_sub$tip_amount), parse = TRUE)
-ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
-          ncol = 2, nrow = 2)
-}
-``` 
+ 
 
 
 Below are the scatter plot along with correlation and regression line for numerical variables
@@ -920,9 +868,66 @@ This also suggests that a null model may be the "best fit" for tip ratio. In thi
 WHY DID WE LOOK AT TIP AMOUNT TOO?
 From analysis shown above it is clear that either there is no relation (the null model will work just fine). Tip-to-fare is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by tip amount as our dependent variable in models and see if it makes any difference on our results. 
 
+### Correlation 
+Here is the another correlation. This time we choose tip_amount as our dependent variable.
+
+```{r correlation2}
+if(FALSE) {
+cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
+}
+```
+
+This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
+
+The same relationship can be visually confirmed through scatter plots below:
+
+Below are the scatter plot along with correlation and regression line for numerical variables
+
+For tip amount
+```{r scatterplots2}
+if(FALSE) {
+Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
+  geom_point(color = "blue")+
+  geom_smooth(method=lm, color = "black") +
+  labs(title="Variation in trip distance and tip amount",
+       x="Trip distance", y = "Tip amount") +
+  geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
+                             df_sub$tip_amount), parse = TRUE)
+
+
+Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in trip duration and tip amount",
+       x="Trip duration", y = "Tip amount")+
+  geom_text(x = 30, y = 40, label = corr_eqn(df_sub$trip_duration,
+                             df_sub$tip_amount), parse = TRUE)
+
+
+Q3 <- ggplot(df_sub, aes(x=congestion_surcharge, y=tip_amount)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in congestion surcharge and tip amount",
+       x="Congestion surcharge", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$congestion_surcharge,
+                             df_sub$tip_amount), parse = TRUE)
+
+Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
+  geom_point(color = "red")+
+  geom_smooth(method=lm) +
+  labs(title="Variation in passenger count and tip amount",
+       x="Passenger count", y = "Tip amount")+
+  geom_text(x = 2, y = 40, label = corr_eqn(df_sub$passenger_count,
+                             df_sub$tip_amount), parse = TRUE)
+ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
+          ncol = 2, nrow = 2)
+}
+
+```
+
 ### LM Model
 
-### Uni and Multivariate modeling with high Pearson Correlation values for 'Tip_Amount'
+### Uni and Multivariate modeling
 
 Let us Start building our linear model with tip amount instead of tip fare ratio with first 3 high Pearson Correlation values for 'Tip_Amount'. fare_amount, trip_distance, trip_duration eere highly correlated variables to tip fare ratio with 0.91, 0.83, 0.71 as pearson coefficients respectively.
 
