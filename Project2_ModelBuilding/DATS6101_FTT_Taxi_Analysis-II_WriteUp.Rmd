@@ -248,7 +248,7 @@ Based on our EDA, we can begin to sketch out an answer to our question: It appea
 
 ## Correlation
 
-For this step, we also use Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
+For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
 ```{r correlation1}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
@@ -561,6 +561,70 @@ plot(cv_lamda)
 The last penalized regression model that we used for our problem is elastic net that linearly combines the L1 and L2 penalties of the lasso and ridge methods. But unfortunately it also did not help in improving R-square value.
 
 ### 5. PCR
+
+As most of our variables where correlated with each other and there were around 27 number of features we decided to use principal component analysis as a variable reduction technique.
+```{r pca}
+pr.out =prcomp(X_train, scale = F)
+summary(pr.out)
+```
+Around 92% of the variance is explained by first 7 components. Below graph shows the same.
+
+```{r }
+prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
+# plot(prop_varex, xlab = "Principal Component",
+#             ylab = "Proportion of Variance Explained",
+#             type = "b")
+
+
+plot(cumsum(prop_varex), xlab = "Principal Component",
+              ylab = "Cumulative Proportion of Variance Explained",
+              type = "b")
+```
+
+We decided to run a simple linear regression model on those components to check if this increase the variablitiy explained by the r2.
+
+### Tip Fare Ratio
+```{r pca_tipfareratio}
+#add a training set with principal components
+pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:8]
+
+#transform test into PCA
+test.data <- predict(pr.out, newdata = X_test)
+test.data <- as.data.frame(test.data)
+
+model <- lm(tip_fare_ratio ~ ., data = pca_train)
+summary(model)
+```
+
+As seen from the model summary, expect component 4 all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not imporve. Hence it is rightly said that even if the components explains 90% of the variance in the data, that may not necessarily mean that you will get a good R2 or high coefficients. 
+We evaluated the metric using mape which is around 22%. No significant improvement from the previous results. 
+
+```{r }
+# predictions
+predictions <- predict(model, test.data)
+
+# Model performance metrics
+results_df <- data.frame(
+  technique = "PCR",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+)
+
+# ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
+#   geom_point() +
+#   geom_point(aes(y = predictions), shape = 1, color = "blue") +
+#   labs(title="Actual & Predicted Values",
+#        x="Fare amount ", y = "Tip fare ratio")
+
+ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Actual Tip amount", y = "Predicted Tip amount")
+
+```
+
+The above graph represents predicted tip amount verses actual tip amount. It is evident that predicted tip amount varies signifcantly from the actual tip amount.
 
 ### 6. Decision Tree
 
