@@ -539,7 +539,7 @@ To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as 
 
 ### Ridge Regression
 
-```{r ridge_tipfareratio2}
+```{r ridge_tipfareratio2, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -605,7 +605,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso Regression
 
-```{r lasso_tipfareratio1}
+```{r lasso_tipfareratio1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -1045,7 +1045,7 @@ results_df <- rbind(results_df, data.frame(
 
 ### Ridge
 
-```{r ridge_tip1}
+```{r ridge_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -1106,7 +1106,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso
 
-```{r lasso_tip}
+```{r lasso_tip, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -1163,7 +1163,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Elastic Net
 
-```{r elnet_tip1}
+```{r elnet_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
