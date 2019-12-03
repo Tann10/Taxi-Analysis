@@ -473,7 +473,10 @@ results_df <- data.frame(
 
 ```
 
-Since the results are not satisfactory we perform step by feature selection.
+Since the results are not satisfactory we perform stepwise feature selection.
+
+### Stepwise regression
+
 Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
 
 ```{r step_by_feature_selection, include= TRUE}
