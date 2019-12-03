@@ -109,14 +109,6 @@ influential_points <- function(df_out, model) {
 
 ```
 
-§ Some basic EDA.
-§ How did you select and determine the correct model to answer your question?
-§ What predictions can you make with your model? Examples.
-§ How reliable are your results?
-§ What additional information or analysis might improve your model results or
-work to control limitations?
-§ References (APA style preferred)
-
 # Introduction
 
 Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
@@ -143,11 +135,9 @@ In this context, given the lack of research in taxicab tipping, this project see
 
 # Data
 
-The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
-
-The New York City Taxi and Limousine Commission (TLC) was created in 1971. The agency is responsible for licensing and regulating New York City's Medallion (Yellow) taxi cabs, for-hire vehicles (community-based liveries, black cars and luxury limousines), commuter vans, and paratransit vehicles. The datasets were collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
+The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The dataset was collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
   
-The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, 2019 June from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
+The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, June 2019, from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
 
 We loaded data into R and clean (preprocess) it so that it could be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
 
@@ -187,6 +177,7 @@ Once we have cleaned our data, we start exploratory data analysis by seeking if 
 ## Distribution
 
 The data is approximately normally distributed ready to use for analysis. There are lesser points on the left side of the mean.
+
 ```{r normality check of processed data, echo=T, include=T}
 #ggplot histogram of tip_fare_ratio for processed df
 df_sub %>%
@@ -198,7 +189,7 @@ df_sub %>%
 ## Hypothesis testing
 ### Trip Distance
 
-```{r subset_2cols, include = T, echo = F}
+```{r subset_2cols, include = FALSE, echo = FALSE}
 
 # Subset data and glimpse data
 df_dist <- subset(df_sub, select=c(tip_fare_ratio, trip_distance))
@@ -213,6 +204,7 @@ result_t <- t.test(short_dist$tip_fare_ratio, long_dist$tip_fare_ratio)
 ```
 
 While trying to find the the variation in tip-fare ratio between short distance (less than 2.4 miles) and long distance (greater than 2.4 miles) commuters of NYC yellow cabs, results (box plot below) obtained tell us that short distance travellers pay larger share of tips relative to their overall fare than those who travel longer distances within NYC radius. 
+
 ```{r box_plot, include = T, echo = F}
 
 # box-plot to see who pays more tips 
@@ -231,6 +223,7 @@ As always, first step in every significance testing is to design hypothesis. Bel
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same for both short and long distance passenger(s)
 </ul>
 ```{r }
+# Print result
 result_t
 ```
 
@@ -252,6 +245,15 @@ For this test our hypothesis were as below:
 trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 td_ttest <- t.test(x = df_sub$trip_duration)
 td_ttest$p.value
+
+# Run ANOVA
+anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = df_sub)
+
+# Run ANOVA
+anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
+
+#Run T-test
+trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 ```
 
 From the results we observe that p-value `r format(td_ttest$p.value, digits = 3)` is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
@@ -274,9 +276,10 @@ anova_tip_amount = aov(tip_fare_ratio ~ passenger_count, data = df_sub)
 summary(anova_tip_amount)
 
 ```
+
 The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is < 0.05, hence we reject null hypothesis. This means that the number of passenger in the car does affect ratio of the tip amount.
 
-### Vendor Id
+### Vendor ID
 
 Similarly, we checked the distribution for the vendor ID and run a t-test to verify the hypoethsis.
 
@@ -304,18 +307,13 @@ anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = df_sub)
 # Print ANOVA results
 anova_tiprat_do
 
-# Run ANOVA
-anova_pickup_period <- aov(tip_fare_ratio ~ pickup_period, data = df_sub)
 
-# Run ANOVA
-anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
-
-#Run T-test
-trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 
 ```
 
-From the previous research, we ran various tests to gain a basic understanding of the data:
+For tip ratio and location, ANOVA tests give p-values of `r format(summary(anova_tiprat_pu)[[1]][["Pr(>F)"]][[1]], digits=3)` and `r format(summary(anova_tiprat_do)[[1]][["Pr(>F)"]][[1]], digits=3)`. We reject the null hypothesis that the means are the same at a significance level of 0.05. The Tukey HSD test show the following pick up pairs have significant differences in tipping ratio: Manhattan and Brooklyn, and Queens and Manhattan. For drop off pairs, Manhattan and Bronx, Manhattan and Brooklyn, and Manhattan and Queens are significant.
+
+From the previous research, we ran various tests to gain a basic understanding of the data, which can be summarized in this table:
 
 Feature (variable)  |  Test  |  P-value  | Null Hypothesis (H0)  | Decision on H0 |  
 -----|-----|-----|--------|--------|  
@@ -396,7 +394,7 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 Bind the columns to get one train and test set 
 ```{r bind}
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
-taxipro <- train
+
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 
@@ -418,21 +416,21 @@ We built linear model with tip amount and first 3 highly correlated values for '
 #Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
 
 #linear model of tip_fare_ratio ~ trip_duration
-fit1 <- lm(tip_fare_ratio ~ trip_duration, data = taxipro )
+fit1 <- lm(tip_fare_ratio ~ trip_duration, data = train )
 #summary(fit1)
 # vif(fit1)
 # plot(fit1)
 
 
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount
-fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = taxipro )
+fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = train )
 #summary(fit2)
 # vif(fit2)
 # plot(fit2)
 
 
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
-fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = taxipro )
+fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = train )
 #summary(fit3)
 #vif(fit3)
 #plot(fit3)
@@ -952,13 +950,13 @@ We built linear model with tip amount and first 3 highly correlated values for '
 #Taking best three variables correlated with tip_fare ratio
 
 #linear model of tip_amount ~ trip_duration
-fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
+fit1_ta <- lm(tip_amount ~ fare_amount, data = train )
 #summary(fit1_ta)
 # vif(fit1_ta)
 # plot(fit1_ta)
 
 #linear model of tip_amount ~ trip_duration+fare_amount
-fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = train )
 #summary(fit2_ta)
 # vif(fit2_ta)
 # plot(fit2_ta)
@@ -1421,7 +1419,7 @@ formattable(results_df,
 ## Limitations and Future Work
 
 Non-Normality of Tipping data
-Missing values?????
+Missing values
 Human errors
 Hardware
 Limited time and resources
