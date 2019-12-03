@@ -442,7 +442,7 @@ Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next
 
 ### 2. Ridge
 
-```{r ridge_tipfareratio}
+```{r ridge_tipfareratio2}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -1057,11 +1057,11 @@ Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time es
 
 
 
-~~~~~~~~~~~~BELOW IS FROM THE RMD FILE WE SUBMITTED LAST WEEK~~~~~~~~~~~~~
-COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE
-
 
 # Model building
+
+~~~~~~~~~~~~BELOW IS FROM THE RMD FILE WE SUBMITTED LAST WEEK~~~~~~~~~~~~~
+COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE
 
 
 # Modeling
