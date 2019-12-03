@@ -343,21 +343,25 @@ For this step, we have used Pearson correlation method to indicate the extent to
 
 
 ```{r correlation1, include=F, echo=F}
+# Create correlation plot
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
 ```
 
 ```{r }
+# Create correlation plot
 corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 ```
 
-The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas passenger count and congestion surcharge are not correlated at all to tip_fare_ratio.
+The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas passenger count and congestion surcharge are not correlated at all to tip fare ratio.
 
 
 # Model Building
 
-Since our data problem falls under regression we chose decision trees and Linear(uni,multivariate) regression models and find the best one that suits our data. We also applied step by feature selection, Lasso, Ridge and Elastic Net and PCA to improve our linear model. Let us look into them in details below.
+We first chose linear (uni,multivariate) regression models see how it fits our data. Linear regression is a "simple" method that may do a good job explaining the relationship with tip, so we decided to try that first. We also applied step by feature selection, Lasso, Ridge and Elastic Net and PCA to improve our linear model. We also used decision trees. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
 
 ## Model Building Preparation
+
+Before building our models, we first prepared our data for modeling building through one hot encoding, creating training and testing sets, and scaling our data.
 
 ### One hot encoding 
 
@@ -376,7 +380,7 @@ com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub
 
 ### Test train split
 
-To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps for instance scaling.To simulate a train and test set we are going to split randomly this data set into 80% train and 20% test.
+To avoid introducing a bias in test using train-data, the train-test split should be performed before (most) data preparation steps for instance scaling. To simulate a train and test set, we randomly split the dataset into 80% train and 20% test.
 
 ```{r split the data}
 #train and test split (into 4 modules (i.e. X_train, y_train (80%) & X_test, y_test (20%))
@@ -727,7 +731,7 @@ The above graph represents predicted tip amount verses actual tip amount. It is 
 
 ### Decision Tree
 
-Finally, we decided to grow a decision tree for our dataset. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
+Finally, we decided to grow a decision tree for our dataset. 
 
 To grow our decision tree, the minimum within node deviance (essentially the minimum deviance for a node to be split) was set to 0.001.
 
@@ -1386,14 +1390,7 @@ In short, most of the models are producing the same results, and the improvement
 
 # Conclusion
 
-Tip fare ratio
-From the variables (distance, duration, congestion surcharge, location) we could not explain any relationship. That means tip fare ratio is roughly a constant value
-There were no significant predictors in the data to explain the relationship
-
-Tip amount
-Tip amount has very strong relationship with fare amount, distance and duration
-Duration and distance are significant variables   (R square & adj R square 71%)
-Best models for tip amount: Elastic net
+From the variables (distance, duration, congestion surcharge, location), we could not explain any relationship with tip fare ratio. That means tip fare ratio is roughly a constant value. There were no significant predictors in the data to explain the relationship. On the other hand, tip amount has very strong relationship with fare amount, distance, and duration. These results are not contradictory but rather complement each other. Tip amount increasing with fare amount means that the percentage of tip relative to the fare amount is roughly the same. Our analysis, however, does suggest that there may be other variables (that we did not analyze) that may affect the tip amount and tip ratio.
 
 ```{r summary, include=TRUE}
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
