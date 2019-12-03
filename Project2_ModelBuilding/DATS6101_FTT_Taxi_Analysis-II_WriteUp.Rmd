@@ -333,7 +333,7 @@ Based on our EDA, we can begin to sketch out an answer to our question: It appea
 
 ## Correlation
 
-For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
+For this step, we have used Pearson correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
 ```{r correlation1, include=F, echo=F}
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
