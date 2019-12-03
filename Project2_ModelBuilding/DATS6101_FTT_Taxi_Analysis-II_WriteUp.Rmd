@@ -693,7 +693,6 @@ tree_ratio_mse
 mape_ratio = mape(test$tip_fare_ratio, tree_ratio_pred)
 Rsquare_ratio = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
 
-if(FALSE) {
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree",
@@ -701,7 +700,6 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, tree_ratio_pred),
   Rsquare = caret::R2(tree_ratio_pred, test$tip_fare_ratio)
 ))
-}
 
 # Prune
 # Predict test values using tree
@@ -717,7 +715,6 @@ tree_ratio_mse_prune
 mape_ratio_prune = mape(test$tip_fare_ratio, tree_ratio_pred_prune)
 Rsquare_ratio_prune = caret::R2(tree_ratio_pred_prune, test$tip_fare_ratio)
 
-if(FALSE) {
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree (Prune)",
@@ -725,7 +722,6 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, tree_ratio_pred_prune),
   Rsquare = caret::R2(tree_ratio_pred_prune, test$tip_fare_ratio)
 ))
-}
 
 # CV
 # Predict test values using tree
@@ -741,7 +737,6 @@ tree_ratio_mse_cv
 mape_ratio_cv = mape(test$tip_fare_ratio, tree_ratio_pred_cv)
 Rsquare_ratio_cv = caret::R2(tree_ratio_pred_cv, test$tip_fare_ratio)
 
-if(FALSE) {
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree (CV)",
@@ -749,7 +744,6 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, tree_ratio_pred_cv),
   Rsquare = caret::R2(tree_ratio_pred_cv, test$tip_fare_ratio)
 ))
-}
 ```
 
 The accuracy of each can be summarized in this table:
@@ -894,14 +888,12 @@ mape_tip = mape(test$tip_amount, tree_tip_pred)
 Rsquare_tip = caret::R2(tree_tip_pred, test$tip_amount)
 
 # Model performance metrics
-if(FALSE) {
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree",
   dependent = "tip_amount",
   mape = mape(test$tip_amount, tree_tip_pred),
   Rsquare = caret::R2(tree_tip_pred, test$tip_amount)
 ))
-}
 
 # Pruned
 # Predict test values using tree
@@ -919,14 +911,12 @@ Rsquare_tip_prune = caret::R2(tree_tip_pred_prune, test$tip_amount)
 
 
 # Model performance metrics
-if(FALSE) {
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree (Prune)",
   dependent = "tip_amount",
   mape = mape(test$tip_amount, tree_tip_pred_prune),
   Rsquare = caret::R2(tree_tip_pred_prune, test$tip_amount)
 ))
-}
 
 # CV
 # Predict test values using tree
@@ -942,7 +932,6 @@ tree_tip_mse_cv
 mape_tip_cv = mape(test$tip_amount, tree_tip_pred_cv)
 Rsquare_tip_cv = caret::R2(tree_tip_pred_cv, test$tip_amount)
 
-if(FALSE) {
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
   technique = "Decision Tree (CV)",
@@ -950,7 +939,6 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_amount, tree_tip_pred_cv),
   Rsquare = caret::R2(tree_tip_pred_cv, test$tip_amount)
 ))
-}
 ```
 
 The accuracy of each can be summarized in this table:
