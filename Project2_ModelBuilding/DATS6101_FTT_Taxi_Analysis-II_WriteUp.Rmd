@@ -237,7 +237,26 @@ result_t
 With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null Hypothesis in favor of Alternate Hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
 
 
-### Trip duration 
+### Trip duration
+
+We hyothesize that there is a relationship between the Duration of the trip and the tip fare ratio. Trip Duration is calculated by subtracting pickup time from drop time. Trip duration is the number of minutes taked for the trip.
+
+For this test our hypothesis were as below:
+<ul>
+  <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same irrespective of Trip Duration
+  <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same across Trip Duration
+</ul>
+
+```{r t test for trip duration, include=FALSE, echo=FALSE}
+#Run T-test
+trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
+td_ttest <- t.test(x = df_sub$trip_duration)
+td_ttest$p.value
+```
+
+From the results we observe that p-value `r format(td_ttest$p.value, digits = 3) is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
+Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on duration of the trip.
+
 
 ### Number of passengers
 We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio. We are considering passenger count as a cateogrical variables. There are 6 factors of passenger count varing from 1 to 6.
@@ -396,24 +415,35 @@ Let us Start building our linear model with first 3 high Pearson Correlation val
 
 #linear model of tip_fare_ratio ~ trip_duration
 fit1 <- lm(tip_fare_ratio ~ trip_duration, data = taxipro )
-summary(fit1)
+#summary(fit1)
 # vif(fit1)
 # plot(fit1)
 
+
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount
 fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = taxipro )
-summary(fit2)
+#summary(fit2)
 # vif(fit2)
 # plot(fit2)
 
+
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
 fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = taxipro )
-summary(fit3)
-vif(fit3)
-plot(fit3)
+#summary(fit3)
+#vif(fit3)
+#plot(fit3)
 ```
+The summary for three linear models is
 
-The model graphs look good except some outliers which we remove in later steps. Let us perform ANOVA test on all the three models. 
+Feature (variable)  |  R^2  | 
+-----|-----|  
+lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)`
+lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)`
+lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)`
+
+Let us perform ANOVA test on all the three models. 
+
+
 
 ```{r, include=TRUE}
 #perform ANOVA to compare three models built
@@ -464,7 +494,7 @@ Below is the Summary from Lm with First 3 features selected with Linear model.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
 summary(fit_feature)
 # vif(fit_feature)
-plot(fit_feature)
+#plot(fit_feature)
 ```
 
 Below is the graph for predicted vs Actual values of tip_fare_ratio
@@ -897,7 +927,7 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 
 ### Linear regression
 
-We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount (0.91), trip_distance (0.83), and trip_duration(0.71).
+We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount(0.91), trip_distance(0.83), and trip_duration(0.71).
 
 ```{r, include= TRUE}
 
@@ -905,13 +935,13 @@ We built linear model with tip amount and first 3 highly correlated values for '
 
 #linear model of tip_amount ~ trip_duration
 fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
-summary(fit1_ta)
+#summary(fit1_ta)
 # vif(fit1_ta)
 # plot(fit1_ta)
 
 #linear model of tip_amount ~ trip_duration+fare_amount
 fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
-summary(fit2_ta)
+#summary(fit2_ta)
 # vif(fit2_ta)
 # plot(fit2_ta)
 
@@ -919,11 +949,17 @@ summary(fit2_ta)
 fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = taxipro )
 summary(fit3_ta)
 # vif(fit3_ta)
-plot(fit3_ta)
+#plot(fit3_ta)
 
 ```
 
-The model graphs look good except some outliers which we remove in later steps. Let us perform ANOVA test on all the three models.
+Feature (variable)  |   R^2  | 
+-----|-----|  
+lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)`
+lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)`
+lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)`
+ 
+Let us perform ANOVA test on all the three models.
 
 ```{r, include=TRUE}
 #perform ANOVA to compare three models built
@@ -966,7 +1002,7 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 From the graph above we see that Adj R^2 remains constant throughout. Hence we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
 
-Below is the Summary from Lm with First 3 features selected with Linear model.
+Below is the Summary from Lm with First 3 features selected with Feature Selection.
 
 ```{r, include=TRUE}
 #Let us select first three features selected by feature selection function above.
@@ -996,6 +1032,7 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
+To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
 ### Ridge
 
