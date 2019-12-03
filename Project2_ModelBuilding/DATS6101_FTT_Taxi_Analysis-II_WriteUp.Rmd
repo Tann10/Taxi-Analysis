@@ -385,7 +385,7 @@ TALK ABOUT WHY WE CHOSE THE MODELS WE USED
 
 ## Model Building Preparation
 
-## One hot encoding 
+### One hot encoding 
 
 In order to convert factor columns to numerical columns we have used one hot encoding. One hot encoding converts all factors as a separate boolean column. 
 
