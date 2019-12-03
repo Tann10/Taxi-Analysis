@@ -130,14 +130,14 @@ Tipping behavior can be explained by both economic and noneconomic factors (Deva
 
 ## Taxicab Tipping
 
-Non-tipping work related to the NYC dataset have been conducted, especially in regard to pick up and drop off locations (Zhan, Hasan, Ukkusuri, & Kamga, 2013; Neutens, Delafontaine, Scott, & De Maeyer, 2012) and to supply and demand. Qian and Ukkusuri (2015) conducted a geographically-weighted regression on the dataset and find that commuting time is negatively related to taxi ridership, whereas subway accessibility is positively correlated to it. While they acknowledge that people with higher incomes theoretically are more able to afford taxis, they note the effect of median income varies by geographical location. Gonzales, Yang, Morgul, and Ozbay (2014) used socioeconomic data in conjunction with the taxicab dataset to model taxi demand and similarly conclude that accessibility, income, population, age, and number of jobs were strongly related to demand. Finally, Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
+Non-tipping work related to the NYC dataset have been conducted, especially in regard to pick up and drop off locations (Zhan, Hasan, Ukkusuri, & Kamga, 2013; Neutens, Delafontaine, Scott, & De Maeyer, 2012) and to supply and demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Accessibility/location (Qian & Ukkusuri, 2015), income, population, age, and number of jobs were strongly related to demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
 
 There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017). Devaraj and Patel (2017) and Flath (2012) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Instead, taxicab tips may be influenced by weather (Devaraj & Patel, 2017), race (Ayres et al., 2005), or wealth (Ayres et al., 2005).
 
 
 ## Relationship to Current Project
 
-In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping by those who paid their fares by credit card. Focusing on the variables provided in the NYC taxicab dataset is beneficial because those variables are the ones the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on appearances and their pick up and drop off locations (Ayres et al., 2005). Moreover, the provided dataset may provide some proxies for socio-economic variables. For instance, pick up and drop off locations may provide some context into a passenger's background for two main reasons as they may be where the passengers live (Lee, Shin, & Park, 2008) or be indicative of people's lifestyles (Lynn, 2006; Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015).
+In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping by those who paid their fares by credit card. Using the variables provided in the NYC taxicab dataset mirrors the appearances the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on perception and pickup and dropoff locations (Ayres et al., 2005). Moreover, pickup and dropoff locations may provide some information on a passenger's background since they may be where the passengers live (Lee, Shin, & Park, 2008) or be indicative of people's lifestyles (Lynn, 2006; Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015).
 
 
 # Data
@@ -148,7 +148,7 @@ The New York City Taxi and Limousine Commission (TLC) was created in 1971. The a
   
 The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, 2019 June from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
 
-First of all, we load data into R and clean (preprocess) it so that it can be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
+We loaded data into R and clean (preprocess) it so that it could be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
 
 ```{r data}
 #read_file
@@ -998,7 +998,51 @@ Human errors
 Hardware
 Limited time and resources
 
+# References
 
+Ayres, I., Vars, F. E., & Zakariya, N. (2005). To insure prejudice: Racial disparities in taxicab tipping. <i>Yale Law Journal, 114</i>, 1613–1674. doi: 10.2139/ssrn.401201
+
+Azar, O. H. (2007). The social norm of tipping: A review. <i>Journal of Applied Social Psychology, 37</i>(2), 380–402. doi: 10.1111/j.0021-9029.2007.00165.x
+
+Azar, O. H. (2010). Tipping motivations and behavior in the U.S. and Israel. <i>Journal of Applied Social Psychology, 40</i>(2), 421–457. doi: 10.1111/j.1559-1816.2009.00581.x
+
+Devaraj, S., & Patel, P. C. (2017). Taxicab tipping and sunlight. <i>PLoS One, 12</i>(6). doi: 10.1371/journal.pone.0179193
+
+Ferreira, N., Poco, J., Vo, H. T., Freire, J., & Silva, C. T. (2013). Visual exploration of big spatio-temporal urban data: A study of New York City taxi trips. <i>IEEE Transactions on Visualization and Computer Graphics, 19</i>(12), 2149–2158. doi: 10.1109/TVCG.2013.226
+
+Flath, D. (2012). Why do we tip taxicab drivers? <i>Japanese Economy, 39</i>(3), 69–76. doi: 10.2753/JES1097-203X390304
+
+Flynn, S. M., & Greenberg, A. E. (2012). Does weather actually affect tipping? An empirical analysis of time-series data. <i>Journal of Applied Social Psychology 42</i>(3), 702–716. doi: 10.2139/ssrn.1617465
+
+Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). <i>Modeling taxi demand with GPS data from taxis and transit.</i> Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf.
+
+Harris, M. B. (1995). Waiters, customers, and service: Some tips about tipping. <i>Journal of Applied Social Psychology, 25</i>(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
+
+Kwan, M. (1999). Gender and individual access to urban opportunities: A study using space–time measures. <i>The Professional Geographer, 51</i>, 211–227. doi: 10.1111/0033-0124.00158
+
+Lee, J., Shin, I., & Park, G. (2008). Analysis of the passenger pick-up pattern for taxi location recommendation. <i>2008 Fourth International Conference on Networked Computing and Advanced Information Management.</i> doi: 10.1109/NCM.2008.24
+
+Lynn, M. (2001). Restaurant tipping and service quality: A tenuous relationship. <i>The Cornell Hotel and Restaurant Administration Quarterly, 42</i>(1), 14–20. doi: 10.1016/s0010-8804(01)90006-0
+
+Lynn, M. (2006). Tipping in restaurants and around the globe: An interdisciplinary review. <i>Handbook of Contemporary Behavioral Economics: Foundations and Developments.</i> Retrieved from https://ssrn.com/abstract=465942.
+
+New York City Taxi and Limousine Commission. (n.d.). Passenger frequently asked questions. Retrieved October 14, 2019, from https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page.
+
+New York City Taxi and Limousine Commission. (2018, May 1). Data dictionary - Yellow taxi trip records. Retrieved October 14, 2019, from https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf.
+
+New York City Taxi and Limousine Commission. (2019). Yellow taxi trip records, June 2019 [Data set]. Retrieved from https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
+
+Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. <i>Journal of Transport Geography, 23</i>, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
+
+Qian, X., & Ukkusuri, S. (2015). Spatial variation of the urban taxi ridership using GPS data. <i>Applied Geography, 59</i>, 31–42. doi: 10.1016/j.apgeog.2015.02.011
+
+Rivoli, D., & Jorgensen, J. (2018, July 31). City vows to crack down on taxis refusing service as it also looks to cap Uber. Retrieved October 14, 2019, from https://www.nydailynews.com/news/politics/ny-pol-tax-uber-refuse-service-20180731-story.html.
+
+Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi riders and drivers. <i>2016 IEEE International Conference on Mobile Services,</i> 57–64. doi: 10.1109/MoSb.2S0e1r6v.128016.19
+
+van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
+
+Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
 
 
 
@@ -1634,50 +1678,5 @@ formattable(results_df,
 ))
 ```
 
-# References
 
-Ayres, I., Vars, F. E., & Zakariya, N. (2005). To insure prejudice: Racial disparities in taxicab tipping. <i>Yale Law Journal, 114</i>, 1613–1674. doi: 10.2139/ssrn.401201
-
-Azar, O. H. (2007). The social norm of tipping: A review. <i>Journal of Applied Social Psychology, 37</i>(2), 380–402. doi: 10.1111/j.0021-9029.2007.00165.x
-
-Azar, O. H. (2010). Tipping motivations and behavior in the U.S. and Israel. <i>Journal of Applied Social Psychology, 40</i>(2), 421–457. doi: 10.1111/j.1559-1816.2009.00581.x
-
-Devaraj, S., & Patel, P. C. (2017). Taxicab tipping and sunlight. <i>PLoS One, 12</i>(6). doi: 10.1371/journal.pone.0179193
-
-Ferreira, N., Poco, J., Vo, H. T., Freire, J., & Silva, C. T. (2013). Visual exploration of big spatio-temporal urban data: A study of New York City taxi trips. <i>IEEE Transactions on Visualization and Computer Graphics, 19</i>(12), 2149–2158. doi: 10.1109/TVCG.2013.226
-
-Flath, D. (2012). Why do we tip taxicab drivers? <i>Japanese Economy, 39</i>(3), 69–76. doi: 10.2753/JES1097-203X390304
-
-Flynn, S. M., & Greenberg, A. E. (2012). Does weather actually affect tipping? An empirical analysis of time-series data. <i>Journal of Applied Social Psychology 42</i>(3), 702–716. doi: 10.2139/ssrn.1617465
-
-Gonzales, E. J., Yang, C., Morgul, E. F., & Ozbay, K. (2014). <i>Modeling taxi demand with GPS data from taxis and transit.</i> Mineta National Transit Research Consortium. Retrieved from https://transweb.sjsu.edu/sites/default/files/1141-modeling-taxi-demand-gps-transit-data.pdf.
-
-Harris, M. B. (1995). Waiters, customers, and service: Some tips about tipping. <i>Journal of Applied Social Psychology, 25</i>(8), 725–744. doi: 10.1111/j.1559-1816.1995.tb01771.x
-
-Kwan, M. (1999). Gender and individual access to urban opportunities: A study using space–time measures. <i>The Professional Geographer, 51</i>, 211–227. doi: 10.1111/0033-0124.00158
-
-Lee, J., Shin, I., & Park, G. (2008). Analysis of the passenger pick-up pattern for taxi location recommendation. <i>2008 Fourth International Conference on Networked Computing and Advanced Information Management.</i> doi: 10.1109/NCM.2008.24
-
-Lynn, M. (2001). Restaurant tipping and service quality: A tenuous relationship. <i>The Cornell Hotel and Restaurant Administration Quarterly, 42</i>(1), 14–20. doi: 10.1016/s0010-8804(01)90006-0
-
-
-Lynn, M. (2006). Tipping in restaurants and around the globe: An interdisciplinary review. <i>Handbook of Contemporary Behavioral Economics: Foundations and Developments.</i> Retrieved from https://ssrn.com/abstract=465942.
-
-New York City Taxi and Limousine Commission. (n.d.). Passenger frequently asked questions. Retrieved October 14, 2019, from https://www1.nyc.gov/site/tlc/passengers/passenger-frequently-asked-questions.page.
-
-New York City Taxi and Limousine Commission. (2018, May 1). Data dictionary - Yellow taxi trip records. Retrieved October 14, 2019, from https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf.
-
-New York City Taxi and Limousine Commission. (2019). Yellow taxi trip records, June 2019 [Data set]. Retrieved from https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
-
-Neutens, T., Delafontaine, M., Scott, D. M., & De Maeyer, P. (2012). An analysis of day-to-day variations in individual space-time accessibility. <i>Journal of Transport Geography, 23</i>, 81–91. doi: 10.1016/j.jtrangeo.2012.04.001
-
-Qian, X., & Ukkusuri, S. (2015). Spatial variation of the urban taxi ridership using GPS data. <i>Applied Geography, 59</i>, 31–42. doi: 10.1016/j.apgeog.2015.02.011
-
-Rivoli, D., & Jorgensen, J. (2018, July 31). City vows to crack down on taxis refusing service as it also looks to cap Uber. Retrieved October 14, 2019, from https://www.nydailynews.com/news/politics/ny-pol-tax-uber-refuse-service-20180731-story.html.
-
-Sun, H., & McIntosh, S. (2016). Big data mobile services for new york city taxi riders and drivers. <i>2016 IEEE International Conference on Mobile Services,</i> 57–64. doi: 10.1109/MoSb.2S0e1r6v.128016.19
-
-van Ham, M., & Tammaru, T. (2015). New perspectives on ethnic segregation over time and space. A domains approach. <i>Urban Geography, 37</i>(7), 953–962. doi: 10.1080/02723638.2016.1142152
-
-Zhan, X., Hasan, S., Ukkusuri, S., & Kamga, C. (2013). Urban link travel time estimation using large-scale taxi data with partial information. Transportation Research Part C, 33, 37–49. doi: 10.1016/j.trc.2013.04.001
 
