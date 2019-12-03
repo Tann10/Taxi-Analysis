@@ -776,7 +776,7 @@ This also suggests that a null model may be the "best fit" for tip ratio. In thi
 
 ## Tip Amount
 
-WHY DID WE LOOK AT TIP AMOUNT TOO????
+WHY DID WE LOOK AT TIP AMOUNT TOO?
 From analysis shown above it is clear that either there is no relation (the null model will work just fine). Tip-to-fare is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by tip amount as our dependent variable in models and see if it makes any difference on our results. 
 
 ### LM Model
@@ -794,6 +794,45 @@ We perform all the steps exactly in same manner as we did eallier for tip-fare r
 We perform all the steps exactly in same manner as we did eallier for tip-fare ratio and we are getting extremenly good results now (R^2 of 83% as compared to only 12% above) for Elastic Net model.
 
 ### PCR
+
+The components which we created earlier are now used against tip amount. We built a linear regression model using 7 principal components. 
+
+```{r pca_tip}
+#add a training set with principal components
+
+pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:8]
+
+#transform test into PCA
+test.data <- predict(pr.out, newdata = X_test)
+test.data <- as.data.frame(test.data)
+
+model <- lm(tip_amount ~ ., data = pca_train)
+summary(model)
+```
+
+As seen from the model summary, expect component 4 all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` is good as seen previously from the other models as well.
+We evaluated the metric using mape which is around 22%. No significant improvement from the previous results. 
+
+
+```{r}
+# predictions
+predictions <- predict(model, test.data)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "PCR",
+  dependent = "tip_amount",
+  mape = mape(test$tip_amount, predictions),
+  Rsquare = caret::R2(predictions, test$tip_amount)
+))
+
+ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
+  geom_point() +
+  labs(title="Actual & Predicted Values",
+       x="Actual Tip amount", y = "Predicted Tip amount")
+
+```
+The above graph represents predicted tip amount verses actual tip amount. Predicted values do not deviate much from the actual values.
 
 ### Decision Tree
 
@@ -988,103 +1027,6 @@ COPY AND PASTE YOUR SECTION INTO SECTIONS ABOVE
 
 
 # Model building
-
-
-## Principal component analysis
-
-We have to use one hot encoding to convert factor variables into numerical variables
-```{r pca}
-pr.out =prcomp(X_train, scale = F)
-summary(pr.out)
-pr.out$rotation[1:5,1:7]
-
-dim(pr.out$x)
-
-biplot(pr.out)
-
-```
-
-
-```{r }
-prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
-
-plot(prop_varex, xlab = "Principal Component",
-             ylab = "Proportion of Variance Explained",
-             type = "b")
-
-
-plot(cumsum(prop_varex), xlab = "Principal Component",
-              ylab = "Cumulative Proportion of Variance Explained",
-              type = "b")
-```
-
-### Tip Fare Ratio
-```{r pca_tipfareratio}
-#add a training set with principal components
-
-pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:8]
-
-#transform test into PCA
-test.data <- predict(pr.out, newdata = X_test)
-test.data <- as.data.frame(test.data)
-
-model <- lm(tip_fare_ratio ~ ., data = pca_train)
-summary(model)
-
-# predictions
-predictions <- predict(model, test.data)
-
-# Model performance metrics
-results_df <- data.frame(
-  technique = "PCR",
-  dependent = "tip_fare_ratio",
-  mape = mape(test$tip_fare_ratio, predictions),
-  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
-)
-
-# ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
-#   geom_point() +
-#   geom_point(aes(y = predictions), shape = 1, color = "blue") +
-#   labs(title="Actual & Predicted Values",
-#        x="Fare amount ", y = "Tip fare ratio")
-
-# ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
-#   geom_point() +
-#   labs(title="Actual & Predicted Values",
-#        x="Actual Tip amount", y = "Predicted Tip amount")
-
-```
-
-### Tip amount
-```{r pca_tip}
-#add a training set with principal components
-
-pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount'], pr.out$x)[,1:8]
-
-#transform test into PCA
-test.data <- predict(pr.out, newdata = X_test)
-test.data <- as.data.frame(test.data)
-
-model <- lm(tip_amount ~ ., data = pca_train)
-summary(model)
-
-# predictions
-predictions <- predict(model, test.data)
-
-# Model performance metrics
-results_df <- rbind(results_df, data.frame(
-  technique = "PCR",
-  dependent = "tip_amount",
-  mape = mape(test$tip_amount, predictions),
-  Rsquare = caret::R2(predictions, test$tip_amount)
-))
-
-ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Actual Tip amount", y = "Predicted Tip amount")
-
-```
 
 
 # Modeling
