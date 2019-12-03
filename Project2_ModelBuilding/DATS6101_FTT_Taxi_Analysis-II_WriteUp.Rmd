@@ -511,6 +511,10 @@ To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as 
 
 ### Ridge Regression
 
+OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
+
+Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
+
 ```{r ridge_tipfareratio2, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
@@ -551,13 +555,8 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 # plot(fit.ridge, xvar="lambda", label = 5)
 ```
 
-OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
-
-Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
-
 
 ```{r plot_coef_lambda, include = T, echo = F}
-library(plotmo)
 fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
@@ -577,6 +576,9 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso Regression
 
+This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
+
+Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
 ```{r lasso_tipfareratio1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
@@ -616,16 +618,11 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 
 ```
 
-This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
-
-Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
-
 
 ```{r plot_coef_lasso1, include = T, echo = F}
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
 plot_glmnet(fit.lasso, label=5)
 ```
-
 
 To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
