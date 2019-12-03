@@ -610,7 +610,7 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
   labs(title="Actual & Predicted Values",
        x="Fare amount ", y = "Tip amount")
 
-plot(fit.ridge, xvar="lambda", label = 5)
+# plot(fit.ridge, xvar="lambda", label = 5)
 ```
 
 OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
@@ -1042,6 +1042,7 @@ ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize
 # Display regression coefficients
 coef(ridge_model)
 
+ridge_model$dev
 
 # Make predictions on the test data
 x.test <- model.matrix(tip_amount~.-tip_fare_ratio, test)[,-1]
@@ -1076,7 +1077,7 @@ Then we plot the cross-validation curve (red dotted line below), and upper and l
 plot(cv_lamda)
 ```
 
-Finally after traing and testing, we are getting extremenly good results now (R^2 of `r ridge_model$%Dev` as compared to only 12% for tip fare ratio) for our model now.
+Finally after traing and testing, we are getting extremenly good results now (R^2 of `r ridge_model$dev` as compared to only 12% for tip fare ratio) for our model now.
 
 ```{r plot_r2_ridge_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "dev", label = TRUE)
@@ -1133,7 +1134,7 @@ Then we plot the Mean Square Error cross-validation curve (red dotted line below
 plot(cv_lamda)
 ```
 
-Finally after traing and testing, we see that we are getting extremenly good results now (R^2 of `r lasso_model$%Dev` as compared to only 12% for tip fare ratio) for our model now.
+Finally after traing and testing, we see that we are getting extremenly good results now (R^2 of `r lasso_model$dev` as compared to only 12% for tip fare ratio) for our model now.
 
 ```{r plot_r2_lasso_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "dev", label = TRUE)
@@ -1189,7 +1190,7 @@ Now when we plot against %deviance we get a very different picture. This is perc
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and we are getting extremely good results now (R^2 of `r elnet_model$%Dev`as compared to only 12% above) for Elastic Net model.
+We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and we are getting extremely good results now (R^2 of `r elnet_model$dev`as compared to only 12% above) for Elastic Net model.
 
 ### PCR
 
