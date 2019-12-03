@@ -117,7 +117,7 @@ influential_points <- function(df_out, model) {
 work to control limitations?
 § References (APA style preferred)
 
-# Introduction (with lit review)
+# Introduction
 
 Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
 
@@ -175,9 +175,13 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 
 ```
 
+Below is the data statistics:
+```{r }
+summary(df_sub)
+```
 # Exploratory Data Analysis
 
-Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and indenpedent numerical variables.
+Once we have cleaned our data, we start exploratory data analysis by seeking if there exists any kind of relationship between our dependent and independent variables.
 
 ## Trip Distance
 
