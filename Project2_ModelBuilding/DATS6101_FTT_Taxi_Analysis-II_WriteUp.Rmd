@@ -409,8 +409,8 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 
 Bind the columns to get one train and test set 
 ```{r bind}
+# bind train and test X and Y columns 
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
-
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 
@@ -484,9 +484,16 @@ results_df <- data.frame(
 ```
 
 ```{r cooksdistance removed}
+# remove points lying outside of cooks distance. Influential points is a user defined func.
 df_out <- influential_points(train, fit3)
+
+# fit a model on the clean dataset using trip duration+fare_amount+trip_distance variables
 model_rmcook <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = df_out)
+
+# print summary of the model
 summary(model_rmcook)
+
+# VIF to find correlated variables
 vif(model_rmcook)
 
 # predictions
