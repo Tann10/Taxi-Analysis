@@ -133,6 +133,10 @@ There exists a paucity of research on tipping in other industries, such as hotel
 In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping by those who paid their fares by credit card. Using the variables provided in the NYC taxicab dataset mirrors the appearances the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on perception and pickup and dropoff locations (Ayres et al., 2005). Moreover, pickup and dropoff locations may provide some information on a passenger's background since they may be where the passengers live (Lee, Shin, & Park, 2008) or be indicative of people's lifestyles (Lynn, 2006; Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015).
 
 
+# Smart Question
+what factors play asignificant role in the prediction of tip fare ratio & tip amount? 
+
+
 # Data
 
 The source dataset used for the project was taken from the New York City Taxi and Limousine Commission (2019) website (https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The dataset was collected and provided to the agency by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). 
@@ -888,7 +892,7 @@ From analysis shown above it is clear that either there is no relation (the null
 ## Tip Amount
 ### Distribution
 
-The data has right skewed distribution
+The data has right skewed distribution. 
 ```{r }
 df_sub %>%
   ggplot(aes(x=tip_amount)) +
@@ -955,21 +959,21 @@ We built linear model with tip amount and first 3 highly correlated values for '
 
 #Taking best three variables correlated with tip_fare ratio
 
-#linear model of tip_amount ~ trip_duration
-fit1_ta <- lm(tip_amount ~ fare_amount, data = train )
+# fit model for tip_amount ~ fare_amount
+fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
 #summary(fit1_ta)
 # vif(fit1_ta)
 # plot(fit1_ta)
 
-#linear model of tip_amount ~ trip_duration+fare_amount
-fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = train )
+# fit model for tip_amount ~ fare_amount+trip_distance
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
 #summary(fit2_ta)
 # vif(fit2_ta)
 # plot(fit2_ta)
 
-#linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
-fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = train )
-#summary(fit3_ta)
+# fit model for tip_amount ~ fare_amount+trip_distance+trip_duration
+fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = taxipro )
+summary(fit3_ta)
 # vif(fit3_ta)
 #plot(fit3_ta)
 
@@ -1058,6 +1062,8 @@ To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as 
 
 ### Ridge
 
+So replacing our dependent variabe to tip amount is giving us good R-square.  Lets see if we get the the same results from Ridge Model too. We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
+
 ```{r ridge_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
 y = train %>%
@@ -1098,7 +1104,7 @@ ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
 
 ```
 
-So replacing our dependent variabe to tip amount is giving us good R-square.  Lets see if we get the the same results from Ridge Model too. We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
+
 
 ```{r plot_coeff_ridge_tip, include=TRUE, echo= FALSE}
 fit = glmnet(x, y, alpha=0)
@@ -1118,6 +1124,8 @@ plot(fit, xvar = "dev", label = TRUE)
 ```
 
 ### Lasso
+
+The second penalized regression model that we are going to use is Lasso. Again first we plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. We can clearly see coefficients going down to zero (instead of just shrinking) here. 
 
 ```{r lasso_tip, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
@@ -1155,7 +1163,6 @@ ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
        x="Fare amount ", y = "Tip amount")
 ```
 
-The second penalized regression model that we are going to use is Lasso. Again first we plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. We can clearly see coefficients going down to zero (instead of just shrinking) here. 
 
 ```{r plot_coeff_lasso_tip, include=TRUE, echo= FALSE}
 fit = glmnet(x, y, alpha=1)
@@ -1398,10 +1405,10 @@ The best model in our analysis for tip amount is the elastic net regularized reg
 
 In short, most of the models are producing the same results, and the improvement is very minimal. Thus, it can be argued that the relationship with tip amount is pretty stable.
 
-
 # Conclusion
 
 From the variables (distance, duration, congestion surcharge, location), we could not explain any relationship with tip fare ratio. That means tip fare ratio is roughly a constant value. There were no significant predictors in the data to explain the relationship. On the other hand, tip amount has very strong relationship with fare amount, distance, and duration. These results are not contradictory but rather complement each other. Tip amount increasing with fare amount means that the percentage of tip relative to the fare amount is roughly the same. Our analysis, however, does suggest that there may be other variables (that we did not analyze) that may affect the tip amount and tip ratio.
+
 
 ```{r summary, include=TRUE}
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
