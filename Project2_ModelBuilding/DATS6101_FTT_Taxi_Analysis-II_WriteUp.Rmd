@@ -1026,11 +1026,11 @@ Let us perform ANOVA test on all the three models.
 anova(fit1_ta,fit2_ta,fit3_ta)
 ```
 
-We observe that p is > 0.05 for fit2 implies fit1 and fit2 are same.
+We observe that p is greater than 0.05 for fit2, which means that fit1 and fit2 are same.
 
-Below is the graph for predicted vs Actual values of tip_amount
+Below is the graph for predicted versus actual values of tip_amount:
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo=F}
 model.final.pred <- add_predictions(test,fit3_ta)
 # head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
