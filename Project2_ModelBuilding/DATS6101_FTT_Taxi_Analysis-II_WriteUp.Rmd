@@ -400,7 +400,10 @@ print(scales)
 All the variables has different means and std hence we need to scale all the variables present above.
 
 ```{r scale_all}
+# transform train data 
 X_train <- fastScale(dataSet = splitted_dfs["X_train"]$X_train, scales = scales, verbose = TRUE)
+
+# fastscale transform test data using statistics of train data 
 X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, verbose = TRUE)
 ```
 
