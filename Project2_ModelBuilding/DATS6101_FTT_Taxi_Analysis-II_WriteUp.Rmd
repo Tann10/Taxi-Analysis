@@ -994,19 +994,19 @@ We built linear model with tip amount and first 3 highly correlated values for '
 #Taking best three variables correlated with tip_fare ratio
 
 # fit model for tip_amount ~ fare_amount
-fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
+fit1_ta <- lm(tip_amount ~ fare_amount, data = train )
 #summary(fit1_ta)
 # vif(fit1_ta)
 # plot(fit1_ta)
 
 # fit model for tip_amount ~ fare_amount+trip_distance
-fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = train )
 #summary(fit2_ta)
 # vif(fit2_ta)
 # plot(fit2_ta)
 
 # fit model for tip_amount ~ fare_amount+trip_distance+trip_duration
-fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = taxipro )
+fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = train )
 summary(fit3_ta)
 # vif(fit3_ta)
 #plot(fit3_ta)
