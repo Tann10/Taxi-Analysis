@@ -566,7 +566,8 @@ Below is the graph for predicted versus actual values of tip-fare ratio:
 model.final.pred <- add_predictions(test,fit_feature)
 
 
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred)) + labs(title="Actual & Predicted Values",
+       x="Actual Tip Fare ratio", y = "Predicted Tip Fare ratio")
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -747,7 +748,7 @@ prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
 # plot cumulative variance graph
 plot(cumsum(prop_varex), xlab = "Principal Component",
               ylab = "Cumulative Proportion of Variance Explained",
-              type = "b")
+              type = "b", main = "Cumulative variance explained by each component")
 ```
 
 We then ran a simple linear regression model on those components to check if this increased the variability explained as indicated by r-squared.
@@ -1044,7 +1045,10 @@ Below is the graph for predicted versus actual values of tip_amount:
 ```{r, include=TRUE, echo=F}
 model.final.pred <- add_predictions(test,fit3_ta)
 # head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+
+  labs(title="Predicted versus Actual values",
+       x="Actual tip amount ", y = " Predicted tip amount")
+
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -1315,10 +1319,11 @@ results_df <- rbind(results_df, data.frame(
 
 ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
   geom_point() +
-  labs(title="Actual & Predicted Values",
+  labs(title="Predicted versus Actual Values",
        x="Actual Tip amount", y = "Predicted Tip amount")
 
 ```
+
 The above graph represents predicted tip amount verses actual tip amount. Predicted values do not deviate much from the actual values.
 
 ### Decision tree
