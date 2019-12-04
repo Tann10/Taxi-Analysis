@@ -566,7 +566,7 @@ Below is the graph for predicted versus actual values of tip-fare ratio:
 model.final.pred <- add_predictions(test,fit_feature)
 
 
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
