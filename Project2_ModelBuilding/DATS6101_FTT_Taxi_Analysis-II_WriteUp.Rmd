@@ -539,18 +539,20 @@ fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do
 summary(fit_feature)
 
 # VIF to find correlated variables
-# vif(fit_feature)
+vif(fit_feature)
+
 #plot(fit_feature)
 ```
 
-Below is the graph for predicted vs Actual values of tip_fare_ratio
+Below is the graph for predicted vs actual values of tip_fare_ratio
 
 ```{r, include=TRUE}
 
-#Prediction
+# Prediction
 model.final.pred <- add_predictions(test,fit_feature)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+
+
+# ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -571,22 +573,31 @@ OLS finds the coefficients that best fit the data. But OLS doesn’t consider wh
 Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
 
 ```{r ridge_tipfareratio2, include=FALSE, echo=FALSE}
+# convert data frame to model matrix as required by glmnet
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
+
+# df to list 
 y = train %>%
   select(tip_fare_ratio) %>%
   unlist() %>%
   as.numeric()
 
+# set seed to get same set of random split for cv every time
 set.seed(123)
+
+# fit a model to get different combinations of lamda
 cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
+
 # Display the best lambda value
 cv_lamda$lambda.min
 
 # Fit the final model on the training data
 ridge_model <- glmnet(x, y, alpha = 0, lambda = cv_lamda$lambda.min, standardize = FALSE)
 
-# Make predictions on the test data
+# transform df to model matrix
 x.test <- model.matrix(tip_fare_ratio ~.-tip_amount, test)[,-1]
+
+# Make predictions on the test data
 predictions <- ridge_model %>% predict(x.test) %>% as.vector()
 
 # Model performance metrics
@@ -600,8 +611,11 @@ results_df <- rbind(results_df, data.frame(
 
 # Display regression coefficients
 coef(ridge_model)
+
+# plot lamda values
 plot(cv_lamda)
 
+# plot actual versus predicted
 ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
   geom_point() +
   labs(title="Actual & Predicted Values",
@@ -612,6 +626,7 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 
 
 ```{r plot_coef_lambda, include = T, echo = F}
+# fit a modela and look at ridge plot
 fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
