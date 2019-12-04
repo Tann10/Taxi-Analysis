@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, include = F)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, include = T)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
@@ -184,6 +184,7 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 Below is the statistics for the selected columns for analysis:
 
 ```{r, include = T, echo=F}
+# Print summary
 summary(df_sub)
 ```
 
@@ -463,22 +464,22 @@ fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = trai
 #plot(fit3)
 ```
 
-The summary for three linear models is
-
-Fit | Feature (variable)  |  R^2  | 
----|-----|-----|  
-1 | lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)`
-2 | lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)`
-3 | lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)`
-
 We subsequently perform ANOVA tests on all the three models. 
+
+The summary for three linear models is:
+
+Fit | Feature (variable)  |  R^2  | ANOVA P-value |
+---|-----|-----|-----|  
+1 | lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)` | -- |
+2 | lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)` | `r format(anova(fit1,fit2,fit3)[6][["Pr(>F)"]][2], digits=3)` |
+3 | lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)` | `r format(anova(fit1,fit2,fit3)[6][["Pr(>F)"]][3], digits=3)` |
 
 ```{r}
 #perform ANOVA to compare three models
 anova(fit1,fit2,fit3)
 ```
 
-We observe that p is greater than 0.05 for the third fit, which implies that fit 2 and fit 3 are the same.
+At a significance level of 0.05, we observe that the p-value is greater than 0.05 for the third fit, which implies that fit 2 and fit 3 are the same.
 
 ```{r, include=TRUE, echo=F}
 #Prediction
@@ -519,13 +520,16 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
-After removal of the outliers from the data there is no improvement in the values for tip fare ratio. Below are the values for MAPE and r-squared.
 
 ```{r echo=F, include=T}
+# Print results
 results_df
 ```
 
-Since the results are not satisfactory we perform stepwise feature selection.
+
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio. For linear with 3 variables with best correlation coefficients, MAPE is `r format(results_df[1, 3], digits=4)` and r-squared is `r format(results_df[1, 4], digits=3)`. For the linear-treated outlier, MAPE is `r format(results_df[2, 3], digits=4)` and r-squared is `r format(results_df[2, 4], digits=3)`.
+
+Since the results are not satisfactory, we perform stepwise feature selection.
 
 ### Stepwise regression
 
@@ -565,7 +569,7 @@ Below is the graph for predicted versus actual values of tip-fare ratio:
 # Prediction
 model.final.pred <- add_predictions(test,fit_feature)
 
-
+# Plot predicted vs actual
 ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred)) + labs(title="Actual & Predicted Values",
        x="Actual Tip Fare ratio", y = "Predicted Tip Fare ratio")
 
@@ -651,12 +655,14 @@ plot_glmnet(fit.ridge, label=5)
 To choose the best lambda, we consult the MSE versus lambda plot shown below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
 ```{r ridge2plt, include = T, echo = F}
+# Plot CV for lamba
 plot(cv_lamda)
 ```
 
 But the r-squared (i.e. the amount of variance that our model can account for) is only 12%, which means there is room for a lot improvement.
 
 ```{r plot_r2_ridge_ratio, include=TRUE, echo= FALSE}
+# Plot graph for glmnet
 fit = glmnet(x, y, alpha = 0)
 plot(fit, xvar = "dev", label = TRUE)
 ```
@@ -668,6 +674,7 @@ This is another type of regularization (L1) technique that can lead to zeroed-ou
 Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
 
 ```{r lasso_tipfareratio1, include=FALSE, echo=FALSE}
+# Prep model parameters
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
   select(tip_fare_ratio) %>%
@@ -680,6 +687,7 @@ lasso_cv <- cv.glmnet(x, y, alpha = 1, standardize = FALSE)
 # Display the best lambda value
 lasso_cv$lambda.min
 
+# Plot lambda CV
 plot(cv_lamda)
 
 # Fit the final model on the training data
@@ -699,15 +707,17 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 
+# Plot predicted vs actual values
 ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
   geom_point() +
-  labs(title="Actual & Predicted Values",
+  labs(title="Predicted vs Actual Values",
        x="Fare amount ", y = "Tip amount")
 
 ```
 
 
 ```{r plot_coef_lasso1, include = T, echo = F}
+# Plot lasso coefficients vs lambda
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
 plot_glmnet(fit.lasso, label=5)
 ```
@@ -715,12 +725,14 @@ plot_glmnet(fit.lasso, label=5)
 To choose the best lambda, we looked at the MSE versus lambda plot as given below. The best lambda value in our case is `r cv_lamda$lambda.min`. 
 
 ```{r lasso2plt, include = T, echo = F}
+# Plot lambda CV
 plot(cv_lamda)
 ```
 
 As with before, the r-squared is only 12% (as shown in graph below), which means there is room for a lot improvement.
 
 ```{r plot_r2_lasso_ratio, include=TRUE, echo= FALSE}
+# Plot glmnet coefficients vs fraction deviance
 fit = glmnet(x, y, alpha = 1)
 plot(fit, xvar = "dev", label = TRUE)
 ```
@@ -731,7 +743,7 @@ The last penalized regression model that we used for our problem is elastic net,
 
 ### Principal component analysis
 
-As most of our variables were correlated with each other, and there were around 27 number of features, we decided to use PCA as a variable reduction technique.
+As most of our variables were correlated with each other, and there were 27 features, we decided to use PCA as a variable reduction technique.
 
 ```{r pca}
 # get principal components using prcomp, we have used scale = F as the data is already scaled
@@ -783,7 +795,7 @@ results_df <- rbind(results_df, data.frame(
 ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
   geom_point() +
   labs(title="Actual & Predicted Values",
-       x="Actual Tip amount", y = "Predicted Tip amount")
+       x="Actual Tip amount $", y = "Predicted Tip amount $")
 
 ```
 
@@ -939,6 +951,7 @@ From analysis shown above it is clear that either there is no relation (the null
 The data has right skewed distribution. 
 
 ```{r include=T, echo=F}
+# Plot distribution of data
 df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
@@ -948,9 +961,8 @@ df_sub %>%
 ### Correlation 
 
 ```{r correlation2, include=T, echo=F}
-if(FALSE) {
+# Plot corelation of tip amount
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
-}
 ```
 
 This time, we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however, are not correlated with the tip amount. 
@@ -959,7 +971,7 @@ The same relationship can be visually confirmed through scatter plots below:
 
 Below are the scatter plot along with correlation and regression line for numerical variables
 ```{r scatterplots2, include=T, echo=T}
-if(FALSE) {
+# Plot correlations and regression line for each variable
 Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
@@ -994,7 +1006,6 @@ Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
                              df_sub$tip_amount), parse = TRUE)
 ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
           ncol = 2, nrow = 2)
-}
 ```
 
 ### Linear regression
@@ -1025,12 +1036,6 @@ summary(fit3_ta)
 
 ```
 
-Fit | Feature (variable)  |   R^2  | 
----|-----|-----|  
-1 | lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)`
-2 | lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)`
-3 | lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)`
- 
 We then perform ANOVA tests on all the three models.
 
 ```{r}
@@ -1038,16 +1043,25 @@ We then perform ANOVA tests on all the three models.
 anova(fit1_ta,fit2_ta,fit3_ta)
 ```
 
-We observe that p is greater than 0.05 for the third fit, which means that the third fit and second fit are pretty much the same.
+Here's a summary of the results:
+
+Fit | Feature (variable)  |   R^2  |  ANOVA P-value |
+---|-----|-----|----|
+1 | lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)` | -- |
+2 | lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)` | `r format(anova(fit1_ta,fit2_ta,fit3_ta)[6][["Pr(>F)"]][2], digits=3)` |
+3 | lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)` | `r format(anova(fit1_ta,fit2_ta,fit3_ta)[6][["Pr(>F)"]][3], digits=3)` |
+
+With a significance level of 0.05, we observe that the p-value is greater than 0.05 for the third fit, which means that the third fit and second fit are pretty much the same.
 
 Below is the graph for predicted versus actual values of tip_amount:
 
 ```{r, include=TRUE, echo=F}
+# Plot predicted vs actual values
 model.final.pred <- add_predictions(test,fit3_ta)
 # head(model.final.pred)
 ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+
-  labs(title="Predicted versus Actual values",
-       x="Actual tip amount ", y = " Predicted tip amount")
+  labs(title="Predicted versus Actual values for Linear Fit Tip Amount",
+       x="Actual tip amount ($)", y = " Predicted tip amount ($)")
 
 
 # Model performance metrics
@@ -1066,7 +1080,7 @@ The results are good. In order to check if any combination of features set gives
 We performed backward stepwise regression, and variables were selected based on adjusted r-squared:
 
 ```{r step_by_feature_selection1, include= TRUE, echo=F}
-
+# Perform stepwise regression (backwards)
 mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
 plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 ```
@@ -1089,10 +1103,10 @@ summary(fit_feature_ta)
 Below is the graph for predicted versus actual values of tip_amount:
 
 ```{r, include=TRUE, echo=F}
-
+# Plot predicted versus actual values
 model.final.pred <- add_predictions(test,fit_feature_ta)
 # head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred)) + labs(title="Predicted versus Actual values for Linear Fit of Tip Amount", x="Actual tip amount ($)", y = " Predicted tip amount ($)")
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -1147,18 +1161,12 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
-# plot actual versus perdicted values 
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
-
 ```
 
 
 
 ```{r plot_coeff_ridge_tip, include=TRUE, echo= FALSE}
-
+# Plot ridge coefficients
 fit = glmnet(x, y, alpha=0)
 plot(fit, label = TRUE)
 ```
@@ -1166,12 +1174,14 @@ plot(fit, label = TRUE)
 Then, we plot the cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
 
 ```{r plot_MSE_ridge_tip, include=TRUE, echo= FALSE}
+# Plot lambda CV
 plot(cv_lamda)
 ```
 
 Finally after training and testing, our results are better (R^2 of `r ridge_model$dev` as compared to only 12% for tip fare ratio) for our model now.
 
 ```{r plot_r2_ridge_tip, include=TRUE, echo= FALSE}
+# Plot coefficients vs fraction deviance
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
@@ -1180,6 +1190,7 @@ plot(fit, xvar = "dev", label = TRUE)
 The second penalized regression model used is lasso. We first plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. In this case, the coefficients are going down to zero (instead of just shrinking). 
 
 ```{r lasso_tip, include=FALSE, echo=FALSE}
+# Prepare model parameters
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -1209,10 +1220,6 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
 ```
 
 
@@ -1236,6 +1243,7 @@ plot(fit, xvar = "dev", label = TRUE)
 ### Elastic net
 
 ```{r elnet_tip1, include=FALSE, echo=FALSE}
+# Prep model parameters
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
 y = train %>%
   select(tip_amount) %>%
@@ -1265,10 +1273,6 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
-ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
-  geom_point() +
-  labs(title="Actual & Predicted Values",
-       x="Fare amount ", y = "Tip amount")
 ```
 
 The elastic-net penalty is controlled by α, and bridges the gap between lasso (α=1, the default) and ridge (α=0). The elastic-net penalty mixes these two; if predictors are correlated in groups, an α=0.5 tends to select the groups in or out together. We plot the coefficients against the log-lambda value for each feature in our set.
@@ -1298,6 +1302,7 @@ pca_train <- data.frame("tip_amount" = splitted_dfs["y_train"]$y_train['tip_amou
 test.data <- predict(pr.out, newdata = X_test)
 test.data <- as.data.frame(test.data)
 
+# get model
 model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
 ```
@@ -1317,10 +1322,11 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
+# Plot predicted vs actual values
 ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
   geom_point() +
-  labs(title="Predicted versus Actual Values",
-       x="Actual Tip amount", y = "Predicted Tip amount")
+  labs(title="Predicted versus Actual Values for PCR of Tip Amount",
+       x="Actual Tip amount ($)", y = "Predicted Tip amount ($)")
 
 ```
 
