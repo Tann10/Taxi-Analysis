@@ -530,7 +530,7 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 The graph above shows that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum adjusted r-squared of 0.11, after which adjusted r-squared remians constant.
 
-Below is the summary from km with the first 3 features selected with linear model.
+Below is the summary from lm with the first 3 features selected with linear model.
 
 ```{r, include= TRUE, echo = F}
 
