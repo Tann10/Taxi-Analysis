@@ -957,6 +957,7 @@ The same relationship can be visually confirmed through scatter plots below:
 
 Below are the scatter plot along with correlation and regression line for numerical variables
 ```{r scatterplots2, include=T, echo=T}
+if(FALSE) {
 Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
@@ -991,6 +992,7 @@ Q4 <- ggplot(df_sub, aes(x=passenger_count, y=tip_amount)) +
                              df_sub$tip_amount), parse = TRUE)
 ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
           ncol = 2, nrow = 2)
+}
 ```
 
 ### Linear regression
@@ -1034,7 +1036,7 @@ We then perform ANOVA tests on all the three models.
 anova(fit1_ta,fit2_ta,fit3_ta)
 ```
 
-We observe that p is greater than 0.05 for fit2, which means that fit1 and fit2 are same.
+We observe that p is greater than 0.05 for the second fit, which means that the first fit and second fit are pretty much the same.
 
 Below is the graph for predicted versus actual values of tip_amount:
 
