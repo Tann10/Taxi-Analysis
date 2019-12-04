@@ -135,7 +135,7 @@ In this context, given the lack of research in taxicab tipping, this project see
 
 # Research Question
 
-In this context, our research question is as follows: Using a subset of NYC taxi data from June 2019, what factors play a significant role in the prediction of tip fare ratio and tip amount paid via credit card? 
+In this context, our research question is as follows: Using a subset of NYC Yellow Taxi data from June 2019, what factors play a significant role in the prediction of tip-fare ratio (also referred to as tip ratio) and tip amount paid via credit card?
 
 
 # Data
@@ -144,7 +144,7 @@ The source dataset used for the project was taken from the New York City Taxi an
   
 The dataset is available for Yellow Taxi, Green Taxi and For-Hire Vehicle Records from 2009 to 2019. The total size of the complete dataset is over 10 GB. We have randomly sampled and selected 20,000 observations from the latest dataset, June 2019, from Yellow Taxi Records (New York City Taxi and Limousine Commission, 2019), due to hardware limitations. The dataset also comes with an associated data dictionary for download (New York City Taxi and Limousine Commission, 2018).
 
-We loaded data into R and clean (preprocess) it so that it could be used for further analysis. Main steps  performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
+In the previous project, we loaded data into R and cleaned (preprocess) it so that it could be used for further analysis. Main steps performed during cleaning data include filtering irrelevant columns and values. Relevant columns were then formatted to their correct type. Also we checked if data frame contains any NAs or duplicate values which might affect the final results.
 
 ```{r data}
 #read_file
@@ -171,7 +171,8 @@ condition <- (!names(df_sub) == "tip_fare_ratio") & (!sapply(df_sub, class) == "
 ```
 
 Below is the statistics for the selected columns for analysis:
-```{r }
+
+```{r, include = T, echo=F}
 summary(df_sub)
 ```
 
@@ -192,6 +193,7 @@ df_sub %>%
 ```
 
 ## Hypothesis testing
+
 ### Trip Distance
 
 ```{r subset_2cols, include = FALSE, echo = FALSE}
@@ -220,26 +222,26 @@ e
 
 ```
 
-Apart from just plotting box-plots we also performed independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
+Apart from just plotting box-plots, we also performed independent two-sample t-test, a significance test that can give us an estimate as to whether different means between two groups are the result of random variation or the product of specific characteristics within the groups.
 
-As always, first step in every significance testing is to design hypothesis. Below are the hypothesis for tip duration: 
+Our hypotheses for this test are as follows:
 <ul>
   <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same for both short and long distance passenger(s)
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same for both short and long distance passenger(s)
 </ul>
-```{r }
+```{r, include=T, echo=F}
 # Print result
 result_t
 ```
 
-With Significance level set to 5%, we got a P-value very close to zero. Concluding that we have enough evidence to reject the Null Hypothesis in favor of Alternate Hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
+With significance level of 0.05, we got a p-value very close to zero. wee have enough evidence to reject the null hypothesis in favor of alternate hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
 
 
 ### Trip duration
 
-We hyothesize that there is a relationship between the Duration of the trip and the tip fare ratio. Trip Duration is calculated by subtracting pickup time from drop time. Trip duration is the number of minutes taked for the trip.
+We hyothesize that there is a relationship between the duration of the trip and the tip-fare ratio. Trip duration is calculated by subtracting pickup time from drop time. Trip duration is the number of minutes taken for the trip.
 
-For this test our hypothesis were as below:
+For this test, our hypotheses were:
 <ul>
   <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same irrespective of Trip Duration
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same across Trip Duration
@@ -261,14 +263,15 @@ anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
 trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 ```
 
-From the results we observe that p-value `r format(td_ttest$p.value, digits = 3)` is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
-Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on duration of the trip.
+From the results, we observe that p-value of `r format(td_ttest$p.value, digits = 3)` is less than 0.05. At a significance level of 0.05, we reject null hypothesis.
+We have enough evidence to reject the null hypothesis in favor of alternative hypothesis, meaning that people travelling via yellow cabs in NYC tip differently based on duration of the trip.
 
 
 ### Number of passengers
-We hyothesize that there is a relationship between the number of passenger in the car and the tip fare ratio. We are considering passenger count as a cateogrical variables. There are 6 factors of passenger count varing from 1 to 6.
 
-For this test our hypothesis were as below:
+We hyothesize that there is a relationship between the number of passenger in the car and the tip-fare ratio. We are considering passenger count as a cateogrical variable. There are 6 factors of passenger count varing from 1 to 6.
+
+Our hypotheses are:
 <ul>
   <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same across all classes of passenger count
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same across all classes of passenger count
@@ -282,7 +285,7 @@ summary(anova_tip_amount)
 
 ```
 
-The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is < 0.05, hence we reject null hypothesis. This means that the number of passenger in the car does affect ratio of the tip amount.
+The mean of all the groups of passenger count does not vary much. Also, the output of ANOVA gives the p-value `r format(summary(anova_tip_amount)[[1]][["Pr(>F)"]][1], digits=3)` which is less than 0.05; hence, we reject null hypothesis. This means that the number of passenger in the car does affect ratio of the tip amount.
 
 ### Vendor ID
 
@@ -295,7 +298,7 @@ ttest_vendor = t.test(tip_fare_ratio ~ VendorID, data = df_sub)
 ttest_vendor
 ```
 
-The p-value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence we reject null hypothesis and conclude that the vendor does affect tip amount.
+The p-value `r format(ttest_vendor$p.value, digits=3)` is less than 0.05; hence, we reject null hypothesis and conclude that the vendor does affect tip amount.
 
 ### Location
 
@@ -311,8 +314,6 @@ anova_tiprat_do <- aov(tip_fare_ratio ~ Borough_do, data = df_sub)
 
 # Print ANOVA results
 anova_tiprat_do
-
-
 
 ```
 
@@ -332,28 +333,27 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 *based on a significance level of 0.05
 
-Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variable we will try to predict tip fare ratio. 
+Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variables we will try to predict tip-fare ratio. 
 
 ## Correlation
 
-For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
+For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly-related. Here, y-variable is tip-fare ratio.
 
 ```{r correlation1, include=F, echo=F}
 # Create correlation plot
 tip_fare_ratio_cor <- cor(df_sub[,condition], df_sub[,c("tip_fare_ratio")], method = c("pearson"))
 ```
 
-```{r }
+```{r, include=T, echo=F}
 # Create correlation plot
 corrplot(cor(df_sub[,(!sapply(df_sub, class) == "factor")]),type="upper", method = "number", tl.col="black")
 ```
 
-The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas passenger count and congestion surcharge are not correlated at all to tip fare ratio.
-
+The results show that trip distance, fare amount, and trip duration are negatively (and weakly) correlated whereas passenger count and congestion surcharge are not correlated at all with tip-fare ratio.
 
 # Model Building
 
-We first chose linear (uni,multivariate) regression models see how it fits our data. Linear regression is a "simple" method that may do a good job explaining the relationship with tip, so we decided to try that first. We also applied step by feature selection, Lasso, Ridge and Elastic Net and PCA to improve our linear model. We also used decision trees. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
+We first chose linear (univariate, multivariate) regression models see how it fits our data. Linear regression is a standard, typical method that may do a good job explaining the relationship with tip, so we decided to try that first. We also applied step by feature selection, lasso, ridge, elastic net and principal component analysis (PCA) to improve our linear model. We also used decision trees. One advantage of decision trees is its ability to approximate non-linear relationships. As our literature review suggets, for short distances, trip time, distance, and fare are all linearly related, yet this relationship grows weaker at greater distances due to the influence of other potential factors (Sun & McIntosh, 2016). Consequently, there may be in fact a non-linear relationship with tip, too.
 
 ## Model Building Preparation
 
@@ -362,7 +362,6 @@ Before building our models, we first prepared our data for modeling building thr
 ### One hot encoding 
 
 In order to convert factor columns to numerical columns we have used one hot encoding. One hot encoding converts all factors as a separate boolean column. 
-
 
 ```{r }
 # one hot encoding for factor columns
@@ -376,7 +375,7 @@ names(new_df_sub) <- gsub(" ", "_", names(new_df_sub))
 com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
 ```
 
-After one-hot encoding we get total `r dim(com_df_sub)[2]` columns. 
+After one-hot encoding we get a total of `r dim(com_df_sub)[2]` columns. 
 
 ### Test train split
 
@@ -398,7 +397,7 @@ scales <- build_scales(dataSet = splitted_dfs["X_train"]$X_train, cols = c(names
 print(scales)
 ```
 
-All the variables has different means and standard deviation; thus, we need to scale all the variables for our analysis
+All the variables has different means and standard deviation; thus, we need to scale all the variables for our analysis.
 
 ```{r scale_all}
 # transform train data 
@@ -408,7 +407,6 @@ X_train <- fastScale(dataSet = splitted_dfs["X_train"]$X_train, scales = scales,
 X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, verbose = TRUE)
 ```
 
-Bind the columns to get one train and test set 
 ```{r bind}
 # bind train and test X and Y columns 
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
@@ -419,13 +417,13 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 ## Tip Ratio
 
-Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. 
+Now that our EDA is complete with tip-fare as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. 
 
-Model evaluation metric used for all models are r-squared and mean absolute percentage error (MAPE). MAE or MSE are scale dependent variables. We wanted to use scale independent model evaluation creteria hence we decided to use MAPE.MAPE is measured as follows:
+Model evaluation metric used for all models are r-squared and mean absolute percentage error (MAPE). Mean absolute error (MAE) or mean squared error (MSE) are scale dependent variables. We wanted to use scale independent model evaluation creteria hence we decided to use MAPE.MAPE is measured as follows:
 ![MAPE formula](MAPE.PNG)
 
 
-### Linear Regression
+### Linear regression
 
 We built a linear model with tip amount and the first 3 highly correlated values for 'Tip_Amount': fare_amount (-0.31), trip_distance (-0.27), and trip_duration (-0.23).
 
@@ -463,14 +461,14 @@ lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(
 
 We subsequently perform ANOVA tests on all the three models. 
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo=F}
 #perform ANOVA to compare three models
 anova(fit1,fit2,fit3)
 ```
 
-We observe that p is greater than 0.05 for fit3, which implies that fit2 and fit3 are same.
+We observe that p is greater than 0.05 for the third fit, which implies that fit 2 and fit 1 are the same.
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo=F}
 #Prediction
 model.final.pred <- add_predictions(test,fit3)
 
@@ -532,9 +530,9 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 The graph above shows that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum adjusted r-squared of 0.11, after which adjusted r-squared remians constant.
 
-Below is the summary from km with the first 3 features selected with Linear model.
+Below is the summary from km with the first 3 features selected with linear model.
 
-```{r, Include= TRUE, echo = F}
+```{r, include= TRUE, echo = F}
 
 #Let us select first three features selected by feature selection function above.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = train )
@@ -548,8 +546,7 @@ vif(fit_feature)
 #plot(fit_feature)
 ```
 
-Below is the graph for predicted vs actual values of tip_fare_ratio:
-
+Below is the graph for predicted versus actual values of tip-fare ratio:
 
 ```{r, include=TRUE, echo = F}
 
@@ -569,9 +566,9 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-We improve the model using Ridge, Lasso, Elastic Net, and PCA.
+We improve the model using ridge, lasso, elastic net, and PCA.
 
-### Ridge Regression
+### Ridge regression
 
 Ordinary least squares (OLS) finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’.
 
@@ -638,7 +635,7 @@ fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
 
-To choose the best lambda, we  consult the MSE versus lambda plot shown below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
+To choose the best lambda, we consult the MSE versus lambda plot shown below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
 ```{r ridge2plt, include = T, echo = F}
 plot(cv_lamda)
@@ -651,7 +648,7 @@ fit = glmnet(x, y, alpha = 0)
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### Lasso Regression
+### Lasso regression
 
 This is another type of regularization (L1) technique that can lead to zeroed-out coefficients (in other words, some of the features are completely neglected for the evaluation of output). Thus, Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
 
@@ -715,13 +712,13 @@ fit = glmnet(x, y, alpha = 1)
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### Elastic Net
+### Elastic net
 
 The last penalized regression model that we used for our problem is elastic net, which linearly combines the L1 and L2 penalties of the lasso and ridge methods. Unfortunately, it also did not help in improving R-square value.
 
-### Principal Component Analysis
+### Principal component analysis
 
-As most of our variables were correlated with each other, and there were around 27 number of features, we decided to use principal component analysis (PCA) as a variable reduction technique.
+As most of our variables were correlated with each other, and there were around 27 number of features, we decided to use PCA as a variable reduction technique.
 
 ```{r pca}
 # get principal components using prcomp, we have used scale = F as the data is already scaled
@@ -741,7 +738,7 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
               type = "b")
 ```
 
-We decided to run a simple linear regression model on those components to check if this increase the variability as indicated by r-squared.
+We then ran a simple linear regression model on those components to check if this increased the variability explained as indicated by r-squared.
 
 ```{r pca_tipfareratiom, include = T, echo = F}
 #add a training set with principal components
@@ -758,7 +755,7 @@ summary(model)
 
 As seen from the model summary, all variables are significant, except component 4. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not improve. Thus, even if the components explains 90% of the variance in the data, that may not necessarily mean that a good R2 or high coefficients will result. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
-```{r }
+```{r, include=T, echo=F}
 # predictions
 predictions <- predict(model, test.data)
 
@@ -779,7 +776,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
 
 The above graph represents predicted tip amount verses actual tip amount. It is evident that predicted tip amount varies signifcantly from the actual tip amount.
 
-### Decision Tree
+### Decision tree
 
 Finally, we decided to grow a decision tree for our dataset. 
 
@@ -913,7 +910,7 @@ Fare amount appears to be the main predictor of tip ratio. In the three models, 
 
 Although the models roughly have 79% accuracy, the model only explains roughly 13-15% of the variation in tip ratio. This suggests that the model is not comprehensive.
 
-### Summary and Analysis
+### Summary and analysis
 
 The best model, when looking at for a low MAPE and high r-squared, is the unpruned decision tree. It is important to note that looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
 
@@ -937,18 +934,18 @@ df_sub %>%
 
 ### Correlation 
 
-```{r correlation2}
+```{r correlation2, include=T, echo=F}
 if(FALSE) {
 cor(df_sub[,condition], df_sub[,c("tip_amount")], method = c("pearson"))
 }
 ```
 
-This time we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however are not correlated with the tip amount. 
+This time, we get stronger and positive correlation coefficients between tip amount and trip distance, fare amount, and trip duration variables. Passenger count and congestion surcharge, however, are not correlated with the tip amount. 
 
 The same relationship can be visually confirmed through scatter plots below:
 
 Below are the scatter plot along with correlation and regression line for numerical variables
-```{r scatterplots2}
+```{r scatterplots2, include=T, echo=T}
 Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
   geom_point(color = "blue")+
   geom_smooth(method=lm, color = "black") +
@@ -987,9 +984,9 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 
 ### Linear regression
 
-We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount(0.91), trip_distance(0.83), and trip_duration(0.71).
+We built a linear model with tip amount and the first 3 highly correlated values for 'Tip_Amount': fare_amount (0.91), trip_distance (0.83), and trip_duration (0.71).
 
-```{r, include= TRUE}
+```{r, include= TRUE, echo=F}
 
 #Taking best three variables correlated with tip_fare ratio
 
@@ -1019,9 +1016,9 @@ lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)`
 lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)`
 lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)`
  
-Let us perform ANOVA test on all the three models.
+We then perform ANOVA tests on all the three models.
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo=F}
 #perform ANOVA to compare three models built
 anova(fit1_ta,fit2_ta,fit3_ta)
 ```
@@ -1044,23 +1041,23 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
-The results are good. In order to check if any combination of features set gives us better results than this we performed Stepwise Regression.
+The results are good. In order to check if any combination of features set gives us better results than this, we performed stepwise regression.
 
 ### Stepwise regression
 
-We performed backward stepwise regression and variables were selected based on adjusted r-squared:
+We performed backward stepwise regression, and variables were selected based on adjusted r-squared:
 
-```{r step_by_feature_selection1, include= TRUE}
+```{r step_by_feature_selection1, include= TRUE, echo=F}
 
 mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
 plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 ```
 
-From the graph above we see that adjusted r-squared remains constant throughout. Hence, we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
+From the graph above, we see that adjusted r-squared remains constant throughout. Hence, we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum adjusted r-squared of 0.83.
 
-Below is the summary from Lm with the first 3 features selected with Feature Selection.
+Below is the summary from lm with the first 3 features selected with feature selection:
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo=F}
 #Let us select first three features selected by feature selection function above.
 fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = train )
 summary(fit_feature_ta) 
@@ -1071,8 +1068,9 @@ summary(fit_feature_ta)
 # anova(fit3_ta,fit_feature_ta)
 ```
 
-Below is the graph for predicted vs Actual values of tip_amount
-```{r, include=TRUE}
+Below is the graph for predicted versus actual values of tip_amount:
+
+```{r, include=TRUE, echo=F}
 
 model.final.pred <- add_predictions(test,fit_feature_ta)
 # head(model.final.pred)
@@ -1147,7 +1145,7 @@ fit = glmnet(x, y, alpha=0)
 plot(fit, label = TRUE)
 ```
 
-Then we plot the cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
+Then, we plot the cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
 
 ```{r plot_MSE_ridge_tip, include=TRUE, echo= FALSE}
 plot(cv_lamda)
@@ -1205,7 +1203,7 @@ fit = glmnet(x, y, alpha=1)
 plot(fit, label = TRUE)
 ```
 
-Then we plot the Mean Square Error cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
+Then we plot the MSE cross-validation curve (red dotted line below), and upper and lower standard deviation curves along the λ sequence (error bars). Two selected λ’s are indicated by the vertical dotted lines.
 
 ```{r plot_MSE_lasso_tip, include=TRUE, echo= FALSE}
 plot(cv_lamda)
@@ -1217,7 +1215,7 @@ Finally after training and testing, our results are better (R^2 of `r lasso_mode
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### Elastic Net
+### Elastic net
 
 ```{r elnet_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
@@ -1269,7 +1267,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 We perform all the steps exactly in same manner as we did earlier for tip ratio; the results indicate an improvement from before (R^2 of `r elnet_model$dev` as compared to only 12% above) for elastic net model.
 
-### Principal Component Analysis
+### Principal component analysis
 
 The components which we created earlier are now used against tip amount. We built a linear regression model using 7 principal components. 
 
@@ -1289,7 +1287,7 @@ summary(model)
 As seen from the model summary, except component 4, all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` is good as seen previously from the other models as well. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
 
-```{r}
+```{r, include=T, echo=F}
 # predictions
 predictions <- predict(model, test.data)
 
@@ -1309,7 +1307,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
 ```
 The above graph represents predicted tip amount verses actual tip amount. Predicted values do not deviate much from the actual values.
 
-### Decision Tree
+### Decision tree
 
 ```{r dt_growtree_tip}
 # Grow decision tree
@@ -1434,13 +1432,15 @@ As with tip ratio, the unpruned, original decision tree is the best model of the
 
 In addition, fare amount appears to be the main predictor of tip ratio. In the three models, the first node split was fare amount, suggesting that there is a difference in tipped amount  according to whether a passenger's fare amount is high or low. The terminal leaves ascend from left to right, which means that the higher the fare amount, the higher tipped paid to the driver.
 
-### Summary and Analysis
+### Summary and analysis
 
 The best model in our analysis for tip amount is the elastic net regularized regression model. It had the lowest MAPE value and highest r-squared, explaining roughly 84% of the variation in the dependent variable. Comparing all models, however, the MAPE and r-squared values are roughly the same, with the exception of the pruned and cross-validated decision tree: The MAPE values are around 21 and 22, indicating an accuracy of 78-79%, and the r-squared values range from 0.79 to 0.84. The high r-squared values suggest that the models are good and reliable.
 
 In short, most of the models are producing the same results, and the improvement is very minimal. Thus, it can be argued that the relationship with tip amount is pretty stable.
 
 # Conclusion
+
+In summary, initially we chose dependent variable (tip-fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
 
 From the variables (distance, duration, congestion surcharge, location), we could not explain any relationship with tip fare ratio. That means tip fare ratio is roughly a constant value. There were no significant predictors in the data to explain the relationship. On the other hand, tip amount has very strong relationship with fare amount, distance, and duration. These results are not contradictory but rather complement each other. Tip amount increasing with fare amount means that the percentage of tip relative to the fare amount is roughly the same. Our analysis, however, does suggest that there may be other variables (that we did not analyze) that may affect the tip amount and tip ratio.
 
@@ -1456,16 +1456,12 @@ formattable(results_df,
 ))
 ```
 
-
-## Limitations and Future Work
-
 ## Project Limitations and Future Work
 
 Our limitations remain the same from the previous project. We ran into hardware limitations given the large amount of data available for processing. The data was over 10 GB, which forced us to take a small sample of the dataset for processing. Moreover, some of the data may have been inputted incorrectly (i.e. a passenger count greater than 6, which is illegal in NYC). In addition, our analysis only focused on those who paid tip by credit card, as cash tips were not recorded. Thus, our analysis does not account for those who choose to pay with cash.
 
 Our literature review suggests that weather may play an important role in tip amount, so future work on refining the model can utilize weather data. Our literature review also indicates that location may be a proxy for race, which affects tip amount. Combining demographic information and location and incorporating those into the model may provide new information. Likewise, additional information on the driver--including rating, gender, and race--may (or may not) provide additional information that could help refine our model. Given the highly fluid nature of the passenger-driver interactions, the taxicab experience, and the inability to quantify some of these instances, conducting empirical experiments may be the only effective way to refine the model.
 
-Additionally, initially we chose dependent variable (tip fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
 
 # References
 
