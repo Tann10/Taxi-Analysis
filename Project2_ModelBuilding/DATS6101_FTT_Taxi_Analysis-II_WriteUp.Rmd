@@ -134,7 +134,7 @@ Tipping behavior can be explained by both economic and noneconomic factors (Deva
 
 ## Taxicab Tipping
 
-Non-tipping work related to the NYC dataset have been conducted, especially in regard to pick up and drop off locations (Zhan, Hasan, Ukkusuri, & Kamga, 2013; Neutens, Delafontaine, Scott, & De Maeyer, 2012) and to supply and demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Accessibility/location (Qian & Ukkusuri, 2015), income, population, age, and number of jobs were strongly related to demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
+Non-tipping work related to the NYC dataset has been conducted, especially in regard to pick up and drop off locations (Zhan, Hasan, Ukkusuri, & Kamga, 2013; Neutens, Delafontaine, Scott, & De Maeyer, 2012) and to supply and demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Accessibility/location (Qian & Ukkusuri, 2015), income, population, age, and number of jobs were strongly related to demand (Qian & Ukkusuri, 2015; Gonzales, Yang, Morgul, & Ozbay 2014). Sun and McIntosh (2016) discover that taxicab ridership is lowest in the early mornings and the highest in the evenings. They also note that for short distances, trip time, distance, and fare are all linearly related; however, this relationship grows weaker at greater distances due to the influence of other potential factors.
 
 There exists a paucity of research on tipping in other industries, such as hotel and transportation (Azar, 2007; Devaraj & Patel, 2017). Devaraj and Patel (2017) and Flath (2012) argue that the factors previously discussed have less influence in a taxi setting given the standardized nature of the taxicab service and the minimal interaction between the driver and the passengers. Instead, taxicab tips may be influenced by weather (Devaraj & Patel, 2017), race (Ayres et al., 2005), or wealth (Ayres et al., 2005).
 
@@ -203,9 +203,9 @@ df_sub %>%
   stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_fare_ratio), sd = sd(df_sub$tip_fare_ratio))) + ggtitle("Distribution of NYC Taxi Tip fare ratio")
 ```
 
-## Hypothesis testing
+## Hypothesis Testing
 
-### Trip Distance
+### Trip distance
 
 ```{r subset_2cols, include = FALSE, echo = FALSE}
 
@@ -344,11 +344,11 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 *based on a significance level of 0.05
 
-Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variables we will try to predict tip-fare ratio. 
+It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variables we will try to predict tip-fare ratio. 
 
 ## Correlation
 
-For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly-related. Here, y-variable is tip-fare ratio.
+Our next step was to look at correlation to see how the data variables relate to each other. For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly-related. Here, y-variable is tip-fare ratio.
 
 ```{r correlation1, include=F, echo=F}
 # Create correlation plot
@@ -408,7 +408,7 @@ scales <- build_scales(dataSet = splitted_dfs["X_train"]$X_train, cols = c(names
 print(scales)
 ```
 
-All the variables has different means and standard deviation; thus, we need to scale all the variables for our analysis.
+All the variables have different means and standard deviation; thus, we scaled all the variables for our analysis to prevent variables with larger variance from inadvertently impacting the analysis.
 
 ```{r scale_all}
 # transform train data 
@@ -541,7 +541,7 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 The graph above shows that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum adjusted r-squared of 0.11, after which adjusted r-squared remians constant.
 
-Below is the summary from km with the first 3 features selected with linear model.
+Below is the summary from lm with the first 3 features selected with linear model.
 
 ```{r, include= TRUE, echo = F}
 
