@@ -1050,11 +1050,7 @@ We performed backward stepwise regression, and variables were selected based on 
 ```{r step_by_feature_selection1, include= TRUE, echo=F}
 
 mod_tip_ratio <- regsubsets(tip_amount ~ .-tip_fare_ratio, data = train, nvmax = 14, nbest = 1, method = "backward")
-# plot(mod_tip_ratio, scale = "Cp", main = "Cp")
 plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-# plot(mod_tip_ratio, scale = "r2", main = "R^2")
-# plot(mod_tip_ratio, scale = "bic", main = "BIC")
-
 ```
 
 From the graph above, we see that adjusted r-squared remains constant throughout. Hence, we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum adjusted r-squared of 0.83.
@@ -1097,12 +1093,17 @@ To further improve the model, Ridge, Lasso, Elastic Net, and PCA are performed.
 So far, replacing our dependent variable to tip amount gives a good r-squared. We then test to see if we get comparable results from a ridge model. We perform all the steps in the same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
 
 ```{r ridge_tip1, include=FALSE, echo=FALSE}
+
+# convert data frame to model matrix as required by glmnet
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
+
+# df to list 
 y = train %>%
   select(tip_amount) %>%
   unlist() %>%
   as.numeric()
 
+# set seed to get same set of random split for cv every time
 set.seed(123)
 cv_lamda = cv.glmnet(x, y, alpha = 0, standardize = FALSE)
 # Display the best lambda value
@@ -1128,7 +1129,7 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_amount)
 ))
 
-# check <- data.frame(predictions, test$tip_amount)
+# plot actual versus perdicted values 
 ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
   geom_point() +
   labs(title="Actual & Predicted Values",
@@ -1139,6 +1140,7 @@ ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
 
 
 ```{r plot_coeff_ridge_tip, include=TRUE, echo= FALSE}
+
 fit = glmnet(x, y, alpha=0)
 plot(fit, label = TRUE)
 ```
@@ -1460,6 +1462,8 @@ formattable(results_df,
 Our limitations remain the same from the previous project. We ran into hardware limitations given the large amount of data available for processing. The data was over 10 GB, which forced us to take a small sample of the dataset for processing. Moreover, some of the data may have been inputted incorrectly (i.e. a passenger count greater than 6, which is illegal in NYC). In addition, our analysis only focused on those who paid tip by credit card, as cash tips were not recorded. Thus, our analysis does not account for those who choose to pay with cash.
 
 Our literature review suggests that weather may play an important role in tip amount, so future work on refining the model can utilize weather data. Our literature review also indicates that location may be a proxy for race, which affects tip amount. Combining demographic information and location and incorporating those into the model may provide new information. Likewise, additional information on the driver--including rating, gender, and race--may (or may not) provide additional information that could help refine our model. Given the highly fluid nature of the passenger-driver interactions, the taxicab experience, and the inability to quantify some of these instances, conducting empirical experiments may be the only effective way to refine the model.
+
+Additionally, initially we chose dependent variable (tip fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
 
 # References
 
