@@ -776,7 +776,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
 
 The above graph represents predicted tip amount verses actual tip amount. It is evident that predicted tip amount varies signifcantly from the actual tip amount.
 
-### Decision Tree
+### Decision tree
 
 Finally, we decided to grow a decision tree for our dataset. 
 
@@ -910,7 +910,7 @@ Fare amount appears to be the main predictor of tip ratio. In the three models, 
 
 Although the models roughly have 79% accuracy, the model only explains roughly 13-15% of the variation in tip ratio. This suggests that the model is not comprehensive.
 
-### Summary and Analysis
+### Summary and analysis
 
 The best model, when looking at for a low MAPE and high r-squared, is the unpruned decision tree. It is important to note that looking across the various models, the MAPE value is mostly the same around 21 or 22, which indicates a 78-79% accuracy. The r-squared values for all the models, however, are extremely low, explaining anywhere from 7% to 15% of the variation in our dependent variable. Consequently, this indicates that the models are neither comprehensive nor good, reliable fits.
 
@@ -1215,7 +1215,7 @@ Finally after training and testing, our results are better (R^2 of `r lasso_mode
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-### Elastic Net
+### Elastic net
 
 ```{r elnet_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
@@ -1267,7 +1267,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 We perform all the steps exactly in same manner as we did earlier for tip ratio; the results indicate an improvement from before (R^2 of `r elnet_model$dev` as compared to only 12% above) for elastic net model.
 
-### Principal Component Analysis
+### Principal component analysis
 
 The components which we created earlier are now used against tip amount. We built a linear regression model using 7 principal components. 
 
@@ -1287,7 +1287,7 @@ summary(model)
 As seen from the model summary, except component 4, all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` is good as seen previously from the other models as well. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
 
-```{r}
+```{r, include=T, echo=F}
 # predictions
 predictions <- predict(model, test.data)
 
@@ -1307,7 +1307,7 @@ ggplot(test, aes(y =predictions ,x = test$tip_amount)) +
 ```
 The above graph represents predicted tip amount verses actual tip amount. Predicted values do not deviate much from the actual values.
 
-### Decision Tree
+### Decision tree
 
 ```{r dt_growtree_tip}
 # Grow decision tree
@@ -1432,13 +1432,15 @@ As with tip ratio, the unpruned, original decision tree is the best model of the
 
 In addition, fare amount appears to be the main predictor of tip ratio. In the three models, the first node split was fare amount, suggesting that there is a difference in tipped amount  according to whether a passenger's fare amount is high or low. The terminal leaves ascend from left to right, which means that the higher the fare amount, the higher tipped paid to the driver.
 
-### Summary and Analysis
+### Summary and analysis
 
 The best model in our analysis for tip amount is the elastic net regularized regression model. It had the lowest MAPE value and highest r-squared, explaining roughly 84% of the variation in the dependent variable. Comparing all models, however, the MAPE and r-squared values are roughly the same, with the exception of the pruned and cross-validated decision tree: The MAPE values are around 21 and 22, indicating an accuracy of 78-79%, and the r-squared values range from 0.79 to 0.84. The high r-squared values suggest that the models are good and reliable.
 
 In short, most of the models are producing the same results, and the improvement is very minimal. Thus, it can be argued that the relationship with tip amount is pretty stable.
 
 # Conclusion
+
+In summary, initially we chose dependent variable (tip-fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
 
 From the variables (distance, duration, congestion surcharge, location), we could not explain any relationship with tip fare ratio. That means tip fare ratio is roughly a constant value. There were no significant predictors in the data to explain the relationship. On the other hand, tip amount has very strong relationship with fare amount, distance, and duration. These results are not contradictory but rather complement each other. Tip amount increasing with fare amount means that the percentage of tip relative to the fare amount is roughly the same. Our analysis, however, does suggest that there may be other variables (that we did not analyze) that may affect the tip amount and tip ratio.
 
@@ -1454,16 +1456,12 @@ formattable(results_df,
 ))
 ```
 
-
-## Limitations and Future Work
-
 ## Project Limitations and Future Work
 
 Our limitations remain the same from the previous project. We ran into hardware limitations given the large amount of data available for processing. The data was over 10 GB, which forced us to take a small sample of the dataset for processing. Moreover, some of the data may have been inputted incorrectly (i.e. a passenger count greater than 6, which is illegal in NYC). In addition, our analysis only focused on those who paid tip by credit card, as cash tips were not recorded. Thus, our analysis does not account for those who choose to pay with cash.
 
 Our literature review suggests that weather may play an important role in tip amount, so future work on refining the model can utilize weather data. Our literature review also indicates that location may be a proxy for race, which affects tip amount. Combining demographic information and location and incorporating those into the model may provide new information. Likewise, additional information on the driver--including rating, gender, and race--may (or may not) provide additional information that could help refine our model. Given the highly fluid nature of the passenger-driver interactions, the taxicab experience, and the inability to quantify some of these instances, conducting empirical experiments may be the only effective way to refine the model.
 
-Additionally, initially we chose dependent variable (tip fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
 
 # References
 
