@@ -1424,11 +1424,11 @@ formattable(results_df,
 
 ## Limitations and Future Work
 
-Non-Normality of Tipping data
-Missing values
-Human errors
-Hardware
-Limited time and resources
+## Project Limitations and Future Work
+
+Our limitations remain the same from the previous project. We ran into hardware limitations given the large amount of data available for processing. The data was over 10 GB, which forced us to take a small sample of the dataset for processing. Moreover, some of the data may have been inputted incorrectly (i.e. a passenger count greater than 6, which is illegal in NYC). In addition, our analysis only focused on those who paid tip by credit card, as cash tips were not recorded. Thus, our analysis does not account for those who choose to pay with cash.
+
+Our literature review suggests that weather may play an important role in tip amount, so future work on refining the model can utilize weather data. Our literature review also indicates that location may be a proxy for race, which affects tip amount. Combining demographic information and location and incorporating those into the model may provide new information. Likewise, additional information on the driver--including rating, gender, and race--may (or may not) provide additional information that could help refine our model. Given the highly fluid nature of the passenger-driver interactions, the taxicab experience, and the inability to quantify some of these instances, conducting empirical experiments may be the only effective way to refine the model.
 
 # References
 
