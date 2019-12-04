@@ -22,7 +22,6 @@ loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.
 ```
 
 ```{r loadlibraries, include=F}
-# Load packages
 loadPkg("plotmo")
 loadPkg("tidyverse")
 loadPkg("glmnet")
@@ -110,14 +109,6 @@ influential_points <- function(df_out, model) {
 
 ```
 
-§ Some basic EDA.
-§ How did you select and determine the correct model to answer your question?
-§ What predictions can you make with your model? Examples.
-§ How reliable are your results?
-§ What additional information or analysis might improve your model results or
-work to control limitations?
-§ References (APA style preferred)
-
 # Introduction
 
 Taxicabs are an integral part of the New York City (NYC) experience. Widely recognized by their yellow color and checkered boxes, there are roughly 13,500 taxicabs in service today, worth about $800,000 each, with 50,000 drivers serving 236 million passengers per year (Devaraj & Patel, 2007).
@@ -198,7 +189,7 @@ df_sub %>%
 ## Hypothesis testing
 ### Trip Distance
 
-```{r subset_2cols, include = T, echo = F}
+```{r subset_2cols, include = FALSE, echo = FALSE}
 
 # Subset data and glimpse data
 df_dist <- subset(df_sub, select=c(tip_fare_ratio, trip_distance))
@@ -265,7 +256,7 @@ anova_drop_period <- aov(tip_fare_ratio ~ drop_period, data = df_sub)
 trip_duration_ttest <- t.test(df_sub$tip_fare_ratio, df_sub$trip_duration)
 ```
 
-From the results we observe that p-value `r format(td_ttest$p.value, digits = 3) is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
+From the results we observe that p-value `r format(td_ttest$p.value, digits = 3)` is < 0.05 With Significance level set to 5% hence we reject null hypothesis.
 Concluding that we have enough evidence to reject the Null hypothesis in favor of Alt Hyp meaning that people travelling through Yellow cabs in NYC tip differently based on duration of the trip.
 
 
@@ -336,11 +327,11 @@ vendor ID | T-test | `r format(ttest_vendor$p.value, digits=3)` | means are equa
 
 *based on a significance level of 0.05
 
-Based on our EDA, we can begin to sketch out an answer to our question. It appears that the following variables may affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variables, we will try to predict tip fare ratio. 
+Based on our EDA, we can begin to sketch out an answer to our question: It appears that the following variables affect the tip ratio for those who paid by credit card: pickup loation, dropoff location, distance travelled in miles, time of day and passenger count. Using these variable we will try to predict tip fare ratio. 
 
 ## Correlation
-For this step, we have used Pearson correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
+For this step, we have Pearson's correlation method to indicate the extent to which two variables are linearly related. Here, y-variable is tip_fare_ratio.
 
 ```{r correlation1, include=F, echo=F}
 # Create correlation plot
@@ -367,6 +358,7 @@ Before building our models, we first prepared our data for modeling building thr
 
 In order to convert factor columns to numerical columns we have used one hot encoding. One hot encoding converts all factors as a separate boolean column. 
 
+
 ```{r }
 # one hot encoding for factor columns
 sub_factor_col <- (!(names(df_sub) %in% c("tip_fare_ratio", "tip_amount"))) & (sapply(df_sub, class) == "factor")
@@ -377,6 +369,8 @@ names(new_df_sub) <- gsub(" ", "_", names(new_df_sub))
 
 com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
 ```
+
+After one-hot encoding we get total `r dim(com_df_sub)[2]` columns. 
 
 ### Test train split
 
@@ -406,7 +400,7 @@ X_test <- fastScale(dataSet = splitted_dfs["X_test"]$X_test, scales = scales, ve
 Bind the columns to get one train and test set 
 ```{r bind}
 train <- cbind(X_train, data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_train"]$y_train['tip_amount']))
-taxipro <- train
+
 
 test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_test['tip_fare_ratio'], "tip_amount" = splitted_dfs["y_test"]$y_test['tip_amount']))
 
@@ -414,32 +408,35 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 ## Tip Ratio
 
-Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. Six differencet models that we are going to apply are:
+Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. 
+
+Model evaluation metric used for all models is r2 and mean absolute percentage error (MAPE). MAE or MSE are scale dependent variables. We wanted to use scale independent model evaluation creteria hence we decided to use MAPE.MAPE is measured as follows:
+![MAPE formula](MAPE.PNG)
+
 
 ### Linear Regression
 
-Let us Start building our linear model with first 3 high Pearson Correlation values for 'Tip_Fare_Ratio'. trip_duration fare_amount trip_distance were highly correlated variables to tip fare ratio with -0.31, -0.27, -0.23 as pearson coefficients respectively.
+We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount (-0.31), trip_distance (-0.27), and trip_duration(-0.23).
 
 ```{r }
-
 #Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
 
 #linear model of tip_fare_ratio ~ trip_duration
-fit1 <- lm(tip_fare_ratio ~ trip_duration, data = taxipro )
+fit1 <- lm(tip_fare_ratio ~ trip_duration, data = train )
 #summary(fit1)
 # vif(fit1)
 # plot(fit1)
 
 
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount
-fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = taxipro )
+fit2 <- lm(tip_fare_ratio ~ trip_duration+fare_amount, data = train )
 #summary(fit2)
 # vif(fit2)
 # plot(fit2)
 
 
 #linear model of tip_fare_ratio ~ trip_duration+fare_amount+trip_distance
-fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = taxipro )
+fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = train )
 #summary(fit3)
 #vif(fit3)
 #plot(fit3)
@@ -457,19 +454,14 @@ Let us perform ANOVA test on all the three models.
 
 
 ```{r, include=TRUE}
-#perform ANOVA to compare three models built
+#perform ANOVA to compare three models
 anova(fit1,fit2,fit3)
 ```
-
 We observe that p is > 0.05 for fit3 implies fit2 and fit3 are same.
-
-Below is the graph for predicted vs Actual values of tip_fare_ratio
 
 ```{r, include=TRUE}
 #Prediction
 model.final.pred <- add_predictions(test,fit3)
-# head(model.final.pred)
-ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
 
 # Model performance metrics
 results_df <- data.frame(
@@ -481,11 +473,33 @@ results_df <- data.frame(
 
 ```
 
+```{r cooksdistance removed}
+df_out <- influential_points(train, fit3)
+model_rmcook <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = df_out)
+summary(model_rmcook)
+vif(model_rmcook)
+
+# predictions
+predictions <- predict(model_rmcook, test)
+
+# Model performance metrics
+results_df <- rbind(results_df, data.frame(
+  technique = "Linear-treated outlier",
+  dependent = "tip_fare_ratio",
+  mape = mape(test$tip_fare_ratio, predictions),
+  Rsquare = caret::R2(predictions, test$tip_fare_ratio)
+))
+```
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio. Below are the values for MAPE and R2.
+```{r }
+results_df
+```
+
 Since the results are not satisfactory we perform stepwise feature selection.
 
 ### Stepwise regression
 
-Below is the tip_fare_ratio ~ . step by feature selection with Adjusted R^2 scaling
+Below is the tip_fare_ratio ~ . step  feature selection with Adjusted R^2 scaling
 
 ```{r step_by_feature_selection, include= TRUE}
 
@@ -502,7 +516,7 @@ Below is the Summary from Lm with First 3 features selected with Linear model.
 ```{r, Include= TRUE}
 
 #Let us select first three features selected by feature selection function above.
-fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = taxipro )
+fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = train )
 summary(fit_feature)
 # vif(fit_feature)
 #plot(fit_feature)
@@ -530,6 +544,10 @@ results_df <- rbind(results_df, data.frame(
 To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
 
 ### Ridge Regression
+
+OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
+
+Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
 
 ```{r ridge_tipfareratio2, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -571,13 +589,8 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 # plot(fit.ridge, xvar="lambda", label = 5)
 ```
 
-OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
-
-Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
-
 
 ```{r plot_coef_lambda, include = T, echo = F}
-library(plotmo)
 fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
@@ -597,6 +610,9 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso Regression
 
+This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
+
+Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
 ```{r lasso_tipfareratio1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
@@ -636,16 +652,11 @@ ggplot(test, aes(x =test$tip_fare_ratio ,y = predictions)) +
 
 ```
 
-This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
-
-Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
-
 
 ```{r plot_coef_lasso1, include = T, echo = F}
 fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
 plot_glmnet(fit.lasso, label=5)
 ```
-
 
 To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
@@ -945,20 +956,20 @@ We built linear model with tip amount and first 3 highly correlated values for '
 #Taking best three variables correlated with tip_fare ratio
 
 #linear model of tip_amount ~ trip_duration
-fit1_ta <- lm(tip_amount ~ fare_amount, data = taxipro )
+fit1_ta <- lm(tip_amount ~ fare_amount, data = train )
 #summary(fit1_ta)
 # vif(fit1_ta)
 # plot(fit1_ta)
 
 #linear model of tip_amount ~ trip_duration+fare_amount
-fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = taxipro )
+fit2_ta <- lm(tip_amount ~ fare_amount+trip_distance, data = train )
 #summary(fit2_ta)
 # vif(fit2_ta)
 # plot(fit2_ta)
 
 #linear model of tip_amount ~ trip_duration+fare_amount+trip_distance
-fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = taxipro )
-summary(fit3_ta)
+fit3_ta <- lm(tip_amount ~ fare_amount+trip_distance+trip_duration, data = train )
+#summary(fit3_ta)
 # vif(fit3_ta)
 #plot(fit3_ta)
 
@@ -1017,7 +1028,7 @@ Below is the Summary from Lm with First 3 features selected with Feature Selecti
 
 ```{r, include=TRUE}
 #Let us select first three features selected by feature selection function above.
-fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = taxipro )
+fit_feature_ta <- lm(tip_amount ~ fare_amount+congestion_surcharge+Borough_do_Bronx, data = train )
 summary(fit_feature_ta) 
 # vif(fit_feature_ta)
 # plot(fit_feature_ta)
@@ -1407,7 +1418,7 @@ formattable(results_df,
 ## Limitations and Future Work
 
 Non-Normality of Tipping data
-Missing values?????
+Missing values
 Human errors
 Hardware
 Limited time and resources
