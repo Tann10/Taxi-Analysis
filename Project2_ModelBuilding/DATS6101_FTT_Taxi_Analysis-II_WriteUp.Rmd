@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, include = F)
 loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
 ```
 
@@ -240,12 +240,13 @@ Our hypotheses for this test are as follows:
   <li>Null Hypothesis: H<sub>o</sub>  Average tip fare ratio is same for both short and long distance passenger(s)
   <li>Alternate Hypothesis: H<sub>a</sub> Average tip fare ratio is NOT same for both short and long distance passenger(s)
 </ul>
-```{r, include=T, echo=F}
+
+```{r}
 # Print result
 result_t
 ```
 
-With significance level of 0.05, we got a p-value very close to zero. wee have enough evidence to reject the null hypothesis in favor of alternate hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
+With significance level of 0.05, we got a p-value very close to zero. We have enough evidence to reject the null hypothesis in favor of alternate hypothesis meaning that people travelling through yellow cabs in NYC tip differently based on distance travelled.
 
 
 ### Trip duration
@@ -464,20 +465,20 @@ fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = trai
 
 The summary for three linear models is
 
-Feature (variable)  |  R^2  | 
------|-----|  
-lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)`
-lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)`
-lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)`
+Fit | Feature (variable)  |  R^2  | 
+---|-----|-----|  
+1 | lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)`
+2 | lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)`
+3 | lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)`
 
 We subsequently perform ANOVA tests on all the three models. 
 
-```{r, include=TRUE, echo=F}
+```{r}
 #perform ANOVA to compare three models
 anova(fit1,fit2,fit3)
 ```
 
-We observe that p is greater than 0.05 for the third fit, which implies that fit 2 and fit 1 are the same.
+We observe that p is greater than 0.05 for the third fit, which implies that fit 2 and fit 3 are the same.
 
 ```{r, include=TRUE, echo=F}
 #Prediction
@@ -565,7 +566,7 @@ Below is the graph for predicted versus actual values of tip-fare ratio:
 model.final.pred <- add_predictions(test,fit_feature)
 
 
-# ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
+ggplot(model.final.pred,aes(tip_fare_ratio,pred))+geom_point(aes(tip_fare_ratio,pred))+geom_line(aes(pred), colour="red", size=1)
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -764,7 +765,7 @@ model <- lm(tip_fare_ratio ~ ., data = pca_train)
 summary(model)
 ```
 
-As seen from the model summary, all variables are significant, except component 4. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not improve. Thus, even if the components explains 90% of the variance in the data, that may not necessarily mean that a good R2 or high coefficients will result. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
+As seen from the model summary, all variables are significant, except component 3. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not improve. Thus, even if the components explains 90% of the variance in the data, that may not necessarily mean that a good R2 or high coefficients will result. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
 ```{r, include=T, echo=F}
 # predictions
@@ -999,7 +1000,7 @@ ggarrange(Q1, Q2, Q3,Q4 + rremove("x.text"),
 
 We built a linear model with tip amount and the first 3 highly correlated values for 'Tip_Amount': fare_amount (0.91), trip_distance (0.83), and trip_duration (0.71).
 
-```{r, include= TRUE, echo=F}
+```{r}
 
 #Taking best three variables correlated with tip_fare ratio
 
@@ -1023,20 +1024,20 @@ summary(fit3_ta)
 
 ```
 
-Feature (variable)  |   R^2  | 
------|-----|  
-lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)`
-lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)`
-lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)`
+Fit | Feature (variable)  |   R^2  | 
+---|-----|-----|  
+1 | lm(tip_amount ~ fare_amount) |`r format(summary(fit1_ta)$r.squared, digits=3)`
+2 | lm(tip_amount ~ fare_amount+trip_distance) |`r format(summary(fit2_ta)$r.squared, digits=3)`
+3 | lm(tip_amount ~ fare_amount+trip_distance+trip_duration) |`r format(summary(fit3_ta)$r.squared, digits=3)`
  
 We then perform ANOVA tests on all the three models.
 
-```{r, include=TRUE, echo=F}
+```{r}
 #perform ANOVA to compare three models built
 anova(fit1_ta,fit2_ta,fit3_ta)
 ```
 
-We observe that p is greater than 0.05 for the second fit, which means that the first fit and second fit are pretty much the same.
+We observe that p is greater than 0.05 for the third fit, which means that the third fit and second fit are pretty much the same.
 
 Below is the graph for predicted versus actual values of tip_amount:
 
@@ -1099,7 +1100,7 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-To further improve the model, Ridge, Lasso, Elastic Net, and PCA are performed.
+To further improve the model, ridge, lasso, elastic net, and PCA are performed.
 
 ### Ridge
 
