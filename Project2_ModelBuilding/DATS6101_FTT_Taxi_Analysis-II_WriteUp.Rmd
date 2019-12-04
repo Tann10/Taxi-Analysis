@@ -133,8 +133,9 @@ There exists a paucity of research on tipping in other industries, such as hotel
 In this context, given the lack of research in taxicab tipping, this project seeks to address the gap in research by identifying if there are other factors other than weather that may affect the amount of tipping by those who paid their fares by credit card. Using the variables provided in the NYC taxicab dataset mirrors the appearances the drivers “interact” with; they cannot see wealth or know a passenger’s background, but they can make inferences (and subsequently guess tip amount) based on perception and pickup and dropoff locations (Ayres et al., 2005). Moreover, pickup and dropoff locations may provide some information on a passenger's background since they may be where the passengers live (Lee, Shin, & Park, 2008) or be indicative of people's lifestyles (Lynn, 2006; Kwan, 1999; Neutens et al. 2012; van Ham & Tammaru, 2015).
 
 
-# Smart Question
-what factors play asignificant role in the prediction of tip fare ratio & tip amount? 
+# Research Question
+
+In this context, our research question is as follows: Using a subset of NYC taxi data from June 2019, what factors play a significant role in the prediction of tip fare ratio and tip amount paid via credit card? 
 
 
 # Data
@@ -388,7 +389,7 @@ splitted_dfs <- train_test_split(com_df_sub)
 
 ### Scaling variables
 
-After splitting, we need to scale the numerical variables in our test and train datasets because the magnitude of the values might not necessarily be proportional. So lets calculate the mean and standard deviation of each numerical column for comparison purposes.
+After splitting, we need to scale the numerical variables in our test and train datasets because the magnitude of the values might not necessarily be proportional. We calculate the mean and standard deviation of each numerical column for comparison purposes.
 
 ```{r scale parameter}
 # We have used dataPreparation package to scale data
@@ -397,7 +398,7 @@ scales <- build_scales(dataSet = splitted_dfs["X_train"]$X_train, cols = c(names
 print(scales)
 ```
 
-All the variables has different means and std hence we need to scale all the variables present above.
+All the variables has different means and standard deviation; thus, we need to scale all the variables for our analysis
 
 ```{r scale_all}
 # transform train data 
@@ -420,13 +421,13 @@ test <- cbind(X_test, data.frame("tip_fare_ratio" = splitted_dfs["y_test"]$y_tes
 
 Now that our EDA is complete with Tip Fare Ratio as dependent variable, the next step is to apply a variety of regression based algorithms allowing us to extract insights from data that we can then use to tell which outcome is likely to hold true for our target variable based on training data. 
 
-Model evaluation metric used for all models is r2 and mean absolute percentage error (MAPE). MAE or MSE are scale dependent variables. We wanted to use scale independent model evaluation creteria hence we decided to use MAPE.MAPE is measured as follows:
+Model evaluation metric used for all models are r-squared and mean absolute percentage error (MAPE). MAE or MSE are scale dependent variables. We wanted to use scale independent model evaluation creteria hence we decided to use MAPE.MAPE is measured as follows:
 ![MAPE formula](MAPE.PNG)
 
 
 ### Linear Regression
 
-We built linear model with tip amount and first 3 highly correlated values for 'Tip_Amount' those are fare_amount (-0.31), trip_distance (-0.27), and trip_duration(-0.23).
+We built a linear model with tip amount and the first 3 highly correlated values for 'Tip_Amount': fare_amount (-0.31), trip_distance (-0.27), and trip_duration (-0.23).
 
 ```{r }
 #Taking best three variables correlated with tip_fare ratio based on Pearson Correlation
@@ -451,6 +452,7 @@ fit3 <- lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance, data = trai
 #vif(fit3)
 #plot(fit3)
 ```
+
 The summary for three linear models is
 
 Feature (variable)  |  R^2  | 
@@ -459,15 +461,14 @@ lm(tip_fare_ratio ~ trip_duration) |`r format(summary(fit1)$r.squared, digits=3)
 lm(tip_fare_ratio ~ trip_duration+fare_amount) |`r format(summary(fit2)$r.squared, digits=3)`
 lm(tip_fare_ratio ~ trip_duration+fare_amount+trip_distance) |`r format(summary(fit3)$r.squared, digits=3)`
 
-Let us perform ANOVA test on all the three models. 
-
-
+We subsequently perform ANOVA tests on all the three models. 
 
 ```{r, include=TRUE}
 #perform ANOVA to compare three models
 anova(fit1,fit2,fit3)
 ```
-We observe that p is > 0.05 for fit3 implies fit2 and fit3 are same.
+
+We observe that p is greater than 0.05 for fit3, which implies that fit2 and fit3 are same.
 
 ```{r, include=TRUE}
 #Prediction
@@ -507,8 +508,10 @@ results_df <- rbind(results_df, data.frame(
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
 ```
-After removal of the outliers from the data there is no improvement in the values for tip fare ratio. Below are the values for MAPE and R2.
-```{r }
+
+After removal of the outliers from the data there is no improvement in the values for tip fare ratio. Below are the values for MAPE and r-squared.
+
+```{r echo=F, include=T}
 results_df
 ```
 
@@ -516,7 +519,7 @@ Since the results are not satisfactory we perform stepwise feature selection.
 
 ### Stepwise regression
 
-Below is the tip_fare_ratio ~ . step  feature selection with Adjusted R^2 scaling
+We perform the step feature selection with adjusted r-squared scaling.
 
 ```{r step_by_feature_selection, include= TRUE}
 
@@ -527,10 +530,11 @@ mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax =
 plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 ```
 
-From the graph above we see that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum Adj R^2 = 0.11 after which Adj R^2 remians constant.
+The graph above shows that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum adjusted r-squared of 0.11, after which adjusted r-squared remians constant.
 
-Below is the Summary from Lm with First 3 features selected with Linear model.
-```{r, Include= TRUE}
+Below is the summary from km with the first 3 features selected with Linear model.
+
+```{r, Include= TRUE, echo = F}
 
 #Let us select first three features selected by feature selection function above.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = train )
@@ -543,9 +547,9 @@ summary(fit_feature)
 #plot(fit_feature)
 ```
 
-Below is the graph for predicted vs Actual values of tip_fare_ratio
+Below is the graph for predicted vs actual values of tip_fare_ratio:
 
-```{r, include=TRUE}
+```{r, include=TRUE, echo = F}
 
 #Prediction
 model.final.pred <- add_predictions(test,fit_feature)
@@ -562,13 +566,15 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
+We improve the model using Ridge, Lasso, Elastic Net, and PCA.
 
 ### Ridge Regression
 
-OLS finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’. The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance This is when ridge regression comes into play, also referred to as Regularization. The ridge regression will penalize your coefficients, such that those who are the least efficient in your estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
+Ordinary least squares (OLS) finds the coefficients that best fit the data. But OLS doesn’t consider which independent variable is more important than others. It simply finds the coefficients for a given data set. In short, there is only one set of betas to be found, resulting in the lowest ‘Residual Sum of Squares (RSS)’.
 
-Ridge regression shrinks coefficients by penalizing, the features were scaled for start condition to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
+The question then becomes “Is a model with the lowest RSS truly the best model?”. Therefore, an OLS model becomes more complex as new variables are added. It can be said that an OLS provides model with lowest bias and the highest variance. It is fixed there, never moves, but we want have a model with low bias as well as low variance. Ridge can fill this gap, and this is also referred to as Regularization. The ridge regression will penalize  coefficients, such that those that are the least efficient in the estimation will "shrink" the fastest. In ridge regression, we can tune the lambda parameter (penalizing factor) so that model coefficients change. 
+
+Ridge regression shrinks coefficients by penalizing; thus the features were scaled for the "starting conditions" to be fair. Next, we iterated through a range of lambda values. The plot below shows shrinking of attributes. Only five attributes with largest coefficient values have been labeled for better visualization.
 
 ```{r ridge_tipfareratio2, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
@@ -616,13 +622,13 @@ fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
 plot_glmnet(fit.ridge, label=5)
 ```
 
-To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
+To choose the best lambda, we  consult the MSE versus lambda plot shown below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
 
 ```{r ridge2plt, include = T, echo = F}
 plot(cv_lamda)
 ```
 
-But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% which means there is room for a lot improvement.
+But the r-squared (i.e. the amount of variance that our model can account for) is only 12%, which means there is room for a lot improvement.
 
 ```{r plot_r2_ridge_ratio, include=TRUE, echo= FALSE}
 fit = glmnet(x, y, alpha = 0)
@@ -631,9 +637,10 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso Regression
 
-This is another type of regularization (L1) technique that can lead to zero coefficients i.e. some of the features are completely neglected for the evaluation of output. So Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
+This is another type of regularization (L1) technique that can lead to zeroed-out coefficients (in other words, some of the features are completely neglected for the evaluation of output). Thus, Lasso regression not only helps in reducing over-fitting but it can help us in feature selection. 
 
 Again, we iterated through a range of lambda values. The plot below shows how lasso is setting irrelevant attributes coefficients to 0. Only five attributes with largest coefficient values are labeled for better visualization.
+
 ```{r lasso_tipfareratio1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_fare_ratio~.-tip_amount,train)[,-1]
 y = train %>%
@@ -679,13 +686,13 @@ fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
 plot_glmnet(fit.lasso, label=5)
 ```
 
-To choose the best lambda though we should consult the MSE vs lambda plot as given below. The best lambda value in our case turns out to be `r cv_lamda$lambda.min`. 
+To choose the best lambda, we looked at the MSE versus lambda plot as given below. The best lambda value in our case is `r cv_lamda$lambda.min`. 
 
 ```{r lasso2plt, include = T, echo = F}
 plot(cv_lamda)
 ```
 
-But R-squared obtained (i.e. the amount of variance that our model can account for) is only 12% (as shown in graph below) which means there is room for a lot improvement.
+As with before, the r-squared is only 12% (as shown in graph below), which means there is room for a lot improvement.
 
 ```{r plot_r2_lasso_ratio, include=TRUE, echo= FALSE}
 fit = glmnet(x, y, alpha = 1)
@@ -694,19 +701,21 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Elastic Net
 
-The last penalized regression model that we used for our problem is elastic net that linearly combines the L1 and L2 penalties of the lasso and ridge methods. But unfortunately it also did not help in improving R-square value.
+The last penalized regression model that we used for our problem is elastic net, which linearly combines the L1 and L2 penalties of the lasso and ridge methods. Unfortunately, it also did not help in improving R-square value.
 
 ### Principal Component Analysis
 
-As most of our variables where correlated with each other and there were around 27 number of features we decided to use principal component analysis as a variable reduction technique.
+As most of our variables were correlated with each other, and there were around 27 number of features, we decided to use principal component analysis (PCA) as a variable reduction technique.
+
 ```{r pca}
 # get principal components using prcomp, we have used scale = F as the data is already scaled
 pr.out =prcomp(X_train, scale = F)
 summary(pr.out)
 ```
-Around 92% of the variance is explained by first 7 components. Below graph shows the same.
 
-```{r }
+Around 92% of the variance is explained by first 7 components (shown below).
+
+```{r include = T, echo=F}
 # calculate how much variance is explained by each component
 prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
 
@@ -716,9 +725,9 @@ plot(cumsum(prop_varex), xlab = "Principal Component",
               type = "b")
 ```
 
-We decided to run a simple linear regression model on those components to check if this increase the variablitiy explained by the r2.
+We decided to run a simple linear regression model on those components to check if this increase the variability as indicated by r-squared.
 
-```{r pca_tipfareratio}
+```{r pca_tipfareratiom, include = T, echo = F}
 #add a training set with principal components
 pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_fare_ratio'], pr.out$x)[,1:8]
 
@@ -731,8 +740,7 @@ model <- lm(tip_fare_ratio ~ ., data = pca_train)
 summary(model)
 ```
 
-As seen from the model summary, expect component 4 all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not imporve. Hence it is rightly said that even if the components explains 90% of the variance in the data, that may not necessarily mean that you will get a good R2 or high coefficients. 
-We evaluated the metric using mape which is around 22%. No significant improvement from the previous results. 
+As seen from the model summary, all variables are significant, except component 4. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` did not improve. Thus, even if the components explains 90% of the variance in the data, that may not necessarily mean that a good R2 or high coefficients will result. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
 ```{r }
 # predictions
@@ -895,13 +903,16 @@ The best model, when looking at for a low MAPE and high r-squared, is the unprun
 
 This also suggests that a null model may be the "best fit" for tip ratio. In this case, tip ratio remains constant despite changes in the independent variables. This may make sense because based on our literature review, tips in the service industry generally hover around 15%; the tips for taxis may also be hovering around a certain percentage.
 
-From analysis shown above it is clear that either there is no relation (the null model will work just fine). **Tip-to-fare** is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by **tip amount** as our dependent variable in models and see if it makes any difference on our results. 
 
 ## Tip Amount
+
+From analysis shown above it is clear that either there is no relation (the null model will work just fine). **Tip-to-fare** is roughly a constant overall, or we do not have the predictors to capture the relationship. Thus, we may need to redefine our dependent variable. We replaced tip-fare ratio with **tip amount** as our dependent variable in models to see if it makes any difference on our results. 
+
 ### Distribution
 
 The data has right skewed distribution. 
-```{r }
+
+```{r include=T, echo=F}
 df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
