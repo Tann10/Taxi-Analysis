@@ -55,9 +55,10 @@ loadPkg("modelr")
 
 ```{r udf}
 # Split the data into training and test set
-
 train_test_split = function(df_sub) {
+  # set a seed to get same values for every run
   set.seed(123)
+  # divide the train and test data
   training.samples <- df_sub$tip_fare_ratio %>%
     createDataPartition(p = 0.8, list = FALSE)
   
@@ -79,7 +80,7 @@ mape <- function(actual,pred){
            return (mape)
 }
 
-
+# func to get correlation value on a ggplot
 corr_eqn <- function(x,y, digits = 2) {
   corr_coef <- round(cor(x, y), digits = digits)
   paste("italic(r) == ", corr_coef)
@@ -88,8 +89,12 @@ corr_eqn <- function(x,y, digits = 2) {
 # Plot cooks distance
 cooks_distance <- function(df, model){
   
+  # calculate cooks distance
   cooksd <- cooks.distance(model)
+  
+  # data frame size
   sample_size <- nrow(df)
+  
   plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
   abline(h = 4/sample_size, col="red")  # add cutoff line
   text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add label
@@ -98,11 +103,17 @@ cooks_distance <- function(df, model){
 
 # removing outlies
 influential_points <- function(df_out, model) {
+  # calculate cooks distance
   cooksd <- cooks.distance(model)
+  
+  # data frame size
   sample_size <- nrow(df_out)
+  
   # influential row numbers
   influential <- as.numeric(names(cooksd)[(cooksd > (4/sample_size))])
   print(length(influential))
+  
+  # subset for the points outside of cooks distance
   df_out <- df_out[-influential, ]
   return (df_out)
 }
