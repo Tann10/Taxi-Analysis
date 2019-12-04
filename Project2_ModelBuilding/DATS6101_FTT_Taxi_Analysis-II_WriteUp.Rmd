@@ -1043,7 +1043,7 @@ Below is the graph for predicted versus actual values of tip_amount:
 ```{r, include=TRUE, echo=F}
 model.final.pred <- add_predictions(test,fit3_ta)
 # head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
@@ -1087,7 +1087,7 @@ Below is the graph for predicted versus actual values of tip_amount:
 
 model.final.pred <- add_predictions(test,fit_feature_ta)
 # head(model.final.pred)
-ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))+geom_line(aes(pred), colour="red", size=1)
+ggplot(model.final.pred,aes(tip_amount,pred))+geom_point(aes(tip_amount,pred))
 
 # Model performance metrics
 results_df <- rbind(results_df, data.frame(
