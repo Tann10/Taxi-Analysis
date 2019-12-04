@@ -371,6 +371,7 @@ new_df_sub <- dummy.data.frame(df_sub[,c(sub_factor_col)],  sep="_")
 # add underscore if space in colname
 names(new_df_sub) <- gsub(" ", "_", names(new_df_sub))
 
+# bind new df and old df numerical columns
 com_df_sub <- cbind(df_sub[,c((!sapply(df_sub, class) == "factor"))], new_df_sub)
 ```
 
@@ -390,6 +391,8 @@ splitted_dfs <- train_test_split(com_df_sub)
 After splitting, we need to scale the numerical variables in our test and train datasets because the magnitude of the values might not necessarily be proportional. So lets calculate the mean and standard deviation of each numerical column for comparison purposes.
 
 ```{r scale parameter}
+# We have used dataPreparation package to scale data
+# Build scales to see mean and sd of numerical columns
 scales <- build_scales(dataSet = splitted_dfs["X_train"]$X_train, cols = c(names(df_sub[,condition])), verbose = TRUE)
 print(scales)
 ```
@@ -683,18 +686,17 @@ The last penalized regression model that we used for our problem is elastic net 
 
 As most of our variables where correlated with each other and there were around 27 number of features we decided to use principal component analysis as a variable reduction technique.
 ```{r pca}
+# get principal components using prcomp, we have used scale = F as the data is already scaled
 pr.out =prcomp(X_train, scale = F)
 summary(pr.out)
 ```
 Around 92% of the variance is explained by first 7 components. Below graph shows the same.
 
 ```{r }
+# calculate how much variance is explained by each component
 prop_varex <- pr.out$sdev*2/sum(pr.out$sdev*2)
-# plot(prop_varex, xlab = "Principal Component",
-#             ylab = "Proportion of Variance Explained",
-#             type = "b")
 
-
+# plot cumulative variance graph
 plot(cumsum(prop_varex), xlab = "Principal Component",
               ylab = "Cumulative Proportion of Variance Explained",
               type = "b")
@@ -710,6 +712,7 @@ pca_train <- data.frame("tip_fare_ratio" = splitted_dfs["y_train"]$y_train['tip_
 test.data <- predict(pr.out, newdata = X_test)
 test.data <- as.data.frame(test.data)
 
+# fit lm model with 7 PCAs selected before
 model <- lm(tip_fare_ratio ~ ., data = pca_train)
 summary(model)
 ```
@@ -728,12 +731,6 @@ results_df <- rbind(results_df, data.frame(
   mape = mape(test$tip_fare_ratio, predictions),
   Rsquare = caret::R2(predictions, test$tip_fare_ratio)
 ))
-
-# ggplot(test, aes(x =test$fare_amount ,y = test$tip_fare_ratio)) +
-#   geom_point() +
-#   geom_point(aes(y = predictions), shape = 1, color = "blue") +
-#   labs(title="Actual & Predicted Values",
-#        x="Fare amount ", y = "Tip fare ratio")
 
 ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
   geom_point() +
