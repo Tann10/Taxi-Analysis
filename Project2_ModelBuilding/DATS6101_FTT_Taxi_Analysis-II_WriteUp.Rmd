@@ -1017,11 +1017,11 @@ results_df <- rbind(results_df, data.frame(
 ))
 ```
 
-The results are good. In order to check if any combination of features set give us better results than this we performed Stepwise Regression.
+The results are good. In order to check if any combination of features set gives us better results than this we performed Stepwise Regression.
 
 ### Stepwise regression
 
-We performed backward stepwise regression and variables were selected based on adjusted R2
+We performed backward stepwise regression and variables were selected based on adjusted r-squared:
 
 ```{r step_by_feature_selection1, include= TRUE}
 
@@ -1033,9 +1033,9 @@ plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
 
 ```
 
-From the graph above we see that Adj R^2 remains constant throughout. Hence we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
+From the graph above we see that adjusted r-squared remains constant throughout. Hence, we select fare_amount, congestion_surcharge, Borough_do_Bronxn as our first three features that give maximum Adj R^2 = 0.83.
 
-Below is the Summary from Lm with First 3 features selected with Feature Selection.
+Below is the summary from Lm with the first 3 features selected with Feature Selection.
 
 ```{r, include=TRUE}
 #Let us select first three features selected by feature selection function above.
@@ -1065,11 +1065,11 @@ results_df <- rbind(results_df, data.frame(
 
 ```
 
-To further improve the model Ridge, Lasso, Elastic Net, and PCA is performed as follows.
+To further improve the model, Ridge, Lasso, Elastic Net, and PCA are performed.
 
 ### Ridge
 
-So replacing our dependent variabe to tip amount is giving us good R-square.  Lets see if we get the the same results from Ridge Model too. We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
+So far, replacing our dependent variable to tip amount gives a good r-squared. We then test to see if we get comparable results from a ridge model. We perform all the steps in the same manner as we did earlier for tip-fare ratio and visualize the coefficients below. Each curve corresponds to a variable. It shows the path of its coefficient against the L2-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ.
 
 ```{r ridge_tip1, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount~.-tip_fare_ratio,train)[,-1]
@@ -1124,7 +1124,7 @@ Then we plot the cross-validation curve (red dotted line below), and upper and l
 plot(cv_lamda)
 ```
 
-Finally after traing and testing, we are getting extremenly good results now (R^2 of `r ridge_model$dev` as compared to only 12% for tip fare ratio) for our model now.
+Finally after training and testing, our results are better (R^2 of `r ridge_model$dev` as compared to only 12% for tip fare ratio) for our model now.
 
 ```{r plot_r2_ridge_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "dev", label = TRUE)
@@ -1132,7 +1132,7 @@ plot(fit, xvar = "dev", label = TRUE)
 
 ### Lasso
 
-The second penalized regression model that we are going to use is Lasso. Again first we plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector at as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. We can clearly see coefficients going down to zero (instead of just shrinking) here. 
+The second penalized regression model used is lasso. We first plot the coefficients. Each curve corresponds to a variable. It shows the path of its coefficient against the L1-norm of the whole coefficient vector as λ varies. The axis above indicates the number of nonzero coefficients at the current λ. In this case, the coefficients are going down to zero (instead of just shrinking). 
 
 ```{r lasso_tip, include=FALSE, echo=FALSE}
 x=model.matrix(tip_amount ~.-tip_fare_ratio,train)[,-1]
@@ -1182,7 +1182,7 @@ Then we plot the Mean Square Error cross-validation curve (red dotted line below
 plot(cv_lamda)
 ```
 
-Finally after traing and testing, we see that we are getting extremenly good results now (R^2 of `r lasso_model$dev` as compared to only 12% for tip fare ratio) for our model now.
+Finally after training and testing, our results are better (R^2 of `r lasso_model$dev` as compared to only 12% for tip ratio) for our model now.
 
 ```{r plot_r2_lasso_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "dev", label = TRUE)
@@ -1226,19 +1226,19 @@ ggplot(test, aes(x =test$tip_amount ,y = predictions)) +
        x="Fare amount ", y = "Tip amount")
 ```
 
-The elastic-net penalty is controlled by α, and bridges the gap between lasso (α=1, the default) and ridge (α=0). The elastic-net penalty mixes these two; if predictors are correlated in groups, an α=0.5 tends to select the groups in or out together. Let’s plot the coefficients against the log-lambda value for each feature in our set.
+The elastic-net penalty is controlled by α, and bridges the gap between lasso (α=1, the default) and ridge (α=0). The elastic-net penalty mixes these two; if predictors are correlated in groups, an α=0.5 tends to select the groups in or out together. We plot the coefficients against the log-lambda value for each feature in our set.
 
 ```{r plot_coef_elnet_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "lambda", label = TRUE)
 ```
 
-Now when we plot against %deviance we get a very different picture. This is percent deviance explained on the training data. What we see here is that toward the end of the path this value are not changing much, but the coefficients are “blowing up” a bit. This lets us focus attention on the parts of the fit that matter.
+When we plot against percent deviance, we get a very different picture. This is percent deviance explained on the training data. Here, toward the end of the path, this value are not changing much, but the coefficients are “blowing up” a bit. This lets us focus attention on the parts of the fit that matter.
 
 ```{r plot_r2_elnet_tip, include=TRUE, echo= FALSE}
 plot(fit, xvar = "dev", label = TRUE)
 ```
 
-We perform all the steps exactly in same manner as we did earlier for tip-fare ratio and we are getting extremely good results now (R^2 of `r elnet_model$dev`as compared to only 12% above) for Elastic Net model.
+We perform all the steps exactly in same manner as we did earlier for tip ratio; the results indicate an improvement from before (R^2 of `r elnet_model$dev` as compared to only 12% above) for elastic net model.
 
 ### Principal Component Analysis
 
@@ -1257,8 +1257,7 @@ model <- lm(tip_amount ~ ., data = pca_train)
 summary(model)
 ```
 
-As seen from the model summary, expect component 4 all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` is good as seen previously from the other models as well.
-We evaluated the metric using mape which is around 22%. No significant improvement from the previous results. 
+As seen from the model summary, except component 4, all variables are significant. The residuals are not symmetric around the median value. The `r format(summary(model)$r.squared)` and `r format( summary(model)$adj.r.squared)` is good as seen previously from the other models as well. We evaluated the metric using MAPE, which is around 22%; there is no significant improvement from the previous results. 
 
 
 ```{r}
