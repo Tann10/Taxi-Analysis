@@ -520,11 +520,11 @@ Below is the tip_fare_ratio ~ . step  feature selection with Adjusted R^2 scalin
 
 ```{r step_by_feature_selection, include= TRUE}
 
+# build stepwise model using regsubsets
 mod_tip_ratio <- regsubsets(tip_fare_ratio ~ .-tip_amount, data = train, nvmax = 14, nbest = 1, method = "backward")
-#plot(mod_tip_ratio, scale = "Cp", main = "Cp")
+
+# plot stepwise results using adj r2 as the model evaluation creteria 
 plot(mod_tip_ratio, scale = "adjr2", main = "Adjusted R^2")
-#plot(mod_tip_ratio, scale = "r2", main = "R^2")
-# plot(mod_tip_ratio, scale = "bic", main = "BIC")
 ```
 
 From the graph above we see that trip_duration, congestion_surcharge, Borough_do_Unknown are the three features that give maximum Adj R^2 = 0.11 after which Adj R^2 remians constant.
@@ -534,7 +534,11 @@ Below is the Summary from Lm with First 3 features selected with Linear model.
 
 #Let us select first three features selected by feature selection function above.
 fit_feature <- lm(tip_fare_ratio ~ trip_duration+congestion_surcharge+Borough_do_Unknown, data = train )
+
+# print summary of the model
 summary(fit_feature)
+
+# VIF to find correlated variables
 # vif(fit_feature)
 #plot(fit_feature)
 ```
