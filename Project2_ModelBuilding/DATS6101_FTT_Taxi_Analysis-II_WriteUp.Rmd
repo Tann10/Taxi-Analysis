@@ -1436,6 +1436,8 @@ Our limitations remain the same from the previous project. We ran into hardware 
 
 Our literature review suggests that weather may play an important role in tip amount, so future work on refining the model can utilize weather data. Our literature review also indicates that location may be a proxy for race, which affects tip amount. Combining demographic information and location and incorporating those into the model may provide new information. Likewise, additional information on the driver--including rating, gender, and race--may (or may not) provide additional information that could help refine our model. Given the highly fluid nature of the passenger-driver interactions, the taxicab experience, and the inability to quantify some of these instances, conducting empirical experiments may be the only effective way to refine the model.
 
+Additionally, initially we chose dependent variable (tip fare ratio) that was poorly describing our dataset and hence failing to predict good results which meant either we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So we replace tip-fare-ratio by **tip amount** as our dependent variable in models and were able to receive significantly good results. 
+
 # References
 
 Ayres, I., Vars, F. E., & Zakariya, N. (2005). To insure prejudice: Racial disparities in taxicab tipping. <i>Yale Law Journal, 114</i>, 1613–1674. doi: 10.2139/ssrn.401201
