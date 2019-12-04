@@ -795,11 +795,11 @@ results_df <- rbind(results_df, data.frame(
 ggplot(test, aes(y =predictions ,x = test$tip_fare_ratio)) +
   geom_point() +
   labs(title="Actual & Predicted Values",
-       x="Actual Tip amount $", y = "Predicted Tip amount $")
+       x="Actual Tip Fare Ratio $", y = "Predicted Tip Fare Ratio $")
 
 ```
 
-The above graph represents predicted tip amount verses actual tip amount. It is evident that predicted tip amount varies signifcantly from the actual tip amount.
+The above graph represents predicted tip fare ratio verses actual tip fare ratio. It is evident that predicted varies signifcantly from the actual.
 
 ### Decision tree
 
@@ -955,7 +955,7 @@ The data has right skewed distribution.
 df_sub %>%
   ggplot(aes(x=tip_amount)) +
   geom_histogram(aes(y =..density..),  colour = "black", fill = "#66B2FF", binwidth = 0.05) + 
-  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data Post-Outlier Removal")
+  stat_function(fun = dnorm, args = list(mean = mean(df_sub$tip_amount), sd = sd(df_sub$tip_amount))) + ggtitle("Distribution of NYC Taxi Tip Data")
 ```
 
 ### Correlation 
@@ -1472,6 +1472,8 @@ From the variables (distance, duration, congestion surcharge, location), we coul
 
 ```{r summary, include=TRUE}
 results_df <-results_df[order(results_df$dependent, results_df$Rsquare),]
+
+rownames(results_df) <- 1:nrow(results_df)
 
 formattable(results_df,
             align =c("l","c","c","c","c"),
