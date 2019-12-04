@@ -884,9 +884,6 @@ The best model, when looking at for a low MAPE and high r-squared, is the unprun
 
 This also suggests that a null model may be the "best fit" for tip ratio. In this case, tip ratio remains constant despite changes in the independent variables. This may make sense because based on our literature review, tips in the service industry generally hover around 15%; the tips for taxis may also be hovering around a certain percentage.
 
-
-
-
 From analysis shown above it is clear that either there is no relation (the null model will work just fine). **Tip-to-fare** is roughly a constant overall or we do not have the predictors to capture the relationship or else we need to redefine our dependent variable. So this time we are going to replace tip-fare-ratio by **tip amount** as our dependent variable in models and see if it makes any difference on our results. 
 
 ## Tip Amount
@@ -921,7 +918,6 @@ Q1 <- ggplot(df_sub, aes(x=trip_distance, y=tip_amount)) +
        x="Trip distance", y = "Tip amount") +
   geom_text(x = 23, y = 40, label = corr_eqn(df_sub$trip_distance,
                              df_sub$tip_amount), parse = TRUE)
-
 
 Q2 <- ggplot(df_sub, aes(x=trip_duration, y=tip_amount)) +
   geom_point(color = "red")+
