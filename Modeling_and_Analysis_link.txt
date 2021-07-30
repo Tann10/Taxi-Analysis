@@ -1,0 +1,3 @@
+Please open this link for published version of full modeling and statistical analysis report for this project:
+
+https://rpubs.com/Guluna/Taxi_analysis_Models
